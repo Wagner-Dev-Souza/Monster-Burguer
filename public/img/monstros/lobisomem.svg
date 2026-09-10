@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260" width="200" height="260" role="img" aria-label="Lobisomem chibi">
+  <title>Lobisomem</title>
+  <ellipse cx="100" cy="244" rx="50" ry="9" fill="#0b2a1a" opacity=".35"/>
+
+  <!-- cauda -->
+  <path d="M150 214c22-6 30-24 22-40-4 16-14 22-26 24z" fill="#7b8794"/>
+
+  <!-- corpo -->
+  <path d="M64 246c-6-50 6-84 36-84s42 34 36 84z" fill="#8d99ae"/>
+  <path d="M100 162c14 0 26 12 30 30-8-6-18-8-30-8s-22 2-30 8c4-18 16-30 30-30z" fill="#cfd8dc"/>
+
+  <!-- braços com garras -->
+  <path d="M62 192c-14 6-20 18-17 30" stroke="#8d99ae" stroke-width="17" stroke-linecap="round" fill="none"/>
+  <path d="M138 192c14 6 20 18 17 30" stroke="#8d99ae" stroke-width="17" stroke-linecap="round" fill="none"/>
+  <g stroke="#f5f5f5" stroke-width="3" stroke-linecap="round">
+    <path d="M42 224l-5 6M49 227l-4 7M56 229l-3 7"/>
+    <path d="M158 224l5 6M151 227l4 7M144 229l3 7"/>
+  </g>
+
+  <!-- orelhas -->
+  <path d="M56 62l-6-32 30 18z" fill="#8d99ae"/>
+  <path d="M144 62l6-32-30 18z" fill="#8d99ae"/>
+  <path d="M58 58l-2-18 16 10z" fill="#f8bbd0"/>
+  <path d="M142 58l2-18-16 10z" fill="#f8bbd0"/>
+
+  <!-- cabeça -->
+  <circle cx="100" cy="96" r="52" fill="#8d99ae"/>
+  <!-- focinho -->
+  <ellipse cx="100" cy="120" rx="27" ry="20" fill="#cfd8dc"/>
+  <ellipse cx="100" cy="110" rx="8" ry="6" fill="#1f1510"/>
+  <path d="M100 116v6M92 124c3 4 13 4 16 0" stroke="#5b6570" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- olhos -->
+  <ellipse cx="80" cy="92" rx="12" ry="14" fill="#fff"/>
+  <ellipse cx="120" cy="92" rx="12" ry="14" fill="#fff"/>
+  <circle cx="81" cy="93" r="7" fill="#f9a825"/>
+  <circle cx="119" cy="93" r="7" fill="#f9a825"/>
+  <circle cx="81" cy="93" r="3.5" fill="#1f1510"/>
+  <circle cx="119" cy="93" r="3.5" fill="#1f1510"/>
+
+  <!-- presas -->
+  <path d="M88 134l4 10 4-10zM104 134l4 10 4-10z" fill="#fff"/>
+</svg>

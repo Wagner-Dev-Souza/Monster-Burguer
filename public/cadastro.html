@@ -4,54 +4,82 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro — Monster Burguer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/estilo.css">
 </head>
 <body>
-  <div class="container container-estreito" style="padding-top:56px;">
-    <div style="text-align:center; margin-bottom:22px;">
-      <div style="font-size:3.4rem;">🍔</div>
-      <h1 style="margin:6px 0 2px;">Criar conta</h1>
-      <p style="color:var(--texto-suave); margin:0;">Leva menos de um minuto</p>
-    </div>
+  <div class="conteudo">
+    <div class="container container-estreito" style="padding-top:44px;">
+      <div style="text-align:center; margin-bottom:18px;">
+        <img src="/img/monstros/zumbi.svg" alt="Zumbi" style="width:112px;">
+        <h1 style="margin:4px 0 0; text-transform:uppercase; letter-spacing:1px;">Criar conta</h1>
+        <p style="color:var(--texto-suave); margin:2px 0 0;">Leva menos de um minuto ⏱️</p>
+      </div>
 
-    <div class="card">
-      <h2>Seus dados</h2>
-      <p class="ajuda">
-        Todo cadastro entra como <strong>cliente</strong>. Se você for funcionário da loja,
-        o dono pode liberar seu acesso administrativo depois.
-      </p>
+      <div class="card">
+        <h2><span class="emoji">📝</span> Seus dados</h2>
+        <p class="ajuda">
+          Todo cadastro entra como <strong>cliente</strong>. Se você for funcionário da loja,
+          o dono pode liberar seu acesso administrativo depois.
+        </p>
 
-      <form id="form-cadastro">
-        <label for="nome">Nome completo</label>
-        <input id="nome" name="nome" placeholder="Como devemos te chamar" required>
+        <form id="form-cadastro">
+          <label for="nome">Nome completo</label>
+          <input id="nome" name="nome" placeholder="Como devemos te chamar" required>
 
-        <label for="cpf">CPF</label>
-        <input id="cpf" name="cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required>
+          <label for="cpf">CPF</label>
+          <input id="cpf" name="cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required>
 
-        <label for="senha">Senha (mínimo 6 caracteres)</label>
-        <input id="senha" name="senha" type="password" placeholder="••••••" required>
+          <label for="senha">Senha (mínimo 6 caracteres)</label>
+          <div class="campo-senha">
+            <input id="senha" name="senha" type="password" placeholder="••••••" required>
+            <button type="button" class="botao-olho"
+                    data-alternar-senha="#senha"
+                    aria-label="Mostrar senha" aria-pressed="false">👁️</button>
+          </div>
 
-        <label for="confirmar">Confirme a senha</label>
-        <input id="confirmar" name="confirmar" type="password" placeholder="••••••" required>
+          <label for="confirmar">Confirme a senha</label>
+          <div class="campo-senha">
+            <input id="confirmar" name="confirmar" type="password" placeholder="••••••" required>
+            <button type="button" class="botao-olho"
+                    data-alternar-senha="#confirmar"
+                    aria-label="Mostrar senha" aria-pressed="false">👁️</button>
+          </div>
 
-        <button type="submit" id="botao">Criar conta</button>
-      </form>
+          <button type="submit" class="botao" id="botao">Criar conta</button>
+        </form>
 
-      <div class="mensagem" id="mensagem"></div>
+        <div class="mensagem" id="mensagem"></div>
 
-      <p style="text-align:center; margin-top:18px; font-size:.9rem; color:var(--texto-suave);">
-        Já tem conta? <a href="/login.html">Entrar</a>
-      </p>
+        <p style="text-align:center; margin:18px 0 0; font-size:.9rem; color:var(--texto-suave);">
+          Já tem conta? <a href="/login.html">Entrar</a>
+        </p>
+      </div>
+
+      <div class="faixa-turma">
+        <h2>Conheça a turma</h2>
+        <div class="turma">
+          <figure><img src="/img/monstros/frank.svg" alt="Frankenstein"><figcaption>Frank</figcaption></figure>
+          <figure><img src="/img/monstros/draculinha.svg" alt="Draculinha"><figcaption>Draculinha</figcaption></figure>
+          <figure><img src="/img/monstros/lobisomem.svg" alt="Lobisomem"><figcaption>Lobi</figcaption></figure>
+          <figure><img src="/img/monstros/mumia.svg" alt="Faraó Múmia"><figcaption>Faraó</figcaption></figure>
+          <figure><img src="/img/monstros/monstro-pantano.svg" alt="Monstro do Pântano"><figcaption>Pântano</figcaption></figure>
+          <figure><img src="/img/monstros/zumbi.svg" alt="Zumbi"><figcaption>Zu</figcaption></figure>
+        </div>
+      </div>
     </div>
   </div>
 
   <script src="/js/api.js"></script>
+  <script src="/js/senha.js"></script>
   <script>
     const form = document.getElementById('form-cadastro');
     const aviso = document.getElementById('mensagem');
     const botao = document.getElementById('botao');
-
     const campoCpf = document.getElementById('cpf');
+
     campoCpf.addEventListener('input', () => {
       const d = apenasDigitos(campoCpf.value).slice(0, 11);
       campoCpf.value = d
@@ -80,7 +108,7 @@
           cpf: apenasDigitos(campoCpf.value),
           senha,
         });
-        // Cadastro já cria a sessão -> vai direto para a loja.
+        // O cadastro já cria a sessão -> vai direto para a loja.
         window.location.href = '/loja.html';
       } catch (erro) {
         mostrarMensagem(aviso, erro.message, 'erro');

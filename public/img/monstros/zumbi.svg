@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260" width="200" height="260" role="img" aria-label="Zumbi chibi">
+  <title>Zumbi</title>
+  <ellipse cx="100" cy="244" rx="50" ry="9" fill="#0b2a1a" opacity=".35"/>
+
+  <!-- corpo / camisa rasgada -->
+  <path d="M66 246c-6-50 6-82 34-82s40 32 34 82z" fill="#455a64"/>
+  <path d="M78 246l6-30 8 12 8-16 8 14 6-28 4 48z" fill="#5c7a86"/>
+  <!-- manchas de lama -->
+  <circle cx="82" cy="214" r="6" fill="#33691e" opacity=".7"/>
+  <circle cx="126" cy="196" r="5" fill="#33691e" opacity=".7"/>
+
+  <!-- braços caídos -->
+  <path d="M64 196c-14 4-20 14-18 26" stroke="#8fbf9f" stroke-width="17" stroke-linecap="round" fill="none"/>
+  <path d="M136 196c14 4 20 14 18 26" stroke="#8fbf9f" stroke-width="17" stroke-linecap="round" fill="none"/>
+
+  <!-- cabeça -->
+  <circle cx="100" cy="98" r="52" fill="#8fbf9f"/>
+
+  <!-- cabelo bagunçado -->
+  <path d="M52 84c4-26 24-40 48-40s44 14 48 40c-10-6-14-14-24-12-6-8-16-10-24-6-10-4-20 0-24 8-8-4-16 4-24 10z" fill="#3e2723"/>
+  <path d="M74 40c-2-10 4-16 10-18M112 34c6-8 14-8 20-4" stroke="#3e2723" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+  <!-- olhos assimétricos (um maior) -->
+  <ellipse cx="80" cy="98" rx="14" ry="16" fill="#fff"/>
+  <ellipse cx="120" cy="100" rx="10" ry="12" fill="#fff"/>
+  <circle cx="80" cy="99" r="7.5" fill="#455a64"/>
+  <circle cx="121" cy="101" r="5.5" fill="#455a64"/>
+  <circle cx="80" cy="99" r="3.5" fill="#1f1510"/>
+  <circle cx="121" cy="101" r="3" fill="#1f1510"/>
+
+  <!-- boca costurada -->
+  <path d="M84 128c10 6 22 4 30-2" stroke="#2e4b3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <g stroke="#2e4b3a" stroke-width="3" stroke-linecap="round">
+    <path d="M88 122v12M96 124v12M104 124v12M112 122v12"/>
+  </g>
+
+  <!-- ferida/curativo -->
+  <path d="M118 66l14-6 4 12-14 6z" fill="#ffe0b2" stroke="#c9b28a" stroke-width="2"/>
+  <ellipse cx="66" cy="116" rx="8" ry="5" fill="#6d8f76" opacity=".8"/>
+</svg>

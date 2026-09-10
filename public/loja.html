@@ -4,53 +4,130 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loja — Monster Burguer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/estilo.css">
 </head>
 <body>
-  <header class="cabecalho">
-    <div class="logo"><span class="emoji">🍔</span> Monster Burguer</div>
-    <div style="display:flex; align-items:center; gap:12px;">
-      <span id="nome-usuario" style="color:var(--texto-suave); font-size:.9rem;"></span>
-      <button class="pequeno secundario" onclick="sair()">Sair</button>
+  <!-- ============================ CABEÇALHO ============================ -->
+  <header class="topo">
+    <div class="marca">
+      <img src="/img/lanche.svg" alt="">
+      <div>
+        <div class="nome">Monster <b>Burguer</b></div>
+        <div class="slogan">A loja dos monstros famintos</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="/loja.html" class="ativo">🍔 Loja</a>
+      <!-- Só aparece para admin (o servidor também bloqueia, isto é só a interface) -->
+      <a href="/admin/painel.html" data-somente-admin hidden>👑 Painel do Dono</a>
+      <button class="sair" onclick="sair()">Sair</button>
+    </nav>
+
+    <div class="usuario">
+      <span data-nome-usuario>...</span>
+      <span class="selo" data-papel-usuario>...</span>
     </div>
   </header>
 
-  <div class="container">
-    <div class="card">
-      <h2>Olá, <span id="primeiro-nome">cliente</span>! 👋</h2>
-      <p class="ajuda">Bem-vindo(a) à Monster Burguer. Aqui é o seu espaço de pedidos.</p>
-    </div>
+  <div class="conteudo">
+    <div class="container">
+      <!-- Aviso exclusivo para quem é admin -->
+      <div class="card" data-aviso-papel hidden style="border-color:var(--amarelo)">
+        <h2><span class="emoji">👑</span> Você é administrador</h2>
+        <p class="ajuda" style="margin:0">
+          Você está navegando na <strong>loja</strong> (visão do cliente). Quando quiser,
+          volte para o <a href="/admin/painel.html">Painel do Dono</a> para gerenciar a loja. 🔁
+        </p>
+      </div>
 
-    <div class="grade">
-      <div class="card embreve">
-        <h2>🍔 Cardápio</h2>
-        <p class="ajuda">Aqui vai aparecer o cardápio completo (lanches e bebidas) — <strong>Fase 4</strong>.</p>
-      </div>
-      <div class="card embreve">
-        <h2>🛒 Carrinho</h2>
-        <p class="ajuda">Adicionar, remover e alterar quantidades — <strong>Fase 4</strong>.</p>
-      </div>
-      <div class="card embreve">
-        <h2>💳 Pedido e pagamento</h2>
-        <p class="ajuda">Confirmar pedido, escolher a forma de pagamento — <strong>Fase 5</strong>.</p>
-      </div>
-      <div class="card embreve">
-        <h2>🛵 Acompanhamento</h2>
-        <p class="ajuda">"Seu pedido está sendo preparado..." — <strong>Fase 6</strong>.</p>
-      </div>
-    </div>
+      <section class="hero">
+        <img class="burguer" src="/img/lanche.svg" alt="">
+        <h1>Fome de <em>monstro</em>?</h1>
+        <p>
+          Olá, <strong data-primeiro-nome>cliente</strong>! Este é o seu espaço: escolha os lanches,
+          monte seu carrinho e acompanhe seu pedido até a entrega.
+        </p>
+      </section>
 
-    <p class="rodape-nota">Você está logado como <strong>cliente</strong>. A área administrativa é restrita ao dono da loja. 🔒</p>
+      <!-- ======================= CARDÁPIO (Fase 4) ======================= -->
+      <div class="card">
+        <h2><span class="emoji">🍔</span> Cardápio</h2>
+        <p class="ajuda">Os lanches e bebidas cadastrados pelo dono vão aparecer aqui — <strong>Fase 4</strong>.</p>
+
+        <div class="grade">
+          <div class="item-cardapio">
+            <img src="/img/monstros/frank.svg" alt="Frank">
+            <b>Monster do Frank</b>
+            <span class="preco">R$ --,--</span>
+            <span class="selo-breve">em breve</span>
+          </div>
+          <div class="item-cardapio">
+            <img src="/img/monstros/draculinha.svg" alt="Draculinha">
+            <b>Draculinha Bacon</b>
+            <span class="preco">R$ --,--</span>
+            <span class="selo-breve">em breve</span>
+          </div>
+          <div class="item-cardapio">
+            <img src="/img/monstros/lobisomem.svg" alt="Lobisomem">
+            <b>Lobo Duplo</b>
+            <span class="preco">R$ --,--</span>
+            <span class="selo-breve">em breve</span>
+          </div>
+          <div class="item-cardapio">
+            <img src="/img/monstros/monstro-pantano.svg" alt="Monstro do Pântano">
+            <b>Pântano Verde</b>
+            <span class="preco">R$ --,--</span>
+            <span class="selo-breve">em breve</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== PRÓXIMAS FASES (vitrine) ==================== -->
+      <div class="grade">
+        <div class="card embreve">
+          <h2><span class="emoji">🛒</span> Carrinho</h2>
+          <p class="ajuda" style="margin:0">Adicionar, remover e alterar quantidades — <strong>Fase 4</strong>.</p>
+        </div>
+        <div class="card embreve">
+          <h2><span class="emoji">💳</span> Pedido e pagamento</h2>
+          <p class="ajuda" style="margin:0">Confirmar pedido e escolher a forma de pagamento — <strong>Fase 5</strong>.</p>
+        </div>
+        <div class="card embreve">
+          <h2><span class="emoji">🛵</span> Acompanhamento</h2>
+          <p class="ajuda" style="margin:0">"Seu pedido está sendo preparado..." — <strong>Fase 6</strong>.</p>
+        </div>
+      </div>
+
+      <div class="faixa-turma">
+        <h2>A turma Monster</h2>
+        <div class="turma">
+          <figure><img src="/img/monstros/chef-monstrinha.svg" alt="Chef Monstrinha"><figcaption>Chef Monstrinha</figcaption></figure>
+          <figure><img src="/img/monstros/frank.svg" alt="Frankenstein"><figcaption>Frank</figcaption></figure>
+          <figure><img src="/img/monstros/draculinha.svg" alt="Draculinha"><figcaption>Draculinha</figcaption></figure>
+          <figure><img src="/img/monstros/lobisomem.svg" alt="Lobisomem"><figcaption>Lobi</figcaption></figure>
+          <figure><img src="/img/monstros/mumia.svg" alt="Faraó Múmia"><figcaption>Faraó</figcaption></figure>
+          <figure><img src="/img/monstros/monstro-pantano.svg" alt="Monstro do Pântano"><figcaption>Pântano</figcaption></figure>
+          <figure><img src="/img/monstros/zumbi.svg" alt="Zumbi"><figcaption>Zu</figcaption></figure>
+        </div>
+      </div>
+
+      <p class="rodape cadeado">
+        🔒 A área administrativa é restrita ao dono da loja — clientes não acessam.
+      </p>
+    </div>
   </div>
 
   <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
   <script>
     (async () => {
-      const usuario = await protegerPagina('cliente');
+      // 'cliente' aqui significa: precisa estar logado (cliente OU admin).
+      const usuario = await iniciarPagina('cliente');
       if (!usuario) return;
-
-      document.getElementById('nome-usuario').textContent = usuario.nome;
-      document.getElementById('primeiro-nome').textContent = usuario.nome.split(' ')[0];
     })();
   </script>
 </body>

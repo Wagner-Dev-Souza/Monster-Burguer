@@ -4,20 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monster Burguer 🍔</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/estilo.css">
 </head>
 <body>
-  <div class="container container-estreito" style="text-align:center; padding-top:80px;">
-    <div style="font-size:4rem;">🍔</div>
-    <h1 style="margin:8px 0 4px;">Monster Burguer</h1>
-    <p style="color:var(--texto-suave);">Carregando seu cardápio...</p>
+  <div class="conteudo">
+    <div class="container container-estreito" style="text-align:center; padding-top:64px;">
+      <img src="/img/lanche.svg" alt="Hambúrguer Monster" style="width:150px;">
+
+      <h1 style="text-transform:uppercase; letter-spacing:2px; margin:12px 0 2px;">
+        Monster <span style="color:var(--verde-brilho)">Burguer</span>
+      </h1>
+      <p style="color:var(--texto-suave); margin-top:0;">Carregando o cardápio da turma...</p>
+
+      <div class="turma" style="margin-top:26px;">
+        <figure><img src="/img/monstros/chef-monstrinha.svg" alt="Chef Monstrinha"><figcaption>Monstrinha</figcaption></figure>
+        <figure><img src="/img/monstros/frank.svg" alt="Frankenstein"><figcaption>Frank</figcaption></figure>
+        <figure><img src="/img/monstros/draculinha.svg" alt="Draculinha"><figcaption>Draculinha</figcaption></figure>
+        <figure><img src="/img/monstros/lobisomem.svg" alt="Lobisomem"><figcaption>Lobi</figcaption></figure>
+        <figure><img src="/img/monstros/mumia.svg" alt="Faraó Múmia"><figcaption>Faraó</figcaption></figure>
+        <figure><img src="/img/monstros/monstro-pantano.svg" alt="Monstro do Pântano"><figcaption>Pântano</figcaption></figure>
+        <figure><img src="/img/monstros/zumbi.svg" alt="Zumbi"><figcaption>Zu</figcaption></figure>
+      </div>
+    </div>
   </div>
 
   <script src="/js/api.js"></script>
   <script>
     // A porta de entrada decide o destino conforme quem está logado:
-    //  - admin  -> área administrativa (/admin/*, protegida pelo servidor)
-    //  - cliente-> loja
+    //  - admin   -> área administrativa (/admin/*, protegida pelo servidor)
+    //  - cliente -> loja (/loja.html)
     //  - visitante -> login
     (async () => {
       try {

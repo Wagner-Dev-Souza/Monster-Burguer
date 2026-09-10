@@ -4,73 +4,102 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel do Dono — Monster Burguer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/estilo.css">
 </head>
 <body>
-  <header class="cabecalho">
-    <div class="logo"><span class="emoji">👑</span> Painel do Dono</div>
-    <div style="display:flex; align-items:center; gap:12px;">
-      <span id="nome-usuario" style="color:var(--texto-suave); font-size:.9rem;"></span>
-      <button class="pequeno secundario" onclick="sair()">Sair</button>
+  <!-- ============================ CABEÇALHO ============================ -->
+  <header class="topo">
+    <div class="marca">
+      <img src="/img/monstros/chef-monstrinha.svg" alt="">
+      <div>
+        <div class="nome">Painel do <b>Dono</b></div>
+        <div class="slogan">Gestão da Monster Burguer</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="/admin/painel.html" class="ativo">👑 Painel</a>
+      <!-- O admin também navega na loja (visão do cliente) -->
+      <a href="/loja.html">🍔 Ver a loja</a>
+      <button class="sair" onclick="sair()">Sair</button>
+    </nav>
+
+    <div class="usuario">
+      <span data-nome-usuario>...</span>
+      <span class="selo" data-papel-usuario>...</span>
     </div>
   </header>
 
-  <div class="container">
-    <div class="card">
-      <h2>Olá, <span id="primeiro-nome">dono</span>! 👑</h2>
-      <p class="ajuda">
-        Esta é a área administrativa: <strong>só quem tem papel admin</strong> consegue abrir estas telas.
-        Clientes cadastrados no sistema não enxergam nada daqui.
+  <div class="conteudo">
+    <div class="container">
+      <section class="hero">
+        <img class="burguer" src="/img/lanche.svg" alt="">
+        <h1>E aí, <em data-primeiro-nome>chefe</em>!</h1>
+        <p>
+          Esta é a área administrativa: <strong>só quem tem papel admin</strong> consegue abrir estas telas.
+          Você também pode <a href="/loja.html">ver a loja como o cliente vê</a> e voltar quando quiser. 🔁
+        </p>
+      </section>
+
+      <!-- ================= GESTÃO DE USUÁRIOS (Fase 1) ================= -->
+      <div class="card">
+        <h2><span class="emoji">👥</span> Usuários do sistema</h2>
+        <p class="ajuda">
+          Promova um funcionário (que se cadastrou como cliente) para <strong>admin</strong> — ele passa a ter
+          acesso a este painel. Você também pode rebaixar quando quiser.
+        </p>
+
+        <div class="mensagem" id="mensagem-usuarios"></div>
+
+        <div class="tabela-rolagem">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>Papel</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="lista-usuarios">
+              <tr><td colspan="4" style="color:var(--texto-suave);">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============ PRÓXIMAS FASES (ainda não implementadas) ============ -->
+      <div class="grade">
+        <div class="card embreve">
+          <h2><span class="emoji">🍔</span> Produtos e ingredientes</h2>
+          <p class="ajuda" style="margin:0">Cadastro de produtos com ficha técnica e margem — <strong>Fase 2</strong>.</p>
+        </div>
+        <div class="card embreve">
+          <h2><span class="emoji">📦</span> Compras e estoque</h2>
+          <p class="ajuda" style="margin:0">Despesas com fornecedores, custo médio e estoque — <strong>Fase 3</strong>.</p>
+        </div>
+        <div class="card embreve">
+          <h2><span class="emoji">🧾</span> Pedidos confirmados</h2>
+          <p class="ajuda" style="margin:0">Acompanhar e avançar o status dos pedidos — <strong>Fase 6</strong>.</p>
+        </div>
+        <div class="card embreve">
+          <h2><span class="emoji">📊</span> Fluxo de caixa</h2>
+          <p class="ajuda" style="margin:0">Receitas, despesas, saldo e relatórios — <strong>Fase 8</strong>.</p>
+        </div>
+      </div>
+
+      <p class="rodape cadeado">
+        🔒 Todas as funcionalidades administrativas são protegidas no servidor
+        (guard das páginas <code>/admin/*</code> + middleware <code>somenteAdmin</code> nas APIs).
       </p>
     </div>
-
-    <!-- ================= GESTÃO DE USUÁRIOS (Fase 1) ================= -->
-    <div class="card">
-      <h2>👥 Usuários do sistema</h2>
-      <p class="ajuda">
-        Promova um funcionário (que se cadastrou como cliente) para <strong>admin</strong> — ele passa a ter
-        acesso a este painel. Você também pode rebaixar quando quiser.
-      </p>
-      <div class="mensagem" id="mensagem-usuarios"></div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>CPF</th>
-            <th>Papel</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody id="lista-usuarios">
-          <tr><td colspan="4" style="color:var(--texto-suave);">Carregando...</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- ============ PRÓXIMAS FASES (ainda não implementadas) ============ -->
-    <div class="grade">
-      <div class="card embreve">
-        <h2>🍔 Produtos e ingredientes</h2>
-        <p class="ajuda">Cadastro de produtos com ficha técnica e margem — <strong>Fase 2</strong>.</p>
-      </div>
-      <div class="card embreve">
-        <h2>📦 Compras e estoque</h2>
-        <p class="ajuda">Despesas com fornecedores, custo médio e estoque — <strong>Fase 3</strong>.</p>
-      </div>
-      <div class="card embreve">
-        <h2>🧾 Pedidos confirmados</h2>
-        <p class="ajuda">Acompanhar e avançar o status dos pedidos — <strong>Fase 6</strong>.</p>
-      </div>
-      <div class="card embreve">
-        <h2>📊 Fluxo de caixa</h2>
-        <p class="ajuda">Receitas, despesas, saldo e relatórios — <strong>Fase 8</strong>.</p>
-      </div>
-    </div>
-
-    <p class="rodape-nota">🔒 Todas as funcionalidades administrativas ficam protegidas pelo middleware <code>somenteAdmin</code>.</p>
   </div>
 
   <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
   <script>
     const aviso = document.getElementById('mensagem-usuarios');
     const corpoTabela = document.getElementById('lista-usuarios');
@@ -101,8 +130,8 @@
         } else {
           const novoPapel = usuario.papel === 'admin' ? 'cliente' : 'admin';
           const botao = document.createElement('button');
-          botao.className = `pequeno ${novoPapel === 'admin' ? '' : 'perigo'}`;
-          botao.textContent = novoPapel === 'admin' ? 'Tornar admin' : 'Rebaixar';
+          botao.className = `botao pequeno ${novoPapel === 'admin' ? '' : 'perigo'}`;
+          botao.textContent = novoPapel === 'admin' ? '👑 Tornar admin' : '⬇️ Rebaixar';
           botao.addEventListener('click', () => alterarPapel(usuario.id, novoPapel));
           celulaAcao.appendChild(botao);
         }
@@ -132,12 +161,8 @@
     }
 
     (async () => {
-      usuarioLogado = await protegerPagina('admin'); // 🔒 barreira do painel
+      usuarioLogado = await iniciarPagina('admin'); // 🔒 barreira do painel
       if (!usuarioLogado) return;
-
-      document.getElementById('nome-usuario').textContent = usuarioLogado.nome;
-      document.getElementById('primeiro-nome').textContent = usuarioLogado.nome.split(' ')[0];
-
       await carregarUsuarios();
     })();
   </script>

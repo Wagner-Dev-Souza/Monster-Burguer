@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260" width="200" height="260" role="img" aria-label="Monstro do Pântano chibi">
+  <title>Monstro do Pântano</title>
+  <ellipse cx="100" cy="244" rx="52" ry="9" fill="#0b2a1a" opacity=".35"/>
+
+  <!-- corpo blobby -->
+  <path d="M60 246c-10-52 4-88 40-88s50 36 40 88z" fill="#4f9d2a"/>
+  <g fill="#2f6b1c" opacity=".8">
+    <circle cx="76" cy="206" r="7"/>
+    <circle cx="122" cy="222" r="9"/>
+    <circle cx="104" cy="190" r="5"/>
+  </g>
+
+  <!-- braços gosmentos -->
+  <path d="M58 196c-14 8-18 22-14 32" stroke="#4f9d2a" stroke-width="18" stroke-linecap="round" fill="none"/>
+  <path d="M142 196c14 8 18 22 14 32" stroke="#4f9d2a" stroke-width="18" stroke-linecap="round" fill="none"/>
+  <!-- gotas -->
+  <path d="M44 232c3 6 6 6 9 0zM156 232c3 6 6 6 9 0z" fill="#8bd05a"/>
+
+  <!-- cabeça -->
+  <circle cx="100" cy="96" r="53" fill="#5fae35"/>
+
+  <!-- alga/cabelo -->
+  <g stroke="#2f6b1c" stroke-width="7" fill="none" stroke-linecap="round">
+    <path d="M64 62c-6-14-2-24 6-30"/>
+    <path d="M86 52c-2-16 4-24 12-26"/>
+    <path d="M112 52c4-16 12-20 20-18"/>
+    <path d="M136 66c8-12 18-14 26-8"/>
+  </g>
+  <!-- vitória-régia na cabeça -->
+  <ellipse cx="132" cy="56" rx="20" ry="9" fill="#2f9e44" stroke="#1b5e20" stroke-width="3"/>
+  <path d="M132 47v18" stroke="#1b5e20" stroke-width="3"/>
+
+  <!-- olhos -->
+  <ellipse cx="80" cy="98" rx="13" ry="15" fill="#fff"/>
+  <ellipse cx="120" cy="98" rx="13" ry="15" fill="#fff"/>
+  <circle cx="80" cy="99" r="8" fill="#1b5e20"/>
+  <circle cx="120" cy="99" r="8" fill="#1b5e20"/>
+  <circle cx="80" cy="99" r="3.5" fill="#1f1510"/>
+  <circle cx="120" cy="99" r="3.5" fill="#1f1510"/>
+  <circle cx="84" cy="94" r="2.5" fill="#fff"/>
+
+  <!-- boca larga e simpática -->
+  <path d="M82 124c6 10 30 10 36 0" stroke="#1b5e20" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="64" cy="116" rx="9" ry="6" fill="#8bd05a" opacity=".7"/>
+  <ellipse cx="136" cy="116" rx="9" ry="6" fill="#8bd05a" opacity=".7"/>
+  <!-- gosma escorrendo -->
+  <path d="M96 140c2 10 4 14 8 14s6-4 8-14z" fill="#8bd05a" opacity=".85"/>
+</svg>

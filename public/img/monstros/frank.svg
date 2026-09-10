@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260" width="200" height="260" role="img" aria-label="Frankenstein chibi">
+  <title>Frankenstein</title>
+  <ellipse cx="100" cy="244" rx="50" ry="9" fill="#0b2a1a" opacity=".35"/>
+
+  <!-- corpo / jaleco -->
+  <path d="M64 246c-6-50 6-84 36-84s42 34 36 84z" fill="#37474f"/>
+  <path d="M92 162l8 22 8-22z" fill="#eceff1"/>
+  <path d="M100 184l-6 62M100 184l6 62" stroke="#263238" stroke-width="3"/>
+
+  <!-- braços -->
+  <path d="M62 194c-14 6-20 18-17 30" stroke="#37474f" stroke-width="17" stroke-linecap="round" fill="none"/>
+  <path d="M138 194c14 6 20 18 17 30" stroke="#37474f" stroke-width="17" stroke-linecap="round" fill="none"/>
+  <!-- mãos verdes -->
+  <circle cx="44" cy="228" r="11" fill="#7cb342"/>
+  <circle cx="156" cy="228" r="11" fill="#7cb342"/>
+
+  <!-- cabeça (achatada no topo) -->
+  <path d="M50 88c0-30 22-46 50-46s50 16 50 46v8c0 30-22 52-50 52S50 126 50 96z" fill="#7cb342"/>
+
+  <!-- cabelo -->
+  <path d="M50 84c2-28 22-44 50-44s48 16 50 44c-8-8-20-12-34-12-8 0-12 6-16 6s-8-6-16-6c-14 0-26 4-34 12z" fill="#212121"/>
+
+  <!-- parafusos -->
+  <g>
+    <rect x="30" y="94" width="20" height="14" rx="5" fill="#9e9e9e" stroke="#616161" stroke-width="2"/>
+    <rect x="150" y="94" width="20" height="14" rx="5" fill="#9e9e9e" stroke="#616161" stroke-width="2"/>
+    <circle cx="40" cy="101" r="3" fill="#616161"/>
+    <circle cx="160" cy="101" r="3" fill="#616161"/>
+  </g>
+
+  <!-- costura na bochecha -->
+  <g stroke="#33691e" stroke-width="3" stroke-linecap="round">
+    <path d="M62 118l26 6"/>
+    <path d="M66 112v14M74 114v14M82 115v14"/>
+  </g>
+
+  <!-- olhos -->
+  <ellipse cx="84" cy="96" rx="12" ry="14" fill="#fff"/>
+  <ellipse cx="116" cy="96" rx="12" ry="14" fill="#fff"/>
+  <circle cx="84" cy="97" r="7" fill="#33691e"/>
+  <circle cx="116" cy="97" r="7" fill="#33691e"/>
+  <circle cx="84" cy="97" r="3.5" fill="#1f1510"/>
+  <circle cx="116" cy="97" r="3.5" fill="#1f1510"/>
+  <circle cx="88" cy="92" r="2.5" fill="#fff"/>
+
+  <!-- sobrancelhas -->
+  <path d="M72 80h20M108 80h20" stroke="#212121" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- sorriso com dentes -->
+  <path d="M88 122c8 8 24 8 32 0" stroke="#1f1510" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M94 124v6M106 126v6" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+</svg>

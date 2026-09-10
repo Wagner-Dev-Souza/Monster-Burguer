@@ -87,6 +87,23 @@ Troque em produção!
 | GET    | `/api/usuarios`             | admin   | Lista usuários                             |
 | PATCH  | `/api/usuarios/:id/papel`   | admin   | Promove/rebaixa usuário (cliente <-> admin)|
 
+## 🎨 Identidade visual
+
+- **Paleta da casa:** verde Monster em gradiente (`#6ac30e → #1f8a3b`), com
+  vermelho (`#d62828`) e amarelo (`#ffd60a`) nos detalhes — pegada de rede de
+  lanchonete.
+- **Fundo:** lanches ilustrados em baixa opacidade (`public/img/lanche.svg`,
+  aplicado em `body::before` com `opacity: .07`).
+  Para usar uma **foto real** de lanche, basta substituir esse arquivo (ou
+  apontar o `url()` do CSS para a foto) e ajustar o `background-size`.
+- **Turma Monster** (chibi, em SVG vetorial em `public/img/monstros/`):
+  Chef Monstrinha, Frank, Draculinha, Lobi (lobisomem), Faraó (múmia),
+  Pântano e Zu (zumbi).
+- **Pré-visualizações em PNG:** `docs/artes/` (geradas a partir dos SVGs).
+- **Interface compartilhada:** `public/js/layout.js` monta o cabeçalho e a
+  navegação conforme o papel do usuário; `public/js/senha.js` cuida do botão
+  de mostrar/esconder a senha (acessível por teclado).
+
 ## 🧠 Decisões de projeto (o porquê)
 
 - **Camadas** (`routes → controllers → services → repositories`): cada arquivo com
