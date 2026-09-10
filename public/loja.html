@@ -115,41 +115,51 @@
 
         <form id="form-conta">
           <label for="conta-nome">Nome completo</label>
-          <input id="conta-nome" name="nome" required>
+          <input id="conta-nome" name="nome" readonly required>
 
           <label for="conta-telefone">Telefone (DDD + número)</label>
-          <input id="conta-telefone" name="telefone" inputmode="numeric" placeholder="(21) 99999-8888">
+          <input id="conta-telefone" name="telefone" inputmode="numeric" placeholder="(21) 99999-8888" readonly>
 
           <div class="grade-formulario" style="margin-top:14px">
             <div>
               <label for="conta-cep">CEP</label>
-              <input id="conta-cep" name="cep" inputmode="numeric" maxlength="9" placeholder="00000-000">
+              <input id="conta-cep" name="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" readonly>
             </div>
             <div class="largo">
               <label for="conta-endereco">Endereço (rua/avenida)</label>
-              <input id="conta-endereco" name="endereco" placeholder="Rua das Assombrações">
+              <input id="conta-endereco" name="endereco" placeholder="Rua das Assombrações" readonly>
             </div>
             <div>
               <label for="conta-numero">Número</label>
-              <input id="conta-numero" name="numero" placeholder="123">
+              <input id="conta-numero" name="numero" placeholder="123" readonly>
             </div>
             <div>
               <label for="conta-complemento">Complemento</label>
-              <input id="conta-complemento" name="complemento" placeholder="apto 42">
+              <input id="conta-complemento" name="complemento" placeholder="apto 42" readonly>
             </div>
             <div>
               <label for="conta-bairro">Bairro</label>
-              <input id="conta-bairro" name="bairro">
+              <input id="conta-bairro" name="bairro" readonly>
             </div>
             <div>
               <label for="conta-cidade">Cidade</label>
-              <input id="conta-cidade" name="cidade">
+              <input id="conta-cidade" name="cidade" readonly>
             </div>
           </div>
 
           <p class="ajuda" style="margin-top:14px">CPF: <strong id="cpf-usuario">...</strong></p>
 
-          <button type="submit" class="botao" id="botao-salvar">💾 Salvar meus dados</button>
+          <!--
+            Modo leitura x modo edição:
+              * os campos nascem com `readonly` (travados)
+              * "Editar" destrava e revela Salvar/Cancelar
+              * ao salvar (ou cancelar), os campos voltam a ficar travados
+          -->
+          <div class="acoes-formulario">
+            <button type="button" class="botao" id="botao-editar">✏️ Editar meus dados</button>
+            <button type="submit" class="botao" id="botao-salvar" hidden>💾 Salvar</button>
+            <button type="button" class="botao fantasma" id="botao-cancelar" hidden>✖ Cancelar</button>
+          </div>
         </form>
 
         <div class="mensagem" id="mensagem-conta"></div>
@@ -239,13 +249,45 @@
       document.getElementById('cpf-usuario').textContent = formatarCPF(usuario.cpf);
     }
 
+    /* --------------------- modo leitura x modo edição ------------------ */
+    const botaoEditar = document.getElementById('botao-editar');
+    const botaoCancelar = document.getElementById('botao-cancelar');
+
+    // Cópia dos dados atuais: é o que o "Cancelar" restaura se a pessoa desistir.
+    let dadosOriginais = null;
+
+    const camposDaConta = () => formConta.querySelectorAll('input');
+
+    function entrarEmModoEdicao() {
+      camposDaConta().forEach((campo) => campo.removeAttribute('readonly'));
+      botaoEditar.hidden = true;
+      botaoSalvar.hidden = false;
+      botaoCancelar.hidden = false;
+      document.getElementById('conta-nome').focus();
+    }
+
+    function sairDoModoEdicao() {
+      camposDaConta().forEach((campo) => campo.setAttribute('readonly', ''));
+      botaoEditar.hidden = false;
+      botaoSalvar.hidden = true;
+      botaoCancelar.hidden = true;
+    }
+
+    botaoEditar.addEventListener('click', entrarEmModoEdicao);
+
+    botaoCancelar.addEventListener('click', () => {
+      if (dadosOriginais) preencherFormulario(dadosOriginais);
+      sairDoModoEdicao();
+      avisoConta.className = 'mensagem'; // limpa avisos anteriores
+    });
+
     /* ----------------------- salvar meus dados ------------------------- */
     formConta.addEventListener('submit', async (evento) => {
       evento.preventDefault();
       botaoSalvar.disabled = true;
 
       try {
-        const { mensagem } = await API.patch('/api/auth/minha-conta', {
+        const { mensagem, usuario } = await API.patch('/api/auth/minha-conta', {
           nome: document.getElementById('conta-nome').value,
           telefone: apenasDigitos(campoTelefone.value),
           cep: apenasDigitos(campoCep.value),
@@ -258,8 +300,12 @@
 
         mostrarMensagem(avisoConta, mensagem, 'sucesso');
 
-        // Recarrega os dados do usuário: o selo do topo passa a mostrar o
-        // novo nome imediatamente.
+        // Fecha o modo edição: campos voltam a ficar travados e o botão Salvar some.
+        dadosOriginais = usuario;
+        preencherFormulario(usuario);
+        sairDoModoEdicao();
+
+        // Recarrega o usuário: o selo do topo passa a mostrar o novo nome.
         await iniciarPagina('cliente');
       } catch (erro) {
         mostrarMensagem(avisoConta, erro.message, 'erro');
@@ -295,7 +341,9 @@
       const usuario = await iniciarPagina('cliente');
       if (!usuario) return;
 
+      dadosOriginais = usuario;
       preencherFormulario(usuario);
+      sairDoModoEdicao(); // começa sempre no modo leitura
     })();
   </script>
 </body>

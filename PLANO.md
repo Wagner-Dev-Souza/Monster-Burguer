@@ -3,7 +3,7 @@
 Cada fase é construída, testada e enviada (push) de forma independente.
 No fim, tudo funciona ponta a ponta.
 
-## Fase 0 — Fundação 🏗️
+## Fase 0 — Fundação 🏗️ — ✅ CONCLUÍDA
 Estrutura de pastas, `package.json`, `.env.example`, `.gitignore`, README,
 conexão SQLite, sistema de migrations, Express com health check e tratamento
 global de erros, suíte de testes.
@@ -11,7 +11,7 @@ global de erros, suíte de testes.
 **Entregável:** `npm install && npm run dev` → servidor no ar, banco criado,
 testes passando.
 
-## Fase 1 — Usuários, Login e Permissões 🔐
+## Fase 1 — Usuários, Login e Permissões 🔐 — ✅ CONCLUÍDA
 Tabela `usuarios` (nome, CPF, senha com hash, papel `cliente`|`admin`, ativo).
 Cadastro de cliente, login com CPF + senha, token JWT em cookie HttpOnly.
 Middlewares `autenticar` e `autorizarAdmin`. Admin inicial criado por seed.
@@ -21,7 +21,7 @@ redirecionamento por papel.
 **Entregável:** o sistema distingue **cliente** de **admin**, e só admin entra
 nas áreas administrativas.
 
-## Fase 2 — Produtos, Ingredientes e Composição 🍔
+## Fase 2 — Produtos, Ingredientes e Composição 🍔 — ✅ CONCLUÍDA
 Tabelas `produtos` (tipo lanche|bebida, estoque, ativo), `ingredientes` e
 `produto_composicao` (ficha técnica). CRUD no painel do dono. Cálculo automático
 do custo de produção e da margem de cada sanduíche.

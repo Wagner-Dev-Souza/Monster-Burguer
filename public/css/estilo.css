@@ -341,6 +341,43 @@ tbody tr:hover { background: rgba(106, 195, 14, .07); }
 .grade-formulario { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 .grade-formulario .largo { grid-column: 1 / -1; }
 
+/* ---------------------------------------------
+   Campos TRAVADOS (modo leitura do "Minha conta")
+   Ficam com aparência de "somente leitura" até o usuário clicar em Editar.
+   --------------------------------------------- */
+input[readonly] {
+  background: #05170c;
+  color: var(--texto-suave);
+  border-color: rgba(255, 255, 255, .10);
+  cursor: default;
+}
+input[readonly]:focus { box-shadow: none; border-color: rgba(255, 255, 255, .10); outline: none; }
+input[readonly] + .cadeado-campo { display: inline; }
+
+.acoes-formulario { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.acoes-formulario .botao { width: auto; margin: 0; padding: 12px 20px; }
+
+/* Selo de margem (verde = saudável, vermelho = prejuízo) */
+.margem { font-weight: 800; }
+.margem.boa { color: var(--verde-brilho); }
+.margem.ruim { color: var(--vermelho-claro); }
+.margem.neutra { color: var(--texto-suave); }
+
+.acoes-tabela { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Linha de item da ficha técnica (ingrediente + quantidade + remover) */
+.linha-ficha { display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; }
+.linha-ficha label { margin-top: 0; }
+
+.resumo-ficha {
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  background: rgba(0, 0, 0, .28); border: 2px dashed var(--borda); border-radius: 14px;
+  padding: 14px 16px; margin-top: 14px;
+}
+.resumo-ficha b { font-size: 1.08rem; }
+
+@media (max-width: 640px) { .linha-ficha { grid-template-columns: 1fr 1fr; } }
+
 @media (max-width: 640px) {
   .marca .slogan { display: none; }
   .marca img { width: 42px; height: 42px; }

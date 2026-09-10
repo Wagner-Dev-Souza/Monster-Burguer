@@ -173,4 +173,41 @@ describe('Interface — elementos obrigatórios', () => {
     assert.match(resposta.text, /data-somente-cliente[\s\S]*id="botao-excluir"/);
     assert.match(resposta.text, /data-aviso-admin[\s\S]*rebaixar você a cliente/);
   });
+
+  it('Minha conta começa em MODO LEITURA (campos travados, só o Editar visível)', async () => {
+    const resposta = await request(app).get('/loja.html');
+
+    // os campos nascem com readOnly
+    assert.match(resposta.text, /id="conta-nome"[^>]*readonly/);
+    assert.match(resposta.text, /id="conta-telefone"[^>]*readonly/);
+
+    // Editar aparece; Salvar e Cancelar nascem escondidos
+    assert.match(resposta.text, /id="botao-editar"/);
+    assert.match(resposta.text, /id="botao-salvar" hidden/);
+    assert.match(resposta.text, /id="botao-cancelar" hidden/);
+
+    // e o JS tem as funções que alternam os modos
+    assert.match(resposta.text, /function entrarEmModoEdicao/);
+    assert.match(resposta.text, /function sairDoModoEdicao/);
+  });
+
+  it('a página de produtos da Fase 2 existe com ingredientes, produtos e ficha técnica', async () => {
+    const fs = await import('node:fs/promises');
+    const html = await fs.readFile(new URL('../public/admin/produtos.html', import.meta.url), 'utf8');
+
+    assert.match(html, /id="form-ingrediente"/);
+    assert.match(html, /id="form-produto"/);
+    assert.match(html, /id="card-ficha"/);
+    assert.match(html, /id="botao-adicionar-item"/);
+    assert.match(html, /id="ficha-margem"/);
+    // lanche x bebida: os campos de revenda aparecem só para bebida
+    assert.match(html, /id="campos-bebida" hidden/);
+  });
+
+  it('o painel tem link para a página de produtos', async () => {
+    const fs = await import('node:fs/promises');
+    const html = await fs.readFile(new URL('../public/admin/painel.html', import.meta.url), 'utf8');
+
+    assert.match(html, /href="\/admin\/produtos\.html"/);
+  });
 });

@@ -88,6 +88,16 @@ Troque em produção!
 | DELETE | `/api/auth/minha-conta`     | logado  | Exclui o PRÓPRIO cadastro (exclusão lógica; admin precisa ser rebaixado antes) |
 | GET    | `/api/usuarios`             | admin   | Lista usuários                             |
 | PATCH  | `/api/usuarios/:id/papel`   | admin   | Promove/rebaixa usuário (cliente <-> admin)|
+| GET    | `/api/ingredientes`         | admin   | Lista ingredientes (+ unidades permitidas) — `?todos=1` inclui inativos |
+| POST   | `/api/ingredientes`         | admin   | Cadastra ingrediente (nome, unidade, custo) |
+| PUT    | `/api/ingredientes/:id`     | admin   | Atualiza ingrediente                       |
+| DELETE | `/api/ingredientes/:id`     | admin   | Desativa ingrediente (exclusão lógica)     |
+| GET    | `/api/produtos`             | admin   | Lista produtos com **custo e margem** — `?tipo=lanche\|bebida`, `?todos=1` |
+| GET    | `/api/produtos/:id`         | admin   | Produto + ficha técnica completa           |
+| POST   | `/api/produtos`             | admin   | Cadastra produto (lanche ou bebida)        |
+| PUT    | `/api/produtos/:id`         | admin   | Atualiza produto                           |
+| PUT    | `/api/produtos/:id/composicao` | admin | Salva a **ficha técnica** inteira (itens: ingrediente + quantidade) |
+| DELETE | `/api/produtos/:id`         | admin   | Desativa produto (soft delete)             |
 
 ## 🎨 Identidade visual
 
@@ -138,3 +148,14 @@ Troque em produção!
   admin antes. Protege a loja de ficar sem ninguém capaz de administrá-la.
 - **Mascote aleatório** no topo de login/cadastro (`public/js/mascote.js`): cada
   visita sorteia um dos 9 monstros.
+- **Dinheiro em CENTAVOS (INTEGER), não em decimal**: `0.1 + 0.2` em ponto flutuante
+  dá `0.30000000000000004`; somando dezenas de pedidos isso vira "centavo fantasma"
+  no caixa. Guardamos inteiros e convertemos só na borda (`src/utils/moeda.js`).
+- **Custo do lanche vem da FICHA TÉCNICA** (soma de quantidade × custo do ingrediente);
+  **custo da bebida vem da compra** (`custo_compra`) — bebida é revenda, não receita.
+- **`custoConfiavel`**: lanche sem ficha técnica responde com margem "não confiável"
+  para o front não exibir um 100% de margem que não existe.
+- **Índice único PARCIAL** (`WHERE ativo = 1`): impede dois ingredientes/produtos
+  ativos com o mesmo nome, mas libera o nome quando o item é desativado.
+- **Soma do custo no SQL** (`LEFT JOIN` + `GROUP BY`): evita o problema "N+1"
+  (uma consulta por produto) ao listar o cardápio.
