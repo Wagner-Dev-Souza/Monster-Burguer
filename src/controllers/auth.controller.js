@@ -1,4 +1,5 @@
 import * as authService from '../services/auth.service.js';
+import * as usuariosService from '../services/usuarios.service.js';
 import { env } from '../config/env.js';
 import { usuarioPublico } from '../utils/publico.js';
 
@@ -28,11 +29,12 @@ function opcoesDoCookie() {
 
 export async function registrar(req, res) {
   const { nome, cpf, senha } = req.body ?? {};
-  const { usuario, token } = await authService.registrar({ nome, cpf, senha });
+  const { usuario } = await authService.registrar({ nome, cpf, senha });
 
-  res.cookie(NOME_COOKIE, token, opcoesDoCookie());
+  // Decisão de produto: cadastro NÃO loga automaticamente.
+  // O front-end encaminha o novo usuário para a tela de login.
   return res.status(201).json({
-    mensagem: 'Cadastro realizado com sucesso! Bem-vindo(a) à Monster Burguer 🍔',
+    mensagem: 'Cadastro realizado com sucesso! Faça login para continuar 🍔',
     usuario,
   });
 }
@@ -54,4 +56,17 @@ export function logout(req, res) {
 export function eu(req, res) {
   // req.usuario foi colocado pelo middleware `autenticar`.
   return res.json({ usuario: usuarioPublico(req.usuario) });
+}
+
+/**
+ * O usuário logado exclui o próprio cadastro.
+ * A sessão também é encerrada: o cookie é limpo na mesma resposta.
+ */
+export async function excluirMinhaConta(req, res) {
+  const { nome } = await usuariosService.excluirMinhaConta(req.usuario);
+
+  res.clearCookie(NOME_COOKIE, { path: '/' });
+  return res.json({
+    mensagem: `Cadastro de ${nome} excluído com sucesso. Sentiremos sua falta! 🐻`,
+  });
 }

@@ -45,7 +45,10 @@ export async function registrar({ nome, cpf, senha }) {
     papel: 'cliente',
   });
 
-  return { usuario: usuarioPublico(usuario), token: gerarToken(usuario) };
+  // OBS: o cadastro NÃO devolve token. Decisão de produto: quem se cadastra é
+  // encaminhado ao login, para confirmar a senha digitada e evitar sessões
+  // criadas "sem querer" (ex.: alguém cadastrando no celular de outra pessoa).
+  return { usuario: usuarioPublico(usuario) };
 }
 
 export async function login({ cpf, senha }) {

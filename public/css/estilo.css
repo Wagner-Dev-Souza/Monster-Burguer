@@ -136,7 +136,25 @@ a:hover { text-decoration: underline; }
   border-color: var(--verde-brilho);
   color: #05230f;
 }
-.nav .sair { background: linear-gradient(180deg, var(--vermelho-claro), var(--vermelho)); border-color: var(--vermelho); color: #fff; }
+
+/* Canto superior direito: usuário + botão Sair */
+.acoes-topo { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+
+.sair {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--raio-p);
+  border: 2px solid #ffb3a6;
+  background: linear-gradient(180deg, var(--vermelho-claro), var(--vermelho));
+  color: #fff;
+  font-family: var(--fonte);
+  font-size: .88rem; font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, .3);
+  transition: transform .1s ease, box-shadow .1s ease;
+}
+.sair:hover { filter: brightness(1.07); }
+.sair:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 0, 0, .3); }
 
 .usuario { display: flex; align-items: center; gap: 10px; font-size: .88rem; color: var(--texto-suave); }
 
@@ -307,9 +325,14 @@ tbody tr:hover { background: rgba(106, 195, 14, .07); }
 .cadeado { font-size: .78rem; color: var(--texto-suave); }
 .pilha { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
+/* Zona de perigo (excluir a própria conta) */
+.zona-perigo { border-color: rgba(214, 40, 40, .55); }
+.zona-perigo h2 { color: var(--vermelho-claro); }
+
 @media (max-width: 640px) {
   .marca .slogan { display: none; }
   .marca img { width: 42px; height: 42px; }
   .topo { padding: 10px 12px; }
   .nav a, .nav button { padding: 8px 12px; font-size: .85rem; }
+  .usuario [data-nome-usuario] { display: none; }
 }

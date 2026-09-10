@@ -80,10 +80,11 @@ Troque em produção!
 | Método | Rota                        | Acesso  | O que faz                                  |
 |--------|-----------------------------|---------|--------------------------------------------|
 | GET    | `/health`                   | público | Status do servidor                         |
-| POST   | `/api/auth/registrar`       | público | Cadastra cliente (nome, CPF, senha)        |
+| POST   | `/api/auth/registrar`       | público | Cadastra cliente — **não cria sessão**, o usuário é levado ao login |
 | POST   | `/api/auth/login`           | público | Autentica (CPF + senha) e emite o token    |
 | POST   | `/api/auth/logout`          | logado  | Encerra a sessão (limpa o cookie)          |
 | GET    | `/api/auth/eu`              | logado  | Dados do usuário da sessão                 |
+| DELETE | `/api/auth/minha-conta`     | logado  | Exclui o PRÓPRIO cadastro (exclusão lógica)|
 | GET    | `/api/usuarios`             | admin   | Lista usuários                             |
 | PATCH  | `/api/usuarios/:id/papel`   | admin   | Promove/rebaixa usuário (cliente <-> admin)|
 
@@ -97,8 +98,8 @@ Troque em produção!
   Para usar uma **foto real** de lanche, basta substituir esse arquivo (ou
   apontar o `url()` do CSS para a foto) e ajustar o `background-size`.
 - **Turma Monster** (chibi, em SVG vetorial em `public/img/monstros/`):
-  Chef Monstrinha, Frank, Draculinha, Lobi (lobisomem), Faraó (múmia),
-  Pântano e Zu (zumbi).
+  Fantasma, Esqueleto, Bruxa, Frank, Draculinha, Lobi (lobisomem),
+  Faraó (múmia), Pântano e Zu (zumbi).
 - **Pré-visualizações em PNG:** `docs/artes/` (geradas a partir dos SVGs).
 - **Interface compartilhada:** `public/js/layout.js` monta o cabeçalho e a
   navegação conforme o papel do usuário; `public/js/senha.js` cuida do botão
@@ -122,3 +123,10 @@ Troque em produção!
   já nasce protegida.
 - **Preço congelado no item do pedido**: mudar o preço do produto hoje não reescreve
   o passado no caixa.
+- **Cadastro não loga automaticamente**: o novo usuário confirma a senha na tela de
+  login (evita sessão criada "sem querer" em aparelho de terceiros).
+- **Excluir a própria conta é exclusão LÓGICA** (`ativo = 0`): o histórico de pedidos
+  e o fluxo de caixa continuam íntegros; o efeito prático para a pessoa é o mesmo —
+  ela não entra mais.
+- **Abas de navegação só para admin**: o cliente não vê (nem transita) entre loja e
+  painel. As abas nascem com `data-somente-admin` e o servidor bloqueia por trás.

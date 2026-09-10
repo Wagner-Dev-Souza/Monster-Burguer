@@ -38,6 +38,10 @@ const API = {
   patch(caminho, corpo) {
     return this.requisitar(caminho, { method: 'PATCH', body: JSON.stringify(corpo ?? {}) });
   },
+
+  delete(caminho) {
+    return this.requisitar(caminho, { method: 'DELETE' });
+  },
 };
 
 /**

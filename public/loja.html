@@ -20,16 +20,22 @@
       </div>
     </div>
 
-    <nav class="nav">
+    <!--
+      ABAS: visíveis SOMENTE para admin (o cliente não transita entre áreas).
+      O `hidden` é removido pelo js/layout.js quando o papel é admin.
+    -->
+    <nav class="nav" data-somente-admin hidden>
       <a href="/loja.html" class="ativo">🍔 Loja</a>
-      <!-- Só aparece para admin (o servidor também bloqueia, isto é só a interface) -->
-      <a href="/admin/painel.html" data-somente-admin hidden>👑 Painel do Dono</a>
-      <button class="sair" onclick="sair()">Sair</button>
+      <a href="/admin/painel.html">👑 Painel do Dono</a>
     </nav>
 
-    <div class="usuario">
-      <span data-nome-usuario>...</span>
-      <span class="selo" data-papel-usuario>...</span>
+    <!-- Canto superior direito: usuário + sair -->
+    <div class="acoes-topo">
+      <span class="usuario">
+        <span data-nome-usuario>...</span>
+        <span class="selo" data-papel-usuario>...</span>
+      </span>
+      <button class="sair" onclick="sair()">Sair</button>
     </div>
   </header>
 
@@ -39,8 +45,8 @@
       <div class="card" data-aviso-papel hidden style="border-color:var(--amarelo)">
         <h2><span class="emoji">👑</span> Você é administrador</h2>
         <p class="ajuda" style="margin:0">
-          Você está navegando na <strong>loja</strong> (visão do cliente). Quando quiser,
-          volte para o <a href="/admin/painel.html">Painel do Dono</a> para gerenciar a loja. 🔁
+          Você está na <strong>loja</strong> (visão do cliente) e pode voltar ao
+          <a href="/admin/painel.html">Painel do Dono</a> pelas abas do topo. 🔁
         </p>
       </div>
 
@@ -102,10 +108,36 @@
         </div>
       </div>
 
+      <!-- ==================== MINHA CONTA (Fase 1) ==================== -->
+      <div class="card">
+        <h2><span class="emoji">🙋</span> Minha conta</h2>
+        <p class="ajuda">
+          Nome: <strong data-nome-usuario>...</strong> · CPF: <span id="cpf-usuario">...</span>
+        </p>
+
+        <div class="mensagem" id="mensagem-conta"></div>
+      </div>
+
+      <!-- Zona de perigo: excluir o próprio cadastro -->
+      <div class="card zona-perigo">
+        <h2><span class="emoji">⚠️</span> Zona de perigo</h2>
+        <p class="ajuda">
+          Excluir seu cadastro <strong>encerra seu acesso</strong> — você não conseguirá mais entrar com este CPF.
+          Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo.
+        </p>
+
+        <label for="confirmacao-exclusao">Digite EXCLUIR para liberar o botão</label>
+        <input id="confirmacao-exclusao" placeholder="EXCLUIR" autocomplete="off">
+
+        <button class="botao perigo" id="botao-excluir" disabled>🗑️ Excluir meu cadastro</button>
+      </div>
+
       <div class="faixa-turma">
         <h2>A turma Monster</h2>
         <div class="turma">
-          <figure><img src="/img/monstros/chef-monstrinha.svg" alt="Chef Monstrinha"><figcaption>Chef Monstrinha</figcaption></figure>
+          <figure><img src="/img/monstros/fantasma.svg" alt="Fantasma"><figcaption>Fantasma</figcaption></figure>
+          <figure><img src="/img/monstros/esqueleto.svg" alt="Esqueleto"><figcaption>Esqueleto</figcaption></figure>
+          <figure><img src="/img/monstros/bruxa.svg" alt="Bruxa"><figcaption>Bruxa</figcaption></figure>
           <figure><img src="/img/monstros/frank.svg" alt="Frankenstein"><figcaption>Frank</figcaption></figure>
           <figure><img src="/img/monstros/draculinha.svg" alt="Draculinha"><figcaption>Draculinha</figcaption></figure>
           <figure><img src="/img/monstros/lobisomem.svg" alt="Lobisomem"><figcaption>Lobi</figcaption></figure>
@@ -116,7 +148,7 @@
       </div>
 
       <p class="rodape cadeado">
-        🔒 A área administrativa é restrita ao dono da loja — clientes não acessam.
+        🔒 A área administrativa é restrita ao dono da loja — clientes não a acessam.
       </p>
     </div>
   </div>
@@ -124,10 +156,37 @@
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
   <script>
+    const avisoConta = document.getElementById('mensagem-conta');
+    const campoConfirmacao = document.getElementById('confirmacao-exclusao');
+    const botaoExcluir = document.getElementById('botao-excluir');
+
+    // O botão só destrava quando a pessoa digita a palavra de confirmação.
+    // É uma trava "anti-clique-por-engano".
+    campoConfirmacao.addEventListener('input', () => {
+      botaoExcluir.disabled = campoConfirmacao.value.trim().toUpperCase() !== 'EXCLUIR';
+    });
+
+    botaoExcluir.addEventListener('click', async () => {
+      botaoExcluir.disabled = true;
+
+      try {
+        const { mensagem } = await API.delete('/api/auth/minha-conta');
+        mostrarMensagem(avisoConta, mensagem, 'sucesso');
+
+        // A sessão acabou: depois de um instante, volta para o login.
+        setTimeout(() => { window.location.href = '/login.html'; }, 2200);
+      } catch (erro) {
+        mostrarMensagem(avisoConta, erro.message, 'erro');
+        botaoExcluir.disabled = false;
+      }
+    });
+
     (async () => {
       // 'cliente' aqui significa: precisa estar logado (cliente OU admin).
       const usuario = await iniciarPagina('cliente');
       if (!usuario) return;
+
+      document.getElementById('cpf-usuario').textContent = formatarCPF(usuario.cpf);
     })();
   </script>
 </body>

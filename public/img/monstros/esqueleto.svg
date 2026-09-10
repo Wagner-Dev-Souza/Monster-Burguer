@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260" width="200" height="260" role="img" aria-label="Esqueleto chibi">
+  <title>Esqueleto</title>
+  <ellipse cx="100" cy="244" rx="46" ry="8" fill="#0b2a1a" opacity=".30"/>
+
+  <!-- pernas de osso -->
+  <g stroke="#f4f7f2" stroke-width="12" stroke-linecap="round">
+    <path d="M86 208v30"/>
+    <path d="M114 208v30"/>
+  </g>
+  <ellipse cx="82" cy="242" rx="12" ry="6" fill="#e6ece4"/>
+  <ellipse cx="118" cy="242" rx="12" ry="6" fill="#e6ece4"/>
+
+  <!-- bacia -->
+  <path d="M74 196c8-8 44-8 52 0 2 8-4 14-10 14H84c-6 0-12-6-10-14z" fill="#f4f7f2"/>
+
+  <!-- caixa torácica -->
+  <path d="M78 150h44v46c-10 6-34 6-44 0z" fill="#f4f7f2"/>
+  <g stroke="#cdd8cb" stroke-width="4" stroke-linecap="round">
+    <path d="M82 162h36M82 174h36M82 186h36"/>
+  </g>
+  <path d="M100 150v46" stroke="#cdd8cb" stroke-width="5"/>
+
+  <!-- braços de osso -->
+  <g stroke="#f4f7f2" stroke-width="12" stroke-linecap="round">
+    <path d="M74 158c-16 6-22 18-20 30"/>
+    <path d="M126 158c16 6 22 18 20 30"/>
+  </g>
+  <circle cx="53" cy="192" r="9" fill="#f4f7f2"/>
+  <circle cx="147" cy="192" r="9" fill="#f4f7f2"/>
+
+  <!-- crânio -->
+  <path d="M50 92c0-32 22-50 50-50s50 18 50 50c0 18-8 30-18 36v10c0 6-6 10-14 10H82c-8 0-14-4-14-10v-10c-10-6-18-18-18-36z" fill="#fbfdf9"/>
+
+  <!-- órbitas com pupilas fofas -->
+  <ellipse cx="80" cy="90" rx="16" ry="17" fill="#26311f"/>
+  <ellipse cx="120" cy="90" rx="16" ry="17" fill="#26311f"/>
+  <circle cx="82" cy="93" r="7.5" fill="#a3e635"/>
+  <circle cx="122" cy="93" r="7.5" fill="#a3e635"/>
+  <circle cx="82" cy="93" r="3.5" fill="#101a0c"/>
+  <circle cx="122" cy="93" r="3.5" fill="#101a0c"/>
+  <circle cx="85" cy="88" r="2.5" fill="#fff"/>
+
+  <!-- nariz e dentes -->
+  <path d="M100 104l-7 12h14z" fill="#cdd8cb"/>
+  <g stroke="#cdd8cb" stroke-width="4">
+    <path d="M84 126h32"/>
+    <path d="M90 122v10M100 122v10M110 122v10"/>
+  </g>
+
+  <!-- dente de ouro (charme) -->
+  <rect x="100" y="122" width="7" height="10" fill="#ffd60a"/>
+</svg>

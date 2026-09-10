@@ -36,3 +36,23 @@ export function alterarPapel(id, papel) {
 
   return usuarioPublico(usuariosRepo.atualizarPapel(id, papel));
 }
+
+/**
+ * O usuário exclui o PRÓPRIO cadastro.
+ *
+ * Decisão importante: fazemos uma EXCLUSÃO LÓGICA (ativo = 0), não um DELETE.
+ * Motivo: nas próximas fases o usuário terá PEDIDOS ligados a ele. Se a linha
+ * fosse apagada, o histórico de vendas e o fluxo de caixa perderiam a
+ * referência — e relatório financeiro que não fecha é pior que um cadastro
+ * inativo. Efeito prático é o mesmo: a pessoa não consegue mais entrar.
+ */
+export function excluirMinhaConta(usuario) {
+  if (usuario.papel === 'admin' && usuariosRepo.contarAdminsAtivos() <= 1) {
+    throw new ErroValidacao(
+      'Você é o último administrador ativo. Promova outro usuário a admin antes de excluir sua conta.',
+    );
+  }
+
+  usuariosRepo.desativar(usuario.id);
+  return { id: usuario.id, nome: usuario.nome };
+}

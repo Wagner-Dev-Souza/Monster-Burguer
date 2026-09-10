@@ -25,7 +25,7 @@ describe('Fase 1 — Cadastro e login', () => {
   after(() => encerrar());
 
   describe('Cadastro de cliente', () => {
-    it('cadastra cliente com sucesso, como CLIENTE e já com sessão', async () => {
+    it('cadastra o cliente como CLIENTE e NÃO cria sessão (vai para o login)', async () => {
       const resposta = await request(app)
         .post('/api/auth/registrar')
         .send({ nome: 'Maria Teste', cpf: CPF_CLIENTE, senha: 'senha123' });
@@ -36,8 +36,9 @@ describe('Fase 1 — Cadastro e login', () => {
       assert.equal(resposta.body.usuario.papel, 'cliente');
       // A senha (nem o hash) nunca sai na resposta.
       assert.equal(resposta.body.usuario.senhaHash, undefined);
-      // Já sai logado: cookie HttpOnly com o token.
-      assert.match(resposta.headers['set-cookie'][0], /token=/);
+      // DECISÃO DE PRODUTO: cadastro NÃO loga automaticamente.
+      assert.equal(resposta.headers['set-cookie'], undefined);
+      assert.match(resposta.body.mensagem, /login/i);
     });
 
     it('recusa CPF com dígito verificador inválido', async () => {

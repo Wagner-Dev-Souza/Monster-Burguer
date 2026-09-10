@@ -51,6 +51,12 @@ export function atualizarPapel(id, papel) {
   return buscarPorId(id);
 }
 
+/** Desativa o usuário (exclusão lógica): ele não consegue mais entrar. */
+export function desativar(id) {
+  db.prepare("UPDATE usuarios SET ativo = 0, atualizado_em = datetime('now') WHERE id = ?").run(id);
+  return buscarPorId(id);
+}
+
 /** Conta admins ativos — usado para proteger o "último admin". */
 export function contarAdminsAtivos() {
   return db.prepare("SELECT COUNT(*) AS total FROM usuarios WHERE papel = 'admin' AND ativo = 1").get().total;

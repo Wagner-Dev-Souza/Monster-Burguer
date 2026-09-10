@@ -13,4 +13,7 @@ rotas.post('/logout', authController.logout);
 // Só quem está logado descobre os próprios dados.
 rotas.get('/eu', autenticar, authController.eu);
 
+// O usuário logado exclui o PRÓPRIO cadastro (cliente ou admin).
+rotas.delete('/minha-conta', autenticar, assincrono(authController.excluirMinhaConta));
+
 export default rotas;

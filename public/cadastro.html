@@ -13,7 +13,7 @@
   <div class="conteudo">
     <div class="container container-estreito" style="padding-top:44px;">
       <div style="text-align:center; margin-bottom:18px;">
-        <img src="/img/monstros/zumbi.svg" alt="Zumbi" style="width:112px;">
+        <img src="/img/monstros/esqueleto.svg" alt="Esqueleto" style="width:112px;">
         <h1 style="margin:4px 0 0; text-transform:uppercase; letter-spacing:1px;">Criar conta</h1>
         <p style="color:var(--texto-suave); margin:2px 0 0;">Leva menos de um minuto ⏱️</p>
       </div>
@@ -61,6 +61,9 @@
       <div class="faixa-turma">
         <h2>Conheça a turma</h2>
         <div class="turma">
+          <figure><img src="/img/monstros/fantasma.svg" alt="Fantasma"><figcaption>Fantasma</figcaption></figure>
+          <figure><img src="/img/monstros/esqueleto.svg" alt="Esqueleto"><figcaption>Esqueleto</figcaption></figure>
+          <figure><img src="/img/monstros/bruxa.svg" alt="Bruxa"><figcaption>Bruxa</figcaption></figure>
           <figure><img src="/img/monstros/frank.svg" alt="Frankenstein"><figcaption>Frank</figcaption></figure>
           <figure><img src="/img/monstros/draculinha.svg" alt="Draculinha"><figcaption>Draculinha</figcaption></figure>
           <figure><img src="/img/monstros/lobisomem.svg" alt="Lobisomem"><figcaption>Lobi</figcaption></figure>
@@ -108,8 +111,10 @@
           cpf: apenasDigitos(campoCpf.value),
           senha,
         });
-        // O cadastro já cria a sessão -> vai direto para a loja.
-        window.location.href = '/loja.html';
+
+        // O cadastro NÃO cria sessão: o novo usuário vai para o LOGIN confirmar
+        // a senha digitada (evita sessão criada "sem querer").
+        window.location.href = '/login.html?cadastro=sucesso';
       } catch (erro) {
         mostrarMensagem(aviso, erro.message, 'erro');
         botao.disabled = false;

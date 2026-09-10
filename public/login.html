@@ -13,7 +13,7 @@
   <div class="conteudo">
     <div class="container container-estreito" style="padding-top:44px;">
       <div style="text-align:center; margin-bottom:18px;">
-        <img src="/img/monstros/chef-monstrinha.svg" alt="Chef Monstrinha" style="width:118px;">
+        <img src="/img/monstros/fantasma.svg" alt="Fantasma" style="width:112px;">
         <h1 style="margin:4px 0 0; text-transform:uppercase; letter-spacing:1px;">
           Monster <span style="color:var(--verde-brilho)">Burguer</span>
         </h1>
@@ -46,10 +46,17 @@
         </p>
       </div>
 
-      <p class="rodape">
-        🔒 Área administrativa restrita ao dono da loja.<br>
-        Cada monstro tem seu lanche favorito — descubra o seu!
-      </p>
+      <div class="faixa-turma">
+        <h2>A turma Monster</h2>
+        <div class="turma">
+          <figure><img src="/img/monstros/fantasma.svg" alt="Fantasma"><figcaption>Fantasma</figcaption></figure>
+          <figure><img src="/img/monstros/esqueleto.svg" alt="Esqueleto"><figcaption>Esqueleto</figcaption></figure>
+          <figure><img src="/img/monstros/bruxa.svg" alt="Bruxa"><figcaption>Bruxa</figcaption></figure>
+          <figure><img src="/img/monstros/frank.svg" alt="Frankenstein"><figcaption>Frank</figcaption></figure>
+          <figure><img src="/img/monstros/draculinha.svg" alt="Draculinha"><figcaption>Draculinha</figcaption></figure>
+          <figure><img src="/img/monstros/zumbi.svg" alt="Zumbi"><figcaption>Zu</figcaption></figure>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -60,6 +67,11 @@
     const aviso = document.getElementById('mensagem');
     const botao = document.getElementById('botao');
     const campoCpf = document.getElementById('cpf');
+
+    // Veio do cadastro? Mostra o aviso de sucesso.
+    if (new URLSearchParams(window.location.search).get('cadastro') === 'sucesso') {
+      mostrarMensagem(aviso, 'Conta criada com sucesso! Agora faça login para continuar 🍔', 'sucesso');
+    }
 
     // Máscara de CPF enquanto digita (000.000.000-00)
     campoCpf.addEventListener('input', () => {

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260" width="200" height="260" role="img" aria-label="Bruxa chibi">
+  <title>Bruxa</title>
+  <ellipse cx="100" cy="244" rx="48" ry="8" fill="#0b2a1a" opacity=".30"/>
+
+  <!-- capa -->
+  <path d="M100 152c26 0 46 28 50 94H50c4-66 24-94 50-94z" fill="#5e35b1"/>
+  <path d="M100 152c26 0 46 28 50 94H100z" fill="#7e57c2"/>
+  <!-- gola alta -->
+  <path d="M66 160l-12-40 20 22zM134 160l12-40-20 22z" fill="#4527a0"/>
+
+  <!-- corpo/vestido -->
+  <path d="M76 246c-6-42 4-70 24-70s30 28 24 70z" fill="#311b92"/>
+
+  <!-- vassoura -->
+  <g transform="rotate(14 152 214)">
+    <rect x="148" y="176" width="8" height="60" rx="4" fill="#8d6e63"/>
+    <path d="M132 232h40l-6 18h-28z" fill="#ffd60a"/>
+    <g stroke="#e0a800" stroke-width="3">
+      <path d="M138 232v18M148 232v18M158 232v18M166 232v18"/>
+    </g>
+  </g>
+
+  <!-- braços -->
+  <path d="M70 196c-14 6-18 18-15 28" stroke="#311b92" stroke-width="15" stroke-linecap="round" fill="none"/>
+  <path d="M130 196c14 4 20 12 22 22" stroke="#311b92" stroke-width="15" stroke-linecap="round" fill="none"/>
+
+  <!-- cabeça (pele verdinha) -->
+  <circle cx="100" cy="102" r="50" fill="#9ccc65"/>
+
+  <!-- cabelo roxo -->
+  <path d="M50 100c0-30 22-48 50-48s50 18 50 48c-8-8-14-18-26-18-8 0-14 6-24 6s-16-6-24-6c-12 0-18 10-26 18z" fill="#7e57c2"/>
+  <path d="M56 108c-6 18-4 34 2 44" stroke="#7e57c2" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M144 108c6 18 4 34-2 44" stroke="#7e57c2" stroke-width="10" fill="none" stroke-linecap="round"/>
+
+  <!-- chapéu de bruxa -->
+  <path d="M64 56h72l-8-16H72z" fill="#1b5e20"/>
+  <ellipse cx="100" cy="56" rx="46" ry="11" fill="#1b5e20"/>
+  <path d="M100 40c-8-26 6-40 20-46-4 14-2 30 6 46z" fill="#1b5e20"/>
+  <path d="M70 50h60" stroke="#ffd60a" stroke-width="6"/>
+  <rect x="92" y="44" width="16" height="14" rx="3" fill="#ffd60a" stroke="#c99700" stroke-width="2"/>
+
+  <!-- olhos -->
+  <ellipse cx="82" cy="104" rx="13" ry="15" fill="#fff"/>
+  <ellipse cx="118" cy="104" rx="13" ry="15" fill="#fff"/>
+  <circle cx="82" cy="105" r="7.5" fill="#6a1b9a"/>
+  <circle cx="118" cy="105" r="7.5" fill="#6a1b9a"/>
+  <circle cx="82" cy="105" r="3.5" fill="#1f1510"/>
+  <circle cx="118" cy="105" r="3.5" fill="#1f1510"/>
+  <circle cx="86" cy="100" r="2.5" fill="#fff"/>
+
+  <!-- sobrancelhas, bochechas e sorriso -->
+  <path d="M70 86l16 6M130 86l-16 6" stroke="#4a148c" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="64" cy="120" rx="8" ry="5" fill="#c5e1a5" opacity=".9"/>
+  <ellipse cx="136" cy="120" rx="8" ry="5" fill="#c5e1a5" opacity=".9"/>
+  <path d="M90 128c6 6 14 6 20 0" stroke="#33691e" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>

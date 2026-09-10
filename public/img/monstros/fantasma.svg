@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260" width="200" height="260" role="img" aria-label="Fantasma chibi">
+  <title>Fantasma</title>
+  <ellipse cx="100" cy="244" rx="46" ry="8" fill="#0b2a1a" opacity=".30"/>
+
+  <!-- corpo flutuante com barra ondulada -->
+  <path d="M100 34c34 0 56 26 56 66v118c-10 0-14-12-22-12s-12 12-22 12-14-12-22-12-12 12-22 12V100c0-40 22-66 54-66z"
+        fill="#eaf6ff" opacity=".95"/>
+  <path d="M100 34c34 0 56 26 56 66v118c-10 0-14-12-22-12s-12 12-22 12-14-12-22-12-12 12-22 12V100c0-40 22-66 54-66z"
+        fill="none" stroke="#b3d9f2" stroke-width="3"/>
+
+  <!-- bracinhos -->
+  <path d="M44 150c-12 4-18 14-16 24" stroke="#eaf6ff" stroke-width="15" stroke-linecap="round" fill="none"/>
+  <path d="M156 150c12 4 18 14 16 24" stroke="#eaf6ff" stroke-width="15" stroke-linecap="round" fill="none"/>
+
+  <!-- olhos -->
+  <ellipse cx="80" cy="106" rx="13" ry="15" fill="#12263a"/>
+  <ellipse cx="120" cy="106" rx="13" ry="15" fill="#12263a"/>
+  <circle cx="84" cy="100" r="4.5" fill="#fff"/>
+  <circle cx="124" cy="100" r="4.5" fill="#fff"/>
+
+  <!-- bochechas -->
+  <ellipse cx="64" cy="122" rx="9" ry="6" fill="#7fc4f0" opacity=".55"/>
+  <ellipse cx="136" cy="122" rx="9" ry="6" fill="#7fc4f0" opacity=".55"/>
+
+  <!-- boquinha assustadora fofa -->
+  <ellipse cx="100" cy="134" rx="12" ry="9" fill="#12263a" opacity=".85"/>
+  <path d="M92 132c4 4 12 4 16 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- brilho suave -->
+  <ellipse cx="72" cy="66" rx="16" ry="10" fill="#fff" opacity=".75" transform="rotate(-20 72 66)"/>
+</svg>
