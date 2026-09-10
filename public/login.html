@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar — Monster Burguer</title>
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <div class="container container-estreito" style="padding-top:56px;">
+    <div style="text-align:center; margin-bottom:22px;">
+      <div style="font-size:3.4rem;">🍔</div>
+      <h1 style="margin:6px 0 2px;">Monster Burguer</h1>
+      <p style="color:var(--texto-suave); margin:0;">Entre para fazer seu pedido</p>
+    </div>
+
+    <div class="card">
+      <h2>Entrar</h2>
+      <p class="ajuda">Use seu CPF e sua senha. O sistema identifica sozinho se você é cliente ou administrador.</p>
+
+      <form id="form-login">
+        <label for="cpf">CPF</label>
+        <input id="cpf" name="cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required>
+
+        <label for="senha">Senha</label>
+        <input id="senha" name="senha" type="password" placeholder="••••••" required>
+
+        <button type="submit" id="botao">Entrar</button>
+      </form>
+
+      <div class="mensagem" id="mensagem"></div>
+
+      <p style="text-align:center; margin-top:18px; font-size:.9rem; color:var(--texto-suave);">
+        Não tem conta? <a href="/cadastro.html">Cadastre-se</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    const form = document.getElementById('form-login');
+    const aviso = document.getElementById('mensagem');
+    const botao = document.getElementById('botao');
+
+    // Máscara simples de CPF enquanto digita (000.000.000-00)
+    const campoCpf = document.getElementById('cpf');
+    campoCpf.addEventListener('input', () => {
+      const d = apenasDigitos(campoCpf.value).slice(0, 11);
+      campoCpf.value = d
+        .replace(/^(\d{3})(\d)/, '$1.$2')
+        .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+        .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+    });
+
+    form.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      botao.disabled = true;
+
+      try {
+        const { usuario } = await API.post('/api/auth/login', {
+          cpf: apenasDigitos(campoCpf.value),
+          senha: document.getElementById('senha').value,
+        });
+
+        // Redireciona pelo PAPEL: é o que separa cliente de admin na prática.
+        window.location.href = usuario.papel === 'admin' ? '/painel.html' : '/loja.html';
+      } catch (erro) {
+        mostrarMensagem(aviso, erro.message, 'erro');
+        botao.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

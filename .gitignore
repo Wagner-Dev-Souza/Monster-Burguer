@@ -1,0 +1,18 @@
+# Dependências
+node_modules/
+
+# Banco de dados local (nunca versionar dados)
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Variáveis de ambiente (segredos ficam FORA do repositório)
+.env
+.env.local
+
+# Logs e temporários
+logs/
+*.log
+.DS_Store

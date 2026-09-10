@@ -1,0 +1,86 @@
+/* =====================================================================
+   Monster Burguer — estilos compartilhados
+   Tema dark com toque "chapa quente" (laranja/vermelho).
+   CSS puro, sem framework: mais fácil de entender cada regra.
+   ===================================================================== */
+:root {
+  --fundo: #16110f;
+  --fundo-card: #221a17;
+  --borda: #3a2c26;
+  --texto: #f5ece7;
+  --texto-suave: #b9a69d;
+  --laranja: #ff6b35;
+  --vermelho: #d63b1f;
+  --verde: #35c46b;
+  --amarelo: #ffc53d;
+  --raio: 14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: radial-gradient(circle at top, #2a1d18 0%, var(--fundo) 60%);
+  color: var(--texto);
+  min-height: 100vh;
+}
+
+a { color: var(--laranja); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.container { max-width: 960px; margin: 0 auto; padding: 24px 18px 60px; }
+.container-estreito { max-width: 460px; }
+
+.cabecalho {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 16px 18px; border-bottom: 1px solid var(--borda);
+  background: rgba(0,0,0,.25); position: sticky; top: 0; backdrop-filter: blur(6px);
+}
+.logo { display: flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: 700; }
+.logo span.emoji { font-size: 1.6rem; }
+
+.card {
+  background: var(--fundo-card); border: 1px solid var(--borda);
+  border-radius: var(--raio); padding: 20px; margin-bottom: 18px;
+}
+.card h2 { margin: 0 0 6px; font-size: 1.1rem; }
+.card p.ajuda { color: var(--texto-suave); font-size: .9rem; margin: 0 0 16px; }
+
+.grade { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+label { display: block; font-size: .85rem; color: var(--texto-suave); margin: 14px 0 6px; }
+
+input, select {
+  width: 100%; padding: 12px 14px; border-radius: 10px;
+  border: 1px solid var(--borda); background: #120e0c; color: var(--texto);
+  font-size: 1rem;
+}
+input:focus, select:focus { outline: 2px solid var(--laranja); border-color: transparent; }
+
+button {
+  margin-top: 18px; width: 100%; padding: 13px 16px; border: 0; border-radius: 10px;
+  background: linear-gradient(180deg, var(--laranja), var(--vermelho));
+  color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer;
+}
+button:hover { filter: brightness(1.08); }
+button:disabled { opacity: .6; cursor: not-allowed; }
+button.secundario { background: #3a2c26; }
+button.perigo { background: linear-gradient(180deg, #d63b1f, #8f2410); }
+button.pequeno { width: auto; padding: 7px 12px; margin: 0; font-size: .85rem; }
+
+.mensagem { margin-top: 14px; padding: 12px 14px; border-radius: 10px; font-size: .92rem; display: none; }
+.mensagem.visivel { display: block; }
+.mensagem.sucesso { background: rgba(53,196,107,.15); border: 1px solid var(--verde); color: #a9f0c4; }
+.mensagem.erro { background: rgba(214,59,31,.15); border: 1px solid var(--vermelho); color: #ffc0b1; }
+
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--borda); }
+th { color: var(--texto-suave); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+
+.etiqueta { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: .75rem; font-weight: 700; }
+.etiqueta.admin { background: rgba(255,107,53,.2); color: var(--laranja); border: 1px solid var(--laranja); }
+.etiqueta.cliente { background: rgba(185,166,157,.15); color: var(--texto-suave); border: 1px solid var(--borda); }
+
+.rodape-nota { color: var(--texto-suave); font-size: .82rem; text-align: center; margin-top: 26px; }
+.embreve { opacity: .55; }

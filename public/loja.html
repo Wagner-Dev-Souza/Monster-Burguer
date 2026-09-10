@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loja — Monster Burguer</title>
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <header class="cabecalho">
+    <div class="logo"><span class="emoji">🍔</span> Monster Burguer</div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span id="nome-usuario" style="color:var(--texto-suave); font-size:.9rem;"></span>
+      <button class="pequeno secundario" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>Olá, <span id="primeiro-nome">cliente</span>! 👋</h2>
+      <p class="ajuda">Bem-vindo(a) à Monster Burguer. Aqui é o seu espaço de pedidos.</p>
+    </div>
+
+    <div class="grade">
+      <div class="card embreve">
+        <h2>🍔 Cardápio</h2>
+        <p class="ajuda">Aqui vai aparecer o cardápio completo (lanches e bebidas) — <strong>Fase 4</strong>.</p>
+      </div>
+      <div class="card embreve">
+        <h2>🛒 Carrinho</h2>
+        <p class="ajuda">Adicionar, remover e alterar quantidades — <strong>Fase 4</strong>.</p>
+      </div>
+      <div class="card embreve">
+        <h2>💳 Pedido e pagamento</h2>
+        <p class="ajuda">Confirmar pedido, escolher a forma de pagamento — <strong>Fase 5</strong>.</p>
+      </div>
+      <div class="card embreve">
+        <h2>🛵 Acompanhamento</h2>
+        <p class="ajuda">"Seu pedido está sendo preparado..." — <strong>Fase 6</strong>.</p>
+      </div>
+    </div>
+
+    <p class="rodape-nota">Você está logado como <strong>cliente</strong>. A área administrativa é restrita ao dono da loja. 🔒</p>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    (async () => {
+      const usuario = await protegerPagina('cliente');
+      if (!usuario) return;
+
+      document.getElementById('nome-usuario').textContent = usuario.nome;
+      document.getElementById('primeiro-nome').textContent = usuario.nome.split(' ')[0];
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monster Burguer 🍔</title>
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <div class="container container-estreito" style="text-align:center; padding-top:80px;">
+    <div style="font-size:4rem;">🍔</div>
+    <h1 style="margin:8px 0 4px;">Monster Burguer</h1>
+    <p style="color:var(--texto-suave);">Carregando seu cardápio...</p>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    // A porta de entrada decide o destino conforme quem está logado:
+    //  - admin  -> painel administrativo
+    //  - cliente-> loja
+    //  - visitante -> login
+    (async () => {
+      try {
+        const { usuario } = await API.get('/api/auth/eu');
+        window.location.href = usuario.papel === 'admin' ? '/painel.html' : '/loja.html';
+      } catch {
+        window.location.href = '/login.html';
+      }
+    })();
+  </script>
+</body>
+</html>
