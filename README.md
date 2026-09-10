@@ -114,7 +114,16 @@ Troque em produção!
 - **Pré-visualizações em PNG:** `docs/artes/` (geradas a partir dos SVGs).
 - **Interface compartilhada:** `public/js/layout.js` monta o cabeçalho e a
   navegação conforme o papel do usuário; `public/js/senha.js` cuida do botão
-  de mostrar/esconder a senha (acessível por teclado).
+  de mostrar/esconder a senha (acessível por teclado); `public/js/mascote.js`
+  sorteia um monstro para o topo das telas de entrada.
+- **🎵 Musiquinha 8-bits** (`public/js/musica.js`): tema sombrio em Lá menor
+  **gerado em tempo real** com a Web Audio API (osciladores quadrados, baixo
+  triangular, bumbo e chimbal de ruído) — nenhum arquivo de áudio no repositório.
+  A posição tocada é salva no `sessionStorage`, então a música **continua de onde
+  parou** ao trocar entre login e cadastro, e **para de vez no login**
+  (`pararMusica()` limpa o estado). Botão flutuante 🔊/🔇 permite ligar/desligar.
+  ⚠️ É carregada com `type="module"` de propósito: sem escopo isolado, as
+  variáveis do arquivo colidiriam com as das páginas (o login declara `const botao`).
 
 ## 🧠 Decisões de projeto (o porquê)
 

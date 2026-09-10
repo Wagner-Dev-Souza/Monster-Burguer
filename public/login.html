@@ -55,6 +55,8 @@
   <script src="/js/api.js"></script>
   <script src="/js/senha.js"></script>
   <script src="/js/mascote.js"></script>
+  <!-- type="module": escopo isolado, sem risco de colidir nomes com o script da página -->
+  <script type="module" src="/js/musica.js"></script>
   <script>
     const form = document.getElementById('form-login');
     const aviso = document.getElementById('mensagem');
@@ -84,6 +86,10 @@
           cpf: apenasDigitos(campoCpf.value),
           senha: document.getElementById('senha').value,
         });
+
+        // 🎵 A musiquinha da vitrine para AQUI: o usuário entrou (não volta a
+        // tocar depois, porque o estado salvo é apagado).
+        if (typeof pararMusica === 'function') pararMusica();
 
         // Redireciona pelo PAPEL: é o que separa cliente de admin na prática.
         window.location.href = usuario.papel === 'admin' ? '/admin/painel.html' : '/loja.html';

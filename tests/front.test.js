@@ -210,4 +210,53 @@ describe('Interface — elementos obrigatórios', () => {
 
     assert.match(html, /href="\/admin\/produtos\.html"/);
   });
+
+  it('login e cadastro carregam a musiquinha 8-bits', async () => {
+    const login = await request(app).get('/login.html');
+    const cadastro = await request(app).get('/cadastro.html');
+
+    assert.match(login.text, /\/js\/musica\.js/);
+    assert.match(cadastro.text, /\/js\/musica\.js/);
+  });
+
+  it('REGRESSÃO: musica.js é carregado como MÓDULO (escopo isolado)', async () => {
+    // O arquivo declara variáveis curtas (botao, contexto, tocando...). Se ele
+    // rodar como script clássico, essas variáveis vão para o escopo GLOBAL e
+    // colidem com as da página — o login declara `const botao`, e a colisão
+    // abortava o script da página inteira (o formulário parava de funcionar).
+    // Carregar como módulo isola o escopo e resolve de vez.
+    const login = await request(app).get('/login.html');
+    const cadastro = await request(app).get('/cadastro.html');
+
+    assert.match(login.text, /<script type="module" src="\/js\/musica\.js"><\/script>/);
+    assert.match(cadastro.text, /<script type="module" src="\/js\/musica\.js"><\/script>/);
+  });
+
+  it('a música é gerada por código (Web Audio) e persiste a posição entre páginas', async () => {
+    const resposta = await request(app).get('/js/musica.js');
+
+    assert.equal(resposta.status, 200);
+    // síntese em vez de arquivo de áudio
+    assert.match(resposta.text, /AudioContext/);
+    assert.match(resposta.text, /createOscillator/);
+    // continuidade entre login <-> cadastro
+    assert.match(resposta.text, /sessionStorage/);
+    assert.match(resposta.text, /monsterMusica/);
+    assert.match(resposta.text, /pagehide/);
+    // parada ao logar
+    assert.match(resposta.text, /function pararMusica/);
+    assert.match(resposta.text, /window\.pararMusica = pararMusica/);
+  });
+
+  it('o login PARA a música antes de entrar', async () => {
+    const resposta = await request(app).get('/login.html');
+
+    assert.match(resposta.text, /pararMusica\(\)/);
+  });
+
+  it('o botão flutuante de ligar/desligar tem estilo próprio', async () => {
+    const resposta = await request(app).get('/css/estilo.css');
+
+    assert.match(resposta.text, /\.musica-botao/);
+  });
 });

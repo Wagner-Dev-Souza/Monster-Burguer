@@ -378,6 +378,30 @@ input[readonly] + .cadeado-campo { display: inline; }
 
 @media (max-width: 640px) { .linha-ficha { grid-template-columns: 1fr 1fr; } }
 
+/* Botão flutuante da musiquinha 8-bits (login/cadastro) */
+.musica-botao {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 40;
+  width: 52px;
+  height: 52px;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  border-radius: 50%;
+  border: 2px solid var(--verde-brilho);
+  background: linear-gradient(180deg, var(--verde-monstro), var(--verde-medio));
+  color: #05230f;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, .35);
+  cursor: pointer;
+  transition: transform .12s ease;
+}
+.musica-botao:hover { transform: translateY(-2px) scale(1.04); filter: brightness(1.08); }
+.musica-botao:active { transform: translateY(2px); box-shadow: 0 3px 0 rgba(0, 0, 0, .35); }
+
 @media (max-width: 640px) {
   .marca .slogan { display: none; }
   .marca img { width: 42px; height: 42px; }
