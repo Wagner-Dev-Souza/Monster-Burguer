@@ -4,6 +4,9 @@
  *
  * Por quê? Garantia de que a senha_hash NUNCA sai do servidor por descuido:
  * é só usar este mapper em toda resposta que envolva usuário.
+ *
+ * Inclui os dados de contato (telefone/endereço) porque a tela "Minha conta"
+ * precisa deles para edição — e são dados do próprio dono da conta.
  */
 export function usuarioPublico(usuario) {
   return {
@@ -12,6 +15,13 @@ export function usuarioPublico(usuario) {
     cpf: usuario.cpf,
     papel: usuario.papel,
     ativo: usuario.ativo,
+    telefone: usuario.telefone ?? null,
+    cep: usuario.cep ?? null,
+    endereco: usuario.endereco ?? null,
+    numero: usuario.numero ?? null,
+    complemento: usuario.complemento ?? null,
+    bairro: usuario.bairro ?? null,
+    cidade: usuario.cidade ?? null,
     criadoEm: usuario.criadoEm,
   };
 }

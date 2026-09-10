@@ -59,6 +59,15 @@ export function eu(req, res) {
 }
 
 /**
+ * O usuário edita os PRÓPRIOS dados (nome, telefone e endereço).
+ * A validação de verdade mora no service; aqui só traduzimos HTTP.
+ */
+export function atualizarMinhaConta(req, res) {
+  const usuario = usuariosService.atualizarMeusDados(req.usuario, req.body ?? {});
+  return res.json({ mensagem: 'Seus dados foram atualizados com sucesso! ✅', usuario });
+}
+
+/**
  * O usuário logado exclui o próprio cadastro.
  * A sessão também é encerrada: o cookie é limpo na mesma resposta.
  */

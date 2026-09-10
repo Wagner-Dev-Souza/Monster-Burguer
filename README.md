@@ -84,7 +84,8 @@ Troque em produção!
 | POST   | `/api/auth/login`           | público | Autentica (CPF + senha) e emite o token    |
 | POST   | `/api/auth/logout`          | logado  | Encerra a sessão (limpa o cookie)          |
 | GET    | `/api/auth/eu`              | logado  | Dados do usuário da sessão                 |
-| DELETE | `/api/auth/minha-conta`     | logado  | Exclui o PRÓPRIO cadastro (exclusão lógica)|
+| PATCH  | `/api/auth/minha-conta`     | logado  | Edita os PRÓPRIOS dados (nome, telefone, endereço) |
+| DELETE | `/api/auth/minha-conta`     | logado  | Exclui o PRÓPRIO cadastro (exclusão lógica; admin precisa ser rebaixado antes) |
 | GET    | `/api/usuarios`             | admin   | Lista usuários                             |
 | PATCH  | `/api/usuarios/:id/papel`   | admin   | Promove/rebaixa usuário (cliente <-> admin)|
 
@@ -130,3 +131,10 @@ Troque em produção!
   ela não entra mais.
 - **Abas de navegação só para admin**: o cliente não vê (nem transita) entre loja e
   painel. As abas nascem com `data-somente-admin` e o servidor bloqueia por trás.
+  ⚠️ O CSS tem `[hidden] { display: none !important; }` — sem essa regra, o
+  `display: flex` das classes atropelava o atributo `hidden` e as abas apareciam
+  para o cliente. Há teste de regressão para isso.
+- **Admin não exclui a própria conta**: precisa ser rebaixado a cliente por outro
+  admin antes. Protege a loja de ficar sem ninguém capaz de administrá-la.
+- **Mascote aleatório** no topo de login/cadastro (`public/js/mascote.js`): cada
+  visita sorteia um dos 9 monstros.

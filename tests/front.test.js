@@ -118,4 +118,59 @@ describe('Interface — elementos obrigatórios', () => {
 
     assert.equal(resposta.status, 404);
   });
+
+  it('REGRESSÃO: o atributo `hidden` vence o display das classes no CSS', async () => {
+    // Sem esta regra, `.nav { display: flex }` atropelava o `hidden` e as abas
+    // "Loja/Painel" apareciam para o cliente. Este teste existe para que o bug
+    // nunca volte sem alguém perceber.
+    const resposta = await request(app).get('/css/estilo.css');
+
+    assert.match(resposta.text, /\[hidden\]\s*\{\s*display:\s*none\s*!important/);
+  });
+
+  it('a tela de login NÃO tem a turma inteira, só o mascote sorteado', async () => {
+    const resposta = await request(app).get('/login.html');
+
+    assert.match(resposta.text, /data-mascote-aleatorio/);
+    assert.ok(!resposta.text.includes('faixa-turma'), 'login não deve exibir a turma completa');
+  });
+
+  it('cadastro também sorteia o mascote do topo', async () => {
+    const resposta = await request(app).get('/cadastro.html');
+
+    assert.match(resposta.text, /data-mascote-aleatorio/);
+    assert.match(resposta.text, /\/js\/mascote\.js/);
+  });
+
+  it('mascote.js tem os 9 personagens para o sorteio', async () => {
+    const resposta = await request(app).get('/js/mascote.js');
+
+    assert.equal(resposta.status, 200);
+    const quantidade = (resposta.text.match(/arquivo: '/g) ?? []).length;
+    assert.equal(quantidade, 9);
+  });
+
+  it('o selo do topo mostra o NOME do usuário (não a palavra "cliente")', async () => {
+    const resposta = await request(app).get('/js/layout.js');
+
+    // O texto do selo é montado com o ícone do papel + o nome da pessoa.
+    assert.match(resposta.text, /el\.textContent = `\$\{icone\} \$\{usuario\.nome\}`/);
+  });
+
+  it('Minha conta tem formulário editável (nome, telefone e endereço)', async () => {
+    const resposta = await request(app).get('/loja.html');
+
+    assert.match(resposta.text, /id="form-conta"/);
+    assert.match(resposta.text, /id="conta-nome"/);
+    assert.match(resposta.text, /id="conta-telefone"/);
+    assert.match(resposta.text, /id="conta-cep"/);
+    assert.match(resposta.text, /id="conta-endereco"/);
+  });
+
+  it('a exclusão de conta é oferecida só ao cliente (admin vê a explicação)', async () => {
+    const resposta = await request(app).get('/loja.html');
+
+    assert.match(resposta.text, /data-somente-cliente[\s\S]*id="botao-excluir"/);
+    assert.match(resposta.text, /data-aviso-admin[\s\S]*rebaixar você a cliente/);
+  });
 });

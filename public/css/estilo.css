@@ -31,6 +31,14 @@
 
 * { box-sizing: border-box; }
 
+/* =====================================================================
+   ⚠️ REGRA CRÍTICA: o atributo `hidden` do HTML precisa vencer o `display`
+   definido nas classes. Sem isto, um elemento marcado como hidden MAS com
+   `display: flex` na classe continuaria VISÍVEL — foi exatamente por isso
+   que as abas "Loja/Painel" apareciam para o cliente.
+   ===================================================================== */
+[hidden] { display: none !important; }
+
 html, body { margin: 0; padding: 0; }
 
 body {
@@ -328,6 +336,10 @@ tbody tr:hover { background: rgba(106, 195, 14, .07); }
 /* Zona de perigo (excluir a própria conta) */
 .zona-perigo { border-color: rgba(214, 40, 40, .55); }
 .zona-perigo h2 { color: var(--vermelho-claro); }
+
+/* Grade simples para formulários com vários campos curtos */
+.grade-formulario { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.grade-formulario .largo { grid-column: 1 / -1; }
 
 @media (max-width: 640px) {
   .marca .slogan { display: none; }

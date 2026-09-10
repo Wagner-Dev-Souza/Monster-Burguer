@@ -21,6 +21,13 @@ function mapear(linha) {
     senhaHash: linha.senha_hash,
     papel: linha.papel,
     ativo: Boolean(linha.ativo),
+    telefone: linha.telefone,
+    cep: linha.cep,
+    endereco: linha.endereco,
+    numero: linha.numero,
+    complemento: linha.complemento,
+    bairro: linha.bairro,
+    cidade: linha.cidade,
     criadoEm: linha.criado_em,
     atualizadoEm: linha.atualizado_em,
   };
@@ -54,6 +61,29 @@ export function atualizarPapel(id, papel) {
 /** Desativa o usuário (exclusão lógica): ele não consegue mais entrar. */
 export function desativar(id) {
   db.prepare("UPDATE usuarios SET ativo = 0, atualizado_em = datetime('now') WHERE id = ?").run(id);
+  return buscarPorId(id);
+}
+
+/** Atualiza os dados de contato/identificação do próprio usuário. */
+export function atualizarContato(id, dados) {
+  db.prepare(`
+    UPDATE usuarios SET
+      nome = ?, telefone = ?, cep = ?, endereco = ?, numero = ?,
+      complemento = ?, bairro = ?, cidade = ?,
+      atualizado_em = datetime('now')
+    WHERE id = ?
+  `).run(
+    dados.nome,
+    dados.telefone,
+    dados.cep,
+    dados.endereco,
+    dados.numero,
+    dados.complemento,
+    dados.bairro,
+    dados.cidade,
+    id,
+  );
+
   return buscarPorId(id);
 }
 

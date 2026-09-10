@@ -31,10 +31,7 @@
 
     <!-- Canto superior direito: usuário + sair -->
     <div class="acoes-topo">
-      <span class="usuario">
-        <span data-nome-usuario>...</span>
-        <span class="selo" data-papel-usuario>...</span>
-      </span>
+      <span class="selo" data-papel-usuario>...</span>
       <button class="sair" onclick="sair()">Sair</button>
     </div>
   </header>
@@ -108,12 +105,52 @@
         </div>
       </div>
 
-      <!-- ==================== MINHA CONTA (Fase 1) ==================== -->
+      <!-- ============ MINHA CONTA: dados editáveis (Fase 1) ============ -->
       <div class="card">
         <h2><span class="emoji">🙋</span> Minha conta</h2>
         <p class="ajuda">
-          Nome: <strong data-nome-usuario>...</strong> · CPF: <span id="cpf-usuario">...</span>
+          Telefone e endereço são usados no fechamento do pedido (entrega) — mantenha sempre atualizados.
+          O <strong>CPF não pode ser alterado</strong>, porque é a sua identificação de login.
         </p>
+
+        <form id="form-conta">
+          <label for="conta-nome">Nome completo</label>
+          <input id="conta-nome" name="nome" required>
+
+          <label for="conta-telefone">Telefone (DDD + número)</label>
+          <input id="conta-telefone" name="telefone" inputmode="numeric" placeholder="(21) 99999-8888">
+
+          <div class="grade-formulario" style="margin-top:14px">
+            <div>
+              <label for="conta-cep">CEP</label>
+              <input id="conta-cep" name="cep" inputmode="numeric" maxlength="9" placeholder="00000-000">
+            </div>
+            <div class="largo">
+              <label for="conta-endereco">Endereço (rua/avenida)</label>
+              <input id="conta-endereco" name="endereco" placeholder="Rua das Assombrações">
+            </div>
+            <div>
+              <label for="conta-numero">Número</label>
+              <input id="conta-numero" name="numero" placeholder="123">
+            </div>
+            <div>
+              <label for="conta-complemento">Complemento</label>
+              <input id="conta-complemento" name="complemento" placeholder="apto 42">
+            </div>
+            <div>
+              <label for="conta-bairro">Bairro</label>
+              <input id="conta-bairro" name="bairro">
+            </div>
+            <div>
+              <label for="conta-cidade">Cidade</label>
+              <input id="conta-cidade" name="cidade">
+            </div>
+          </div>
+
+          <p class="ajuda" style="margin-top:14px">CPF: <strong id="cpf-usuario">...</strong></p>
+
+          <button type="submit" class="botao" id="botao-salvar">💾 Salvar meus dados</button>
+        </form>
 
         <div class="mensagem" id="mensagem-conta"></div>
       </div>
@@ -121,15 +158,26 @@
       <!-- Zona de perigo: excluir o próprio cadastro -->
       <div class="card zona-perigo">
         <h2><span class="emoji">⚠️</span> Zona de perigo</h2>
-        <p class="ajuda">
-          Excluir seu cadastro <strong>encerra seu acesso</strong> — você não conseguirá mais entrar com este CPF.
-          Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo.
+
+        <!-- Explicação que só o ADMIN vê (regra de negócio do servidor) -->
+        <p class="ajuda" data-aviso-admin hidden>
+          Você é <strong>administrador</strong>: para excluir sua conta, peça a outro admin para
+          <strong>rebaixar você a cliente</strong> primeiro. É uma proteção para a loja nunca ficar
+          sem ninguém capaz de administrá-la.
         </p>
 
-        <label for="confirmacao-exclusao">Digite EXCLUIR para liberar o botão</label>
-        <input id="confirmacao-exclusao" placeholder="EXCLUIR" autocomplete="off">
+        <!-- Só o CLIENTE vê o formulário de exclusão -->
+        <div data-somente-cliente hidden>
+          <p class="ajuda">
+            Excluir seu cadastro <strong>encerra seu acesso</strong> — você não conseguirá mais entrar com este CPF.
+            Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo.
+          </p>
 
-        <button class="botao perigo" id="botao-excluir" disabled>🗑️ Excluir meu cadastro</button>
+          <label for="confirmacao-exclusao">Digite EXCLUIR para liberar o botão</label>
+          <input id="confirmacao-exclusao" placeholder="EXCLUIR" autocomplete="off">
+
+          <button class="botao perigo" id="botao-excluir" disabled>🗑️ Excluir meu cadastro</button>
+        </div>
       </div>
 
       <div class="faixa-turma">
@@ -159,7 +207,68 @@
     const avisoConta = document.getElementById('mensagem-conta');
     const campoConfirmacao = document.getElementById('confirmacao-exclusao');
     const botaoExcluir = document.getElementById('botao-excluir');
+    const formConta = document.getElementById('form-conta');
+    const botaoSalvar = document.getElementById('botao-salvar');
 
+    const campoTelefone = document.getElementById('conta-telefone');
+    const campoCep = document.getElementById('conta-cep');
+
+    /* ---------------------- máscaras de digitação ---------------------- */
+    campoTelefone.addEventListener('input', () => {
+      const d = apenasDigitos(campoTelefone.value).slice(0, 11);
+      campoTelefone.value = d.length <= 10
+        ? d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
+        : d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+    });
+
+    campoCep.addEventListener('input', () => {
+      const d = apenasDigitos(campoCep.value).slice(0, 8);
+      campoCep.value = d.replace(/^(\d{5})(\d)/, '$1-$2');
+    });
+
+    /* --------------------- preenche o formulário ----------------------- */
+    function preencherFormulario(usuario) {
+      document.getElementById('conta-nome').value = usuario.nome ?? '';
+      document.getElementById('conta-telefone').value = usuario.telefone ?? '';
+      document.getElementById('conta-cep').value = usuario.cep ?? '';
+      document.getElementById('conta-endereco').value = usuario.endereco ?? '';
+      document.getElementById('conta-numero').value = usuario.numero ?? '';
+      document.getElementById('conta-complemento').value = usuario.complemento ?? '';
+      document.getElementById('conta-bairro').value = usuario.bairro ?? '';
+      document.getElementById('conta-cidade').value = usuario.cidade ?? '';
+      document.getElementById('cpf-usuario').textContent = formatarCPF(usuario.cpf);
+    }
+
+    /* ----------------------- salvar meus dados ------------------------- */
+    formConta.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      botaoSalvar.disabled = true;
+
+      try {
+        const { mensagem } = await API.patch('/api/auth/minha-conta', {
+          nome: document.getElementById('conta-nome').value,
+          telefone: apenasDigitos(campoTelefone.value),
+          cep: apenasDigitos(campoCep.value),
+          endereco: document.getElementById('conta-endereco').value,
+          numero: document.getElementById('conta-numero').value,
+          complemento: document.getElementById('conta-complemento').value,
+          bairro: document.getElementById('conta-bairro').value,
+          cidade: document.getElementById('conta-cidade').value,
+        });
+
+        mostrarMensagem(avisoConta, mensagem, 'sucesso');
+
+        // Recarrega os dados do usuário: o selo do topo passa a mostrar o
+        // novo nome imediatamente.
+        await iniciarPagina('cliente');
+      } catch (erro) {
+        mostrarMensagem(avisoConta, erro.message, 'erro');
+      } finally {
+        botaoSalvar.disabled = false;
+      }
+    });
+
+    /* -------------------- excluir meu cadastro ------------------------- */
     // O botão só destrava quando a pessoa digita a palavra de confirmação.
     // É uma trava "anti-clique-por-engano".
     campoConfirmacao.addEventListener('input', () => {
@@ -186,7 +295,7 @@
       const usuario = await iniciarPagina('cliente');
       if (!usuario) return;
 
-      document.getElementById('cpf-usuario').textContent = formatarCPF(usuario.cpf);
+      preencherFormulario(usuario);
     })();
   </script>
 </body>
