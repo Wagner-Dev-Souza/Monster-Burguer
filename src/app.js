@@ -4,6 +4,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import rotas from './routes/index.js';
 import { rotaNaoEncontrada, tratarErros } from './middlewares/error.middleware.js';
+import { somenteAdminNaPagina } from './middlewares/pagina-admin.middleware.js';
 
 /**
  * Monta o app Express SEM subir o servidor.
@@ -32,7 +33,23 @@ export function criarApp() {
 
   app.use('/api', rotas);
 
-  // Front-end estático (HTML/CSS/JS puro) servido pelo próprio Express.
+  // ===================================================================
+  // 🔒 ÁREA ADMINISTRATIVA (HTML) — protegida no SERVIDOR.
+  //
+  // A ORDEM AQUI É CRÍTICA: este guard precisa ser registrado ANTES do
+  // express.static da pasta public/, senão o static genérico encontraria o
+  // arquivo em public/admin/ e o entregaria a qualquer visitante, sem passar
+  // pela verificação de papel.
+  //
+  // Todo arquivo dentro de public/admin/ (as telas administrativas das
+  // próximas fases: produtos, estoque, caixa...) nasce protegido por padrão.
+  // ===================================================================
+  app.use('/admin', somenteAdminNaPagina, express.static(path.join(RAIZ, 'public', 'admin')));
+
+  // Compatibilidade: link antigo continua funcionando (e continua protegido).
+  app.get('/painel.html', (req, res) => res.redirect(302, '/admin/painel.html'));
+
+  // Front-end público (loja, login, cadastro, CSS, JS).
   app.use(express.static(path.join(RAIZ, 'public')));
 
   app.use(rotaNaoEncontrada);

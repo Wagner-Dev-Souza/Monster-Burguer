@@ -39,7 +39,8 @@ monster-burguer/
 │   ├── utils/          # CPF, senha, JWT, erros da aplicação
 │   ├── app.js          # monta o app Express (sem subir servidor)
 │   └── server.js       # sobe o servidor (e roda migrations/seeds)
-├── public/             # front-end servido pelo Express
+├── public/             # front-end público (loja, login, cadastro)
+│   └── admin/          # 🔒 telas administrativas (protegidas no servidor)
 ├── tests/              # testes automatizados
 ├── data/               # banco SQLite (ignorado pelo git)
 └── PLANO.md            # plano de fases do projeto
@@ -97,5 +98,10 @@ Troque em produção!
   (proteção contra XSS) e o servidor não precisa guardar sessão em memória.
 - **Soft delete** (`ativo = false`): apagar produto de verdade quebraria o histórico
   de pedidos e relatórios financeiros.
+- **Área administrativa segregada em `/admin/`**: as páginas de admin ficam atrás
+  de um guard (**`somenteAdminNaPagina`**) registrado ANTES do `express.static`.
+  Consequência: um cliente **nunca recebe o HTML** do painel — o servidor responde
+  com redirecionamento antes de o arquivo sair. Rota nova dentro de `public/admin/`
+  já nasce protegida.
 - **Preço congelado no item do pedido**: mudar o preço do produto hoje não reescreve
   o passado no caixa.

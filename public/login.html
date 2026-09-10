@@ -63,7 +63,7 @@
         });
 
         // Redireciona pelo PAPEL: é o que separa cliente de admin na prática.
-        window.location.href = usuario.papel === 'admin' ? '/painel.html' : '/loja.html';
+        window.location.href = usuario.papel === 'admin' ? '/admin/painel.html' : '/loja.html';
       } catch (erro) {
         mostrarMensagem(aviso, erro.message, 'erro');
         botao.disabled = false;
