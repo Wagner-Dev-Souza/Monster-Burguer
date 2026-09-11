@@ -469,6 +469,55 @@ input[readonly] + .cadeado-campo { display: inline; }
   font-size: .74rem; font-weight: 800;
 }
 
+/* ============================================================
+   FASE 5 — Checkout, formas de pagamento e pedidos
+   ============================================================ */
+.formas-pagamento {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin-top: 10px;
+}
+.forma-pagamento {
+  display: flex; align-items: center; gap: 9px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--borda);
+  background: rgba(255, 255, 255, .05);
+  cursor: pointer;
+  font-weight: 700; font-size: .92rem;
+  margin: 0;
+}
+.forma-pagamento input { width: auto; margin: 0; }
+.forma-pagamento.escolhida { border-color: var(--verde-monstro); background: rgba(106, 195, 14, .15); }
+
+.pedido-card {
+  border: 2px solid var(--borda);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, .22);
+}
+.pedido-topo { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; }
+.pedido-topo b { font-size: 1.02rem; }
+.pedido-itens { margin: 10px 0 0; padding-left: 18px; color: var(--texto-suave); font-size: .88rem; line-height: 1.6; }
+
+.status {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-size: .72rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.status.aguardando_pagamento { background: rgba(255, 214, 10, .18); color: var(--amarelo); border: 1px solid var(--amarelo); }
+.status.pago { background: rgba(106, 195, 14, .18); color: var(--verde-brilho); border: 1px solid var(--verde-monstro); }
+.status.em_preparo, .status.pronto { background: rgba(255, 107, 53, .18); color: var(--laranja); border: 1px solid var(--laranja); }
+.status.saiu_entrega, .status.entregue { background: rgba(53, 196, 107, .18); color: var(--verde); border: 1px solid var(--verde); }
+.status.cancelado { background: rgba(214, 40, 40, .18); color: var(--vermelho-claro); border: 1px solid var(--vermelho); }
+
+.linha-resumo { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: .95rem; }
+.linha-resumo.destaque { border-top: 2px dashed var(--borda); margin-top: 8px; padding-top: 12px; font-size: 1.15rem; font-weight: 800; }
+.linha-resumo .valor { color: var(--verde-brilho); }
+
 @media (max-width: 640px) {
   .linha-carrinho { grid-template-columns: 1fr auto; }
   .linha-carrinho .subtotal { grid-column: 1 / -1; text-align: left; }

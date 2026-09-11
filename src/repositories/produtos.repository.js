@@ -92,6 +92,27 @@ export function desativar(id) {
   return buscarPorId(id);
 }
 
+/** Atualiza só o custo de compra (bebida) — usado pelo custo médio das compras. */
+export function atualizarCustoCompra(id, custoCompraCentavos) {
+  db.prepare("UPDATE produtos SET custo_compra = ?, atualizado_em = datetime('now') WHERE id = ?")
+    .run(custoCompraCentavos, id);
+
+  return buscarPorId(id);
+}
+
+/**
+ * Ajusta o estoque somando `delta` (positivo entra, negativo sai).
+ * O `MAX(0, ...)` é uma trava: se duas vendas correrem juntas, o estoque nunca
+ * fica negativo — no pior caso fica zerado.
+ */
+export function ajustarEstoque(id, delta) {
+  db.prepare(`
+    UPDATE produtos SET estoque = MAX(0, estoque + ?), atualizado_em = datetime('now') WHERE id = ?
+  `).run(delta, id);
+
+  return buscarPorId(id);
+}
+
 /* ------------------------------ FICHA TÉCNICA ------------------------------ */
 
 /** Itens da ficha técnica com o nome/unidade/custo do ingrediente (para exibir e calcular). */

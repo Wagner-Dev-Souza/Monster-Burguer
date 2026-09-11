@@ -23,6 +23,7 @@
     <nav class="nav">
       <a href="/admin/painel.html" class="ativo">👑 Painel</a>
       <a href="/admin/produtos.html">🍔 Produtos</a>
+      <a href="/admin/compras.html">📦 Compras</a>
       <a href="/loja.html">🛍️ Ver a loja</a>
     </nav>
 
@@ -68,6 +69,30 @@
             </tbody>
           </table>
         </div>
+      </div>
+
+      <!-- ============ PEDIDOS DOS CLIENTES (Fase 5) ============ -->
+      <div class="card">
+        <h2><span class="emoji">🧾</span> Pedidos dos clientes</h2>
+        <p class="ajuda">
+          Todo pedido feito na loja, com o total e a forma de pagamento. O avanço do status
+          (preparo → entrega) entra na <strong>Fase 6</strong>.
+        </p>
+
+        <div class="mensagem" id="mensagem-pedidos-admin"></div>
+
+        <div class="grade" style="margin-bottom:16px">
+          <div>
+            <p class="ajuda" style="margin:0">Receita de pedidos pagos</p>
+            <p style="margin:0; font-size:1.2rem; font-weight:800; color:var(--verde-brilho)" id="receita-total">R$ 0,00</p>
+          </div>
+          <div>
+            <p class="ajuda" style="margin:0">Pedidos aguardando pagamento</p>
+            <p style="margin:0; font-size:1.2rem; font-weight:800; color:var(--amarelo)" id="aguardando-pagamento">0</p>
+          </div>
+        </div>
+
+        <div id="lista-pedidos-admin"></div>
       </div>
 
       <!-- ============ HISTÓRICO DE ALTERAÇÕES (auditoria) ============ -->
@@ -227,10 +252,62 @@
       }
     }
 
+    /* ---------------------------------------------------------------------
+       Pedidos dos clientes (Fase 5): lista + resumo de receita.
+       --------------------------------------------------------------------- */
+    const avisoPedidosAdmin = document.getElementById('mensagem-pedidos-admin');
+    const corpoPedidosAdmin = document.getElementById('lista-pedidos-admin');
+    const reais = (valor) => `R$ ${Number(valor ?? 0).toFixed(2).replace('.', ',')}`;
+
+    function renderizarPedidosAdmin(pedidos) {
+      corpoPedidosAdmin.innerHTML = '';
+
+      if (pedidos.length === 0) {
+        corpoPedidosAdmin.innerHTML = '<p class="ajuda">Nenhum pedido ainda. Quando um cliente comprar, ele aparece aqui. 🍔</p>';
+        return;
+      }
+
+      pedidos.forEach((pedido) => {
+        const cartao = document.createElement('div');
+        cartao.className = 'pedido-card';
+
+        const itens = pedido.itens
+          .map((item) => `${item.quantidade}× ${item.nome} — ${reais(item.subtotal)}`)
+          .join('<br>');
+
+        cartao.innerHTML = `
+          <div class="pedido-topo">
+            <b>Pedido ${pedido.codigo}</b>
+            <span class="status ${pedido.status}">${pedido.statusLabel}</span>
+          </div>
+          <p class="ajuda" style="margin:6px 0 0">
+            Cliente: ${pedido.cliente.nome ?? '-'} (${pedido.cliente.codigo})
+            · ${pedido.formaPagamentoLabel ?? 'sem pagamento ainda'}
+          </p>
+          <p class="pedido-itens">${itens}</p>
+          <div class="linha-resumo destaque"><span>Total</span><span class="valor">${reais(pedido.total)}</span></div>
+        `;
+
+        corpoPedidosAdmin.appendChild(cartao);
+      });
+    }
+
+    async function carregarPedidos() {
+      try {
+        const { pedidos, resumo } = await API.get('/api/pedidos');
+        document.getElementById('receita-total').textContent = reais(resumo.receitaTotal);
+        document.getElementById('aguardando-pagamento').textContent = String(resumo.aguardandoPagamento);
+        renderizarPedidosAdmin(pedidos);
+      } catch (erro) {
+        mostrarMensagem(avisoPedidosAdmin, erro.message, 'erro');
+      }
+    }
+
     (async () => {
       usuarioLogado = await iniciarPagina('admin'); // 🔒 barreira do painel
       if (!usuarioLogado) return;
       await carregarUsuarios();
+      await carregarPedidos();
       await carregarHistorico();
     })();
   </script>

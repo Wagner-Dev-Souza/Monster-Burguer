@@ -101,6 +101,14 @@ Troque em produção!
 | DELETE | `/api/produtos/:id`         | admin   | Desativa produto (soft delete)             |
 | GET    | `/api/cardapio`             | 🌍 público | Cardápio do cliente final (lanches + bebidas disponíveis) — **sem custo/margem** |
 | GET    | `/api/auditoria`            | admin   | Histórico de quem fez o quê — `?limite=30`, `?entidade=produto` |
+| GET    | `/api/compras`              | admin   | Despesas registradas + resumo (total e do mês) — `?tipo=ingrediente\|produto` |
+| POST   | `/api/compras`              | admin   | Registra compra do fornecedor → recalcula **custo médio ponderado** |
+| DELETE | `/api/compras/:id`          | admin   | Exclui compra e recalcula os custos (devolve estoque, se bebida) |
+| POST   | `/api/pedidos`              | cliente | Cria o pedido (preço congelado, exige telefone + endereço) |
+| GET    | `/api/pedidos/meus`         | cliente | Meus pedidos com status |
+| GET    | `/api/pedidos/:id`          | dono/admin | Detalhe do pedido                        |
+| POST   | `/api/pedidos/:id/pagar`    | cliente | **Pagamento simulado** → vira receita e baixa estoque de bebida |
+| GET    | `/api/pedidos`              | admin   | Todos os pedidos + resumo de receita       |
 
 ## 🎨 Identidade visual
 
@@ -185,3 +193,16 @@ Troque em produção!
 - **Carrinho no `localStorage`, com chave por usuário** (`monsterCarrinho:<id>`):
   duas contas na mesma máquina não misturam pedidos, e o carrinho sobrevive ao
   recarregar a página.
+- **Compra do fornecedor recalcula o custo sozinha** (média ponderada:
+  `Σ valor pago ÷ Σ quantidade comprada`). É o que liga a despesa da loja ao custo
+  do lanche e, por consequência, à margem. Média móvel por lote exigiria controlar
+  estoque por lote — complexidade que não se paga nesta fase.
+- **Preço e nome CONGELADOS no item do pedido**: reajustar o cardápio hoje não
+  reescreve o que o cliente fechou ontem. Histórico não se reescreve.
+- **Itens repetidos são consolidados ANTES de validar estoque**: se o carrinho
+  mandasse "3 + 3" de uma bebida com 5 em estoque em duas linhas, a validação
+  passaria duas vezes — juntando primeiro, o furo fecha.
+- **Estoque de bebida é baixado na confirmação do pagamento** (lanche não tem
+  estoque: é produzido na hora). O `MAX(0, ...)` impede estoque negativo.
+- **Telefone e endereço são exigidos para fechar o pedido** — é aqui que os dados
+  de entrega são recolhidos; ficam editáveis em "Minha conta".

@@ -84,6 +84,14 @@ export function listarProdutosQueUsam(ingredienteId) {
     .all(ingredienteId);
 }
 
+/** Atualiza SÓ o custo unitário (usado pelo custo médio ponderado das compras). */
+export function atualizarCusto(id, custoUnitarioCentavos) {
+  db.prepare("UPDATE ingredientes SET custo_unitario = ?, atualizado_em = datetime('now') WHERE id = ?")
+    .run(custoUnitarioCentavos, id);
+
+  return buscarPorId(id);
+}
+
 /** Quantos itens de ficha técnica usam este ingrediente (para avisar antes de desativar). */
 export function contarUsos(id) {
   return db

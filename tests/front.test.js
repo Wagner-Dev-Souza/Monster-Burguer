@@ -310,4 +310,40 @@ describe('Interface — elementos obrigatórios', () => {
     assert.match(html, /id="lista-auditoria"/);
     assert.match(html, /\/api\/auditoria/);
   });
+
+  it('FASE 5: a loja tem checkout com formas de pagamento e botão de pagamento', async () => {
+    const resposta = await request(app).get('/loja.html');
+
+    assert.match(resposta.text, /id="card-checkout"/);
+    assert.match(resposta.text, /id="formas-pagamento"/);
+    assert.match(resposta.text, /id="campo-troco"/);
+    assert.match(resposta.text, /id="botao-confirmar-pedido"/);
+    assert.match(resposta.text, /id="botao-pagar"/);
+    assert.match(resposta.text, /id="lista-pedidos"/);
+    assert.match(resposta.text, /API\.post\('\/api\/pedidos'/);
+    assert.match(resposta.text, /\/pagar`/);
+    // a loja é de teste: nada de dados de cartão
+    assert.match(resposta.text, /não pedimos número de cartão/i);
+  });
+
+  it('FASE 3: a página de compras existe com formulário e histórico', async () => {
+    const fs = await import('node:fs/promises');
+    const html = await fs.readFile(new URL('../public/admin/compras.html', import.meta.url), 'utf8');
+
+    assert.match(html, /id="form-compra"/);
+    assert.match(html, /id="compra-tipo"/);
+    assert.match(html, /id="compra-item"/);
+    assert.match(html, /id="compra-valor"/);
+    assert.match(html, /id="lista-compras"/);
+    assert.match(html, /média ponderada/i);
+  });
+
+  it('o painel mostra os pedidos dos clientes e a receita', async () => {
+    const fs = await import('node:fs/promises');
+    const html = await fs.readFile(new URL('../public/admin/painel.html', import.meta.url), 'utf8');
+
+    assert.match(html, /id="lista-pedidos-admin"/);
+    assert.match(html, /id="receita-total"/);
+    assert.match(html, /href="\/admin\/compras\.html"/);
+  });
 });

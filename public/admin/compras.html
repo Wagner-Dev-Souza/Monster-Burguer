@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compras e Despesas — Monster Burguer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <img src="/img/lanche.svg" alt="">
+      <div>
+        <div class="nome">Compras & <b>Despesas</b></div>
+        <div class="slogan">Gestão da Monster Burguer</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="/admin/painel.html">👑 Painel</a>
+      <a href="/admin/produtos.html">🍔 Produtos</a>
+      <a href="/admin/compras.html" class="ativo">📦 Compras</a>
+      <a href="/loja.html">🛍️ Ver a loja</a>
+    </nav>
+
+    <div class="acoes-topo">
+      <span class="selo" data-papel-usuario>...</span>
+      <button class="sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="conteudo">
+    <div class="container">
+      <section class="hero">
+        <img class="burguer" src="/img/lanche.svg" alt="">
+        <h1>O que <em>entrou</em> na despensa</h1>
+        <p>
+          Registre aqui o que você comprou do fornecedor. O sistema <strong>recalcula sozinho</strong> o custo
+          do ingrediente (média ponderada: total gasto ÷ total comprado) — e esse custo é o que faz a
+          <strong>margem de cada lanche</strong> ficar real.
+        </p>
+      </section>
+
+      <!-- ========================= RESUMO ========================= -->
+      <div class="grade">
+        <div class="card">
+          <h2><span class="emoji">💸</span> Despesas totais</h2>
+          <p class="ajuda" style="margin:0" id="despesa-total">R$ 0,00</p>
+          <p class="ajuda" style="margin:6px 0 0" id="despesa-quantidade">0 compras registradas</p>
+        </div>
+        <div class="card">
+          <h2><span class="emoji">📅</span> Despesas do mês</h2>
+          <p class="ajuda" style="margin:0" id="despesa-mes">R$ 0,00</p>
+          <p class="ajuda" style="margin:6px 0 0" id="despesa-mes-quantidade">0 compras neste mês</p>
+        </div>
+      </div>
+
+      <!-- ==================== REGISTRAR COMPRA ==================== -->
+      <div class="card">
+        <h2><span class="emoji">🧾</span> Registrar compra</h2>
+        <p class="ajuda">
+          Ingrediente entra na receita dos lanches. Bebida é revenda: a compra aumenta o <strong>estoque</strong>.
+        </p>
+
+        <div class="mensagem" id="mensagem-compra"></div>
+
+        <form id="form-compra">
+          <div class="grade-formulario">
+            <div>
+              <label for="compra-tipo">Tipo</label>
+              <select id="compra-tipo">
+                <option value="ingrediente">🥬 Ingrediente (receita)</option>
+                <option value="produto">🥤 Bebida (revenda)</option>
+              </select>
+            </div>
+            <div>
+              <label for="compra-item">Item</label>
+              <select id="compra-item"></select>
+            </div>
+            <div>
+              <label for="compra-quantidade">Quantidade</label>
+              <input id="compra-quantidade" inputmode="decimal" placeholder="10" required>
+            </div>
+            <div>
+              <label for="compra-valor">Valor total pago (R$)</label>
+              <input id="compra-valor" inputmode="decimal" placeholder="400,00" required>
+            </div>
+            <div>
+              <label for="compra-fornecedor">Fornecedor (opcional)</label>
+              <input id="compra-fornecedor" placeholder="Frigorífico do Zé">
+            </div>
+            <div>
+              <label for="compra-data">Data da compra</label>
+              <input id="compra-data" type="date">
+            </div>
+          </div>
+
+          <label for="compra-observacao">Observação (opcional)</label>
+          <input id="compra-observacao" placeholder="ex.: promoção do fornecedor">
+
+          <div class="acoes-formulario">
+            <button type="submit" class="botao" id="botao-compra">➕ Registrar compra</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ===================== HISTÓRICO ===================== -->
+      <div class="card">
+        <h2><span class="emoji">📚</span> Histórico de compras</h2>
+        <p class="ajuda">Excluir uma compra lançada errada recalcula os custos automaticamente.</p>
+
+        <div class="mensagem" id="mensagem-historico"></div>
+
+        <div class="tabela-rolagem">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Item</th>
+                <th>Tipo</th>
+                <th>Quantidade</th>
+                <th>Valor total</th>
+                <th>Valor unitário</th>
+                <th>Fornecedor</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="lista-compras">
+              <tr><td colspan="8" style="color:var(--texto-suave)">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="rodape cadeado">
+        🔒 Custos e despesas são informação estratégica: só admin acessa.
+      </p>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script>
+    const reais = (valor) => `R$ ${Number(valor ?? 0).toFixed(2).replace('.', ',')}`;
+    const avisoCompra = document.getElementById('mensagem-compra');
+    const avisoHistorico = document.getElementById('mensagem-historico');
+
+    let ingredientes = [];
+    let bebidas = [];
+
+    /* -------------------- monta o select de itens -------------------- */
+    function montarSelectDeItens() {
+      const tipo = document.getElementById('compra-tipo').value;
+      const select = document.getElementById('compra-item');
+      select.innerHTML = '';
+
+      const itens = tipo === 'ingrediente' ? ingredientes : bebidas;
+
+      if (itens.length === 0) {
+        const opcao = document.createElement('option');
+        opcao.value = '';
+        opcao.textContent = tipo === 'ingrediente'
+          ? '(nenhum ingrediente cadastrado)'
+          : '(nenhuma bebida cadastrada)';
+        select.appendChild(opcao);
+        return;
+      }
+
+      itens.forEach((item) => {
+        const opcao = document.createElement('option');
+        opcao.value = String(item.id);
+        opcao.textContent = tipo === 'ingrediente'
+          ? `${item.nome} (${item.unidade})`
+          : `${item.nome} — estoque: ${item.estoque}`;
+        select.appendChild(opcao);
+      });
+    }
+
+    document.getElementById('compra-tipo').addEventListener('change', montarSelectDeItens);
+
+    /* ---------------------- carrega os dados ---------------------- */
+    async function carregarItens() {
+      const [dadosIngredientes, dadosProdutos] = await Promise.all([
+        API.get('/api/ingredientes'),
+        API.get('/api/produtos?tipo=bebida'),
+      ]);
+
+      ingredientes = dadosIngredientes.ingredientes;
+      bebidas = dadosProdutos.produtos;
+      montarSelectDeItens();
+    }
+
+    function renderizarCompras(compras) {
+      const corpo = document.getElementById('lista-compras');
+      corpo.innerHTML = '';
+
+      if (compras.length === 0) {
+        corpo.innerHTML = '<tr><td colspan="8" style="color:var(--texto-suave)">Nenhuma compra registrada ainda.</td></tr>';
+        return;
+      }
+
+      compras.forEach((compra) => {
+        const linha = document.createElement('tr');
+        const [ano, mes, dia] = String(compra.dataCompra).split('-');
+
+        linha.innerHTML = `
+          <td>${dia}/${mes}/${ano}</td>
+          <td>${compra.itemNome}</td>
+          <td>${compra.tipo === 'ingrediente' ? '🥬 ingrediente' : '🥤 bebida'}</td>
+          <td>${compra.quantidade}${compra.itemUnidade ? ` ${compra.itemUnidade}` : ''}</td>
+          <td>${reais(compra.valorTotal)}</td>
+          <td>${reais(compra.valorUnitario)}</td>
+          <td>${compra.fornecedor ?? '-'}</td>
+        `;
+
+        const acoes = document.createElement('td');
+        const botao = document.createElement('button');
+        botao.className = 'botao pequeno perigo';
+        botao.textContent = '🗑️ Excluir';
+        botao.addEventListener('click', () => excluirCompra(compra));
+        acoes.appendChild(botao);
+
+        linha.appendChild(acoes);
+        corpo.appendChild(linha);
+      });
+    }
+
+    async function carregarCompras() {
+      const dados = await API.get('/api/compras');
+
+      document.getElementById('despesa-total').textContent = reais(dados.resumo.totalDespesas);
+      document.getElementById('despesa-quantidade').textContent =
+        `${dados.resumo.quantidadeCompras} compra(s) registrada(s)`;
+      document.getElementById('despesa-mes').textContent = reais(dados.resumo.despesasDoMes);
+      document.getElementById('despesa-mes-quantidade').textContent =
+        `${dados.resumo.comprasDoMes} compra(s) neste mês`;
+
+      renderizarCompras(dados.compras);
+    }
+
+    /* ---------------------- registrar compra ---------------------- */
+    document.getElementById('form-compra').addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+
+      const tipo = document.getElementById('compra-tipo').value;
+      const itemId = document.getElementById('compra-item').value;
+
+      if (!itemId) {
+        mostrarMensagem(avisoCompra, 'Cadastre o item antes de registrar a compra.', 'erro');
+        return;
+      }
+
+      const corpo = {
+        tipo,
+        ingredienteId: tipo === 'ingrediente' ? Number(itemId) : null,
+        produtoId: tipo === 'produto' ? Number(itemId) : null,
+        quantidade: document.getElementById('compra-quantidade').value,
+        valorTotal: document.getElementById('compra-valor').value,
+        fornecedor: document.getElementById('compra-fornecedor').value,
+        dataCompra: document.getElementById('compra-data').value || null,
+        observacao: document.getElementById('compra-observacao').value,
+      };
+
+      try {
+        const resposta = await API.post('/api/compras', corpo);
+        mostrarMensagem(avisoCompra, resposta.mensagem, 'sucesso');
+
+        document.getElementById('form-compra').reset();
+        montarSelectDeItens();
+
+        await carregarCompras();
+        await carregarItens(); // custo/estoque mudaram
+      } catch (erro) {
+        mostrarMensagem(avisoCompra, erro.message, 'erro');
+      }
+    });
+
+    async function excluirCompra(compra) {
+      if (!confirm(`Excluir a compra de "${compra.itemNome}" (${reais(compra.valorTotal)})? Os custos serão recalculados.`)) return;
+
+      try {
+        const resposta = await API.delete(`/api/compras/${compra.id}`);
+        mostrarMensagem(avisoHistorico, resposta.mensagem, 'sucesso');
+        await carregarCompras();
+        await carregarItens();
+      } catch (erro) {
+        mostrarMensagem(avisoHistorico, erro.message, 'erro');
+      }
+    }
+
+    /* ------------------------ inicialização ------------------------ */
+    (async () => {
+      const usuario = await iniciarPagina('admin'); // 🔒 barreira do painel
+      if (!usuario) return;
+
+      await carregarItens();
+      await carregarCompras();
+    })();
+  </script>
+</body>
+</html>

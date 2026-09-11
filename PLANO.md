@@ -26,7 +26,7 @@ Tabelas `produtos` (tipo lanche|bebida, estoque, ativo), `ingredientes` e
 `produto_composicao` (ficha técnica). CRUD no painel do dono. Cálculo automático
 do custo de produção e da margem de cada sanduíche.
 
-## Fase 3 — Compras/Despesas e Estoque 📦
+## Fase 3 — Compras/Despesas e Estoque 📦 — ✅ CONCLUÍDA
 Tabela `compras` (ingrediente, quantidade, valor, fornecedor, data). Cada compra
 recalcula o **custo médio ponderado** do ingrediente. Controle de estoque,
 inclusive das bebidas.
@@ -35,10 +35,10 @@ inclusive das bebidas.
 Endpoints do cardápio (lanches + bebidas ativos). Carrinho no navegador:
 adicionar, remover item, alterar quantidade e voltar ao cardápio.
 
-> Observação: entregue antes da Fase 3 (a pedido do cliente). A Fase 3
-> (compras/despesas + custo médio + movimentação de estoque) segue pendente.
+> Observação: a Fase 4 foi entregue antes da Fase 3 (a pedido do cliente);
+> ambas já estão concluídas.
 
-## Fase 5 — Pedidos, Checkout e Pagamento Simulado 💳
+## Fase 5 — Pedidos, Checkout e Pagamento Simulado 💳 — ✅ CONCLUÍDA
 Tabelas `pedidos` e `pedido_itens` (com preço congelado). Confirmação do pedido,
 revisão dos itens, escolha da forma de pagamento (PIX, crédito, débito, dinheiro
 com troco, na entrega) e botão de **confirmar pagamento (simulado)** → o pedido
