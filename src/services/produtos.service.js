@@ -2,6 +2,7 @@ import * as produtosRepo from '../repositories/produtos.repository.js';
 import * as ingredientesRepo from '../repositories/ingredientes.repository.js';
 import { centavosParaReais, reaisParaCentavos } from '../utils/moeda.js';
 import { limitarTexto } from '../utils/texto.js';
+import { MASCOTES, ehMascoteValido, mascoteDoProduto } from '../utils/mascotes.js';
 import { ErroConflito, ErroNaoEncontrado, ErroValidacao } from '../utils/errors.js';
 
 /**
@@ -47,6 +48,12 @@ function paraPublico(produto, composicao = null) {
     nome: produto.nome,
     descricao: produto.descricao,
     tipo: produto.tipo,
+    // Arte do produto: escolhida pelo dono no painel; sem escolha, cai na arte
+    // derivada do id (nunca fica igual para todo mundo e não troca a cada visita).
+    mascote: mascoteDoProduto(produto),
+    // O painel usa isto para saber se a arte foi ESCOLHIDA ou é a automática
+    // (assim a grade de opções abre sem seleção quando ninguém escolheu ainda).
+    mascoteEscolhido: Boolean(produto.mascote),
     precoVenda: centavosParaReais(produto.precoVendaCentavos),
     custoCompra: centavosParaReais(produto.custoCompraCentavos),
     estoque: produto.estoque,
@@ -118,6 +125,13 @@ function validar(dados) {
     throw new ErroValidacao('Estoque inválido. Informe um número inteiro (zero ou mais).');
   }
 
+  // Mascote: opcional. Se vier preenchido, precisa estar na lista (senão a
+  // imagem da loja quebraria). Vazio = usa a arte derivada do id.
+  const mascote = dados?.mascote ? String(dados.mascote) : null;
+  if (mascote && !ehMascoteValido(mascote)) {
+    throw new ErroValidacao(`Mascote inválido. Escolha um destes: ${MASCOTES.join(', ')}.`);
+  }
+
   return {
     nome,
     descricao: limitarTexto(dados?.descricao, 200) || null,
@@ -125,6 +139,7 @@ function validar(dados) {
     precoVendaCentavos,
     custoCompraCentavos,
     estoque,
+    mascote,
   };
 }
 

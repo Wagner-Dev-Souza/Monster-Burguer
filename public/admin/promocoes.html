@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promoções e Cupons — Monster Burguer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <img src="/img/lanche.svg" alt="">
+      <div>
+        <div class="nome">Promoções & <b>Cupons</b></div>
+        <div class="slogan">Gestão da Monster Burguer</div>
+      </div>
+    </div>
+
+    <nav class="nav" data-nav hidden></nav>
+
+    <div class="acoes-topo">
+      <span class="selo" data-papel-usuario>...</span>
+      <button class="sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="conteudo">
+    <div class="container">
+      <section class="hero">
+        <img class="burguer" src="/img/monstros/bruxa.svg" alt="">
+        <h1>Preço com <em>magia</em></h1>
+        <p>
+          <strong>Promoção</strong> é desconto em um produto (aparece no cardápio com o selo de %).
+          <strong>Cupom</strong> é um código que o cliente digita na hora de pagar. 🎟️
+        </p>
+      </section>
+
+      <!-- ========================= PROMOÇÕES ========================= -->
+      <div class="card">
+        <h2><span class="emoji">🏷️</span> Promoção por produto</h2>
+        <p class="ajuda">Só uma promoção fica ativa por produto: ao criar uma nova, a anterior sai do ar.</p>
+
+        <div class="mensagem" id="mensagem-promocao"></div>
+
+        <form id="form-promocao">
+          <div class="grade-formulario">
+            <div>
+              <label for="promocao-produto">Produto</label>
+              <select id="promocao-produto"></select>
+            </div>
+            <div>
+              <label for="promocao-percentual">Desconto (%)</label>
+              <input id="promocao-percentual" inputmode="numeric" placeholder="15" required>
+            </div>
+            <div>
+              <label for="promocao-inicio">Começa em (opcional)</label>
+              <input id="promocao-inicio" type="date">
+            </div>
+            <div>
+              <label for="promocao-fim">Termina em (opcional)</label>
+              <input id="promocao-fim" type="date">
+            </div>
+          </div>
+
+          <div class="acoes-formulario">
+            <button type="submit" class="botao" id="botao-promocao">➕ Criar promoção</button>
+            <button type="button" class="botao fantasma" id="botao-cancelar-promocao" hidden>✖ Cancelar edição</button>
+          </div>
+        </form>
+
+        <div class="tabela-rolagem">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Desconto</th>
+                <th>Período</th>
+                <th>Situação</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="lista-promocoes">
+              <tr><td colspan="5" style="color:var(--texto-suave)">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- =========================== CUPONS =========================== -->
+      <div class="card">
+        <h2><span class="emoji">🎟️</span> Cupons de desconto</h2>
+        <p class="ajuda">O cliente digita o código no pagamento. O uso é contado só quando o pedido é PAGO.</p>
+
+        <div class="mensagem" id="mensagem-cupom"></div>
+
+        <form id="form-cupom">
+          <div class="grade-formulario">
+            <div>
+              <label for="cupom-codigo">Código</label>
+              <input id="cupom-codigo" placeholder="MONSTER10" required>
+            </div>
+            <div>
+              <label for="cupom-percentual">Desconto (%)</label>
+              <input id="cupom-percentual" inputmode="numeric" placeholder="10" required>
+            </div>
+            <div>
+              <label for="cupom-minimo">Pedido mínimo (R$)</label>
+              <input id="cupom-minimo" inputmode="decimal" placeholder="0,00">
+            </div>
+            <div>
+              <label for="cupom-usos">Limite de usos</label>
+              <input id="cupom-usos" inputmode="numeric" placeholder="(vazio = ilimitado)">
+            </div>
+            <div>
+              <label for="cupom-validade">Válido até (opcional)</label>
+              <input id="cupom-validade" type="date">
+            </div>
+          </div>
+
+          <div class="acoes-formulario">
+            <button type="submit" class="botao" id="botao-cupom">➕ Criar cupom</button>
+            <button type="button" class="botao fantasma" id="botao-cancelar-cupom" hidden>✖ Cancelar edição</button>
+          </div>
+        </form>
+
+        <div class="tabela-rolagem">
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Desconto</th>
+                <th>Mínimo</th>
+                <th>Usos</th>
+                <th>Validade</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="lista-cupons">
+              <tr><td colspan="6" style="color:var(--texto-suave)">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="rodape cadeado">🔒 Preço e desconto são informação estratégica: só admin acessa.</p>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script type="module" src="/js/musica.js"></script>
+  <script>
+    const avisoPromocao = document.getElementById('mensagem-promocao');
+    const avisoCupom = document.getElementById('mensagem-cupom');
+
+    let produtos = [];
+    let promocoes = [];
+    let cupons = [];
+    let idPromocaoEmEdicao = null;
+    let idCupomEmEdicao = null;
+
+    const dataBr = (iso) => (iso ? iso.split('-').reverse().join('/') : null);
+
+    /* ========================= PROMOÇÕES ========================= */
+    function montarSelectDeProdutos() {
+      const select = document.getElementById('promocao-produto');
+      const anterior = select.value;
+      select.innerHTML = '';
+
+      produtos.forEach((produto) => {
+        const opcao = document.createElement('option');
+        opcao.value = String(produto.id);
+        opcao.textContent = `${produto.nome} — ${reais(produto.precoVenda)}`;
+        select.appendChild(opcao);
+      });
+
+      if (anterior) select.value = anterior;
+    }
+
+    function situacaoDaPromocao(promocao) {
+      if (!promocao.ativo) return '<span class="etiqueta cliente">inativa</span>';
+      if (promocao.vigente) return '<span class="status pago">vigente</span>';
+      if (promocao.inicio && promocao.inicio > new Date().toISOString().slice(0, 10)) {
+        return `<span class="status aguardando_pagamento">começa ${dataBr(promocao.inicio)}</span>`;
+      }
+      return '<span class="status cancelado">fora do período</span>';
+    }
+
+    function renderizarPromocoes() {
+      const corpo = document.getElementById('lista-promocoes');
+      corpo.innerHTML = '';
+
+      if (promocoes.length === 0) {
+        corpo.innerHTML = '<tr><td colspan="5" style="color:var(--texto-suave)">Nenhuma promoção criada ainda.</td></tr>';
+        return;
+      }
+
+      promocoes.forEach((promocao) => {
+        const periodo = promocao.inicio || promocao.fim
+          ? `${promocao.inicio ? dataBr(promocao.inicio) : 'sempre'} → ${promocao.fim ? dataBr(promocao.fim) : 'sempre'}`
+          : 'sem prazo';
+
+        const linha = document.createElement('tr');
+        linha.innerHTML = `
+          <td>${promocao.produtoNome ?? '(produto removido)'}</td>
+          <td><b style="color:var(--verde-brilho)">-${promocao.percentual}%</b></td>
+          <td>${periodo}</td>
+          <td>${situacaoDaPromocao(promocao)}</td>
+        `;
+
+        const acoes = document.createElement('td');
+        const grupo = document.createElement('div');
+        grupo.className = 'acoes-tabela';
+
+        const editar = document.createElement('button');
+        editar.className = 'botao pequeno fantasma';
+        editar.textContent = '✏️ Editar';
+        editar.addEventListener('click', () => carregarPromocaoNoFormulario(promocao));
+
+        const alternar = document.createElement('button');
+        alternar.className = 'botao pequeno fantasma';
+        alternar.textContent = promocao.ativo ? '⏸️ Desativar' : '▶️ Ativar';
+        alternar.addEventListener('click', () => alternarPromocao(promocao));
+
+        const excluir = document.createElement('button');
+        excluir.className = 'botao pequeno perigo';
+        excluir.textContent = '🗑️ Excluir';
+        excluir.addEventListener('click', () => excluirPromocao(promocao));
+
+        grupo.append(editar, alternar, excluir);
+        acoes.appendChild(grupo);
+        linha.appendChild(acoes);
+        corpo.appendChild(linha);
+      });
+    }
+
+    async function carregarPromocoes() {
+      const dados = await API.get('/api/promocoes');
+      promocoes = dados.promocoes;
+      renderizarPromocoes();
+    }
+
+    function carregarPromocaoNoFormulario(promocao) {
+      idPromocaoEmEdicao = promocao.id;
+      document.getElementById('promocao-produto').value = String(promocao.produtoId);
+      document.getElementById('promocao-percentual').value = String(promocao.percentual);
+      document.getElementById('promocao-inicio').value = promocao.inicio ?? '';
+      document.getElementById('promocao-fim').value = promocao.fim ?? '';
+      document.getElementById('botao-promocao').textContent = '💾 Salvar promoção';
+      document.getElementById('botao-cancelar-promocao').hidden = false;
+      window.scrollTo({ top: document.getElementById('form-promocao').offsetTop - 120, behavior: 'smooth' });
+    }
+
+    function limparFormularioPromocao() {
+      idPromocaoEmEdicao = null;
+      document.getElementById('form-promocao').reset();
+      document.getElementById('botao-promocao').textContent = '➕ Criar promoção';
+      document.getElementById('botao-cancelar-promocao').hidden = true;
+    }
+
+    document.getElementById('botao-cancelar-promocao').addEventListener('click', limparFormularioPromocao);
+
+    document.getElementById('form-promocao').addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+
+      const corpo = {
+        produtoId: Number(document.getElementById('promocao-produto').value),
+        percentual: document.getElementById('promocao-percentual').value,
+        inicio: document.getElementById('promocao-inicio').value || null,
+        fim: document.getElementById('promocao-fim').value || null,
+      };
+
+      try {
+        const resposta = idPromocaoEmEdicao
+          ? await API.put(`/api/promocoes/${idPromocaoEmEdicao}`, corpo)
+          : await API.post('/api/promocoes', corpo);
+
+        mostrarMensagem(avisoPromocao, resposta.mensagem, 'sucesso');
+        limparFormularioPromocao();
+        await carregarPromocoes();
+      } catch (erro) {
+        mostrarMensagem(avisoPromocao, erro.message, 'erro');
+      }
+    });
+
+    async function alternarPromocao(promocao) {
+      try {
+        const { mensagem } = await API.put(`/api/promocoes/${promocao.id}`, {
+          produtoId: promocao.produtoId,
+          percentual: promocao.percentual,
+          inicio: promocao.inicio,
+          fim: promocao.fim,
+          ativo: !promocao.ativo,
+        });
+
+        mostrarMensagem(avisoPromocao, mensagem, 'sucesso');
+        await carregarPromocoes();
+      } catch (erro) {
+        mostrarMensagem(avisoPromocao, erro.message, 'erro');
+      }
+    }
+
+    async function excluirPromocao(promocao) {
+      if (!confirm(`Excluir a promoção de ${promocao.produtoNome} (-${promocao.percentual}%)?`)) return;
+
+      try {
+        const { mensagem } = await API.delete(`/api/promocoes/${promocao.id}`);
+        mostrarMensagem(avisoPromocao, mensagem, 'sucesso');
+        await carregarPromocoes();
+      } catch (erro) {
+        mostrarMensagem(avisoPromocao, erro.message, 'erro');
+      }
+    }
+
+    /* =========================== CUPONS =========================== */
+    function renderizarCupons() {
+      const corpo = document.getElementById('lista-cupons');
+      corpo.innerHTML = '';
+
+      if (cupons.length === 0) {
+        corpo.innerHTML = '<tr><td colspan="6" style="color:var(--texto-suave)">Nenhum cupom criado ainda.</td></tr>';
+        return;
+      }
+
+      const hoje = new Date().toISOString().slice(0, 10);
+
+      cupons.forEach((cupom) => {
+        const usos = cupom.usosMaximos === null
+          ? `${cupom.usos} (sem limite)`
+          : `${cupom.usos} de ${cupom.usosMaximos}`;
+
+        let situacao = '<span class="status pago">ativo</span>';
+        if (!cupom.ativo) situacao = '<span class="etiqueta cliente">inativo</span>';
+        else if (cupom.validoAte && cupom.validoAte < hoje) situacao = '<span class="status cancelado">vencido</span>';
+        else if (cupom.usosMaximos !== null && cupom.usos >= cupom.usosMaximos) situacao = '<span class="status cancelado">esgotado</span>';
+
+        const linha = document.createElement('tr');
+        linha.innerHTML = `
+          <td><b>${cupom.codigo}</b></td>
+          <td><b style="color:var(--verde-brilho)">-${cupom.percentual}%</b></td>
+          <td>${reais(cupom.valorMinimo)}</td>
+          <td>${usos}</td>
+          <td>${cupom.validoAte ? dataBr(cupom.validoAte) : 'sem prazo'} ${situacao}</td>
+        `;
+
+        const acoes = document.createElement('td');
+        const grupo = document.createElement('div');
+        grupo.className = 'acoes-tabela';
+
+        const editar = document.createElement('button');
+        editar.className = 'botao pequeno fantasma';
+        editar.textContent = '✏️ Editar';
+        editar.addEventListener('click', () => carregarCupomNoFormulario(cupom));
+
+        const alternar = document.createElement('button');
+        alternar.className = 'botao pequeno fantasma';
+        alternar.textContent = cupom.ativo ? '⏸️ Desativar' : '▶️ Ativar';
+        alternar.addEventListener('click', () => alternarCupom(cupom));
+
+        const excluir = document.createElement('button');
+        excluir.className = 'botao pequeno perigo';
+        excluir.textContent = '🗑️ Excluir';
+        excluir.addEventListener('click', () => excluirCupom(cupom));
+
+        grupo.append(editar, alternar, excluir);
+        acoes.appendChild(grupo);
+        linha.appendChild(acoes);
+        corpo.appendChild(linha);
+      });
+    }
+
+    async function carregarCupons() {
+      const dados = await API.get('/api/cupons');
+      cupons = dados.cupons;
+      renderizarCupons();
+    }
+
+    function carregarCupomNoFormulario(cupom) {
+      idCupomEmEdicao = cupom.id;
+      document.getElementById('cupom-codigo').value = cupom.codigo;
+      document.getElementById('cupom-percentual').value = String(cupom.percentual);
+      document.getElementById('cupom-minimo').value = cupom.valorMinimo ? String(cupom.valorMinimo).replace('.', ',') : '';
+      document.getElementById('cupom-usos').value = cupom.usosMaximos ?? '';
+      document.getElementById('cupom-validade').value = cupom.validoAte ?? '';
+      document.getElementById('botao-cupom').textContent = '💾 Salvar cupom';
+      document.getElementById('botao-cancelar-cupom').hidden = false;
+      window.scrollTo({ top: document.getElementById('form-cupom').offsetTop - 120, behavior: 'smooth' });
+    }
+
+    function limparFormularioCupom() {
+      idCupomEmEdicao = null;
+      document.getElementById('form-cupom').reset();
+      document.getElementById('botao-cupom').textContent = '➕ Criar cupom';
+      document.getElementById('botao-cancelar-cupom').hidden = true;
+    }
+
+    document.getElementById('botao-cancelar-cupom').addEventListener('click', limparFormularioCupom);
+
+    document.getElementById('form-cupom').addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+
+      const corpo = {
+        codigo: document.getElementById('cupom-codigo').value,
+        percentual: document.getElementById('cupom-percentual').value,
+        valorMinimo: document.getElementById('cupom-minimo').value || 0,
+        usosMaximos: document.getElementById('cupom-usos').value || null,
+        validoAte: document.getElementById('cupom-validade').value || null,
+      };
+
+      try {
+        const resposta = idCupomEmEdicao
+          ? await API.put(`/api/cupons/${idCupomEmEdicao}`, corpo)
+          : await API.post('/api/cupons', corpo);
+
+        mostrarMensagem(avisoCupom, resposta.mensagem, 'sucesso');
+        limparFormularioCupom();
+        await carregarCupons();
+      } catch (erro) {
+        mostrarMensagem(avisoCupom, erro.message, 'erro');
+      }
+    });
+
+    async function alternarCupom(cupom) {
+      try {
+        const { mensagem } = await API.put(`/api/cupons/${cupom.id}`, {
+          codigo: cupom.codigo,
+          percentual: cupom.percentual,
+          valorMinimo: cupom.valorMinimo,
+          usosMaximos: cupom.usosMaximos,
+          validoAte: cupom.validoAte,
+          ativo: !cupom.ativo,
+        });
+
+        mostrarMensagem(avisoCupom, mensagem, 'sucesso');
+        await carregarCupons();
+      } catch (erro) {
+        mostrarMensagem(avisoCupom, erro.message, 'erro');
+      }
+    }
+
+    async function excluirCupom(cupom) {
+      if (!confirm(`Excluir o cupom ${cupom.codigo}?`)) return;
+
+      try {
+        const { mensagem } = await API.delete(`/api/cupons/${cupom.id}`);
+        mostrarMensagem(avisoCupom, mensagem, 'sucesso');
+        await carregarCupons();
+      } catch (erro) {
+        mostrarMensagem(avisoCupom, erro.message, 'erro');
+      }
+    }
+
+    /* ========================= inicialização ========================= */
+    (async () => {
+      const usuario = await iniciarPagina('admin');
+      if (!usuario) return;
+
+      const dados = await API.get('/api/produtos');
+      produtos = dados.produtos;
+      montarSelectDeProdutos();
+
+      await carregarPromocoes();
+      await carregarCupons();
+    })();
+  </script>
+</body>
+</html>

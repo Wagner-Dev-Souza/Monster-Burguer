@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loja — Monster Burguer</title>
+  <title>Cardápio — Monster Burguer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/estilo.css">
 </head>
 <body>
-  <!-- ============================ CABEÇALHO ============================ -->
+  <!-- O cabeçalho é o mesmo em todas as telas; a navegação é montada pelo layout.js
+       conforme o papel do usuário (cliente ou admin). -->
   <header class="topo">
     <div class="marca">
       <img src="/img/lanche.svg" alt="">
@@ -20,14 +21,9 @@
       </div>
     </div>
 
-    <!-- ABAS: visíveis SOMENTE para admin (o cliente não transita entre áreas) -->
-    <nav class="nav" data-somente-admin hidden>
-      <a href="/loja.html" class="ativo">🍔 Loja</a>
-      <a href="/admin/painel.html">👑 Painel do Dono</a>
-    </nav>
+    <nav class="nav" data-nav hidden></nav>
 
     <div class="acoes-topo">
-      <a href="#carrinho" class="selo cliente" style="text-decoration:none">🛒 Carrinho <span class="contador-carrinho" id="contador-carrinho">0</span></a>
       <span class="selo" data-papel-usuario>...</span>
       <button class="sair" onclick="sair()">Sair</button>
     </div>
@@ -35,28 +31,23 @@
 
   <div class="conteudo">
     <div class="container">
-      <!-- Aviso exclusivo para quem é admin -->
+      <!-- Aviso exclusivo de quem é admin (está vendo a loja como cliente) -->
       <div class="card" data-aviso-papel hidden style="border-color:var(--amarelo)">
         <h2><span class="emoji">👑</span> Você é administrador</h2>
         <p class="ajuda" style="margin:0">
-          Você está na <strong>loja</strong> (visão do cliente) e pode voltar ao
-          <a href="/admin/painel.html">Painel do Dono</a> pelas abas do topo. 🔁
+          Esta é a <strong>loja</strong> (visão do cliente). Para gerenciar, use as abas do topo. 🔁
         </p>
       </div>
 
       <section class="hero">
         <img class="burguer" src="/img/lanche.svg" alt="">
         <h1>Fome de <em>monstro</em>?</h1>
-        <p>
-          Olá, <strong data-primeiro-nome>cliente</strong>! Escolha seus lanches, monte o carrinho
-          e acompanhe o total na hora. 🍔
-        </p>
+        <p>Olá, <strong data-primeiro-nome>cliente</strong>! Escolha seus lanches — o carrinho fica guardado entre as páginas. 🍔</p>
       </section>
 
-      <!-- ====================== CARDÁPIO (Fase 4) ====================== -->
       <div class="card">
         <h2><span class="emoji">🍔</span> Cardápio</h2>
-        <p class="ajuda">Tudo o que o dono cadastrou e está disponível hoje.</p>
+        <p class="ajuda">Tudo o que está disponível hoje. Promoções aparecem com o selo de desconto.</p>
 
         <div class="mensagem" id="mensagem-cardapio"></div>
         <div id="cardapio">
@@ -64,219 +55,60 @@
         </div>
       </div>
 
-      <!-- ====================== CARRINHO (Fase 4) ====================== -->
-      <div class="card" id="carrinho">
-        <h2><span class="emoji">🛒</span> Meu carrinho</h2>
-        <p class="ajuda">Ajuste as quantidades, remova o que não quiser ou clique de novo no cardápio para somar mais itens.</p>
-
-        <div class="mensagem" id="mensagem-carrinho"></div>
-        <div id="lista-carrinho"></div>
-
-        <div class="total-carrinho">
-          <span>Total do pedido</span>
-          <span class="valor" id="total-carrinho">R$ 0,00</span>
-        </div>
-
-        <div class="acoes-formulario">
-          <button type="button" class="botao" id="botao-finalizar" disabled>➡️ Finalizar pedido</button>
-          <button type="button" class="botao fantasma" id="botao-limpar">🗑️ Limpar carrinho</button>
-        </div>
-      </div>
-
-      <!-- ================== CHECKOUT (Fase 5) ================== -->
-      <div class="card" id="card-checkout" hidden>
-        <h2><span class="emoji">🧾</span> Fechar o pedido</h2>
-        <p class="ajuda">Confira os itens, veja o total e escolha como vai pagar.</p>
-
-        <div class="mensagem" id="mensagem-checkout"></div>
-
-        <div id="resumo-checkout"></div>
-
-        <h3 style="margin:16px 0 0; font-size:.88rem; text-transform:uppercase; letter-spacing:1px; color:var(--amarelo)">
-          Forma de pagamento
-        </h3>
-        <div class="formas-pagamento" id="formas-pagamento"></div>
-
-        <div id="campo-troco" hidden style="margin-top:14px">
-          <label for="troco-para">Troco para quanto? (R$)</label>
-          <input id="troco-para" inputmode="decimal" placeholder="50,00">
-          <p class="ajuda" style="margin-top:6px">Deixe em branco se não precisar de troco.</p>
-        </div>
-
-        <label for="pedido-observacao">Observação do pedido (opcional)</label>
-        <input id="pedido-observacao" placeholder="ex.: sem cebola, apartamento 302...">
-
-        <div class="acoes-formulario">
-          <button type="button" class="botao" id="botao-confirmar-pedido">✅ Confirmar pedido</button>
-          <button type="button" class="botao fantasma" id="botao-cancelar-checkout">✖ Voltar ao carrinho</button>
-        </div>
-
-        <!-- Etapa 2: o pagamento simulado -->
-        <div id="etapa-pagamento" hidden style="margin-top:18px; border-top:2px dashed var(--borda); padding-top:16px">
-          <h3 style="margin:0 0 6px; font-size:1rem">💳 Confirmar pagamento</h3>
-          <p class="ajuda" id="texto-pagamento"></p>
-          <p class="ajuda" style="color:var(--texto-suave)">
-            Loja de teste: não pedimos número de cartão nem dados bancários. O botão apenas formaliza a compra.
-          </p>
-          <div class="acoes-formulario">
-            <button type="button" class="botao" id="botao-pagar">💳 Confirmar pagamento</button>
-            <button type="button" class="botao fantasma" id="botao-desistir">Pagar depois</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ================== MEUS PEDIDOS (Fase 5) ================== -->
-      <div class="card">
-        <h2><span class="emoji">📋</span> Meus pedidos</h2>
-        <p class="ajuda">Acompanhe aqui o que você já pediu e o status de cada pedido.</p>
-
-        <div class="mensagem" id="mensagem-pedidos"></div>
-        <div id="lista-pedidos"></div>
-      </div>
-
-      <!-- ============ MINHA CONTA: dados editáveis (Fase 1) ============ -->
-      <div class="card">
-        <h2><span class="emoji">🙋</span> Minha conta</h2>
-        <p class="ajuda">
-          Seu código no sistema: <strong data-codigo-usuario>#0000</strong> (é ele que identifica quem fez cada
-          alteração). Telefone e endereço são usados no fechamento do pedido — mantenha atualizados.
-        </p>
-
-        <form id="form-conta">
-          <label for="conta-nome">Nome completo</label>
-          <input id="conta-nome" name="nome" readonly required>
-
-          <label for="conta-telefone">Telefone (DDD + número)</label>
-          <input id="conta-telefone" name="telefone" inputmode="numeric" placeholder="(21) 99999-8888" readonly>
-
-          <div class="grade-formulario" style="margin-top:14px">
-            <div>
-              <label for="conta-cep">CEP</label>
-              <input id="conta-cep" name="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" readonly>
-            </div>
-            <div class="largo">
-              <label for="conta-endereco">Endereço (rua/avenida)</label>
-              <input id="conta-endereco" name="endereco" placeholder="Rua das Assombrações" readonly>
-            </div>
-            <div>
-              <label for="conta-numero">Número</label>
-              <input id="conta-numero" name="numero" placeholder="123" readonly>
-            </div>
-            <div>
-              <label for="conta-complemento">Complemento</label>
-              <input id="conta-complemento" name="complemento" placeholder="apto 42" readonly>
-            </div>
-            <div>
-              <label for="conta-bairro">Bairro</label>
-              <input id="conta-bairro" name="bairro" readonly>
-            </div>
-            <div>
-              <label for="conta-cidade">Cidade</label>
-              <input id="conta-cidade" name="cidade" readonly>
-            </div>
-          </div>
-
-          <p class="ajuda" style="margin-top:14px">CPF: <strong id="cpf-usuario">...</strong></p>
-
-          <div class="acoes-formulario">
-            <button type="button" class="botao" id="botao-editar">✏️ Editar meus dados</button>
-            <button type="submit" class="botao" id="botao-salvar" hidden>💾 Salvar</button>
-            <button type="button" class="botao fantasma" id="botao-cancelar" hidden>✖ Cancelar</button>
-          </div>
-        </form>
-
-        <div class="mensagem" id="mensagem-conta"></div>
-      </div>
-
-      <!-- Zona de perigo: excluir o próprio cadastro -->
-      <div class="card zona-perigo">
-        <h2><span class="emoji">⚠️</span> Zona de perigo</h2>
-
-        <p class="ajuda" data-aviso-admin hidden>
-          Você é <strong>administrador</strong>: para excluir sua conta, peça a outro admin para
-          <strong>rebaixar você a cliente</strong> primeiro. É uma proteção para a loja nunca ficar
-          sem ninguém capaz de administrá-la.
-        </p>
-
-        <div data-somente-cliente hidden>
-          <p class="ajuda">
-            Excluir seu cadastro <strong>encerra seu acesso</strong> — você não conseguirá mais entrar com este CPF.
-            Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo.
-          </p>
-
-          <label for="confirmacao-exclusao">Digite EXCLUIR para liberar o botão</label>
-          <input id="confirmacao-exclusao" placeholder="EXCLUIR" autocomplete="off">
-
-          <button class="botao perigo" id="botao-excluir" disabled>🗑️ Excluir meu cadastro</button>
-        </div>
-      </div>
-
-      <div class="faixa-turma">
-        <h2>A turma Monster</h2>
-        <div class="turma">
-          <figure><img src="/img/monstros/fantasma.svg" alt="Fantasma"><figcaption>Fantasma</figcaption></figure>
-          <figure><img src="/img/monstros/esqueleto.svg" alt="Esqueleto"><figcaption>Esqueleto</figcaption></figure>
-          <figure><img src="/img/monstros/bruxa.svg" alt="Bruxa"><figcaption>Bruxa</figcaption></figure>
-          <figure><img src="/img/monstros/frank.svg" alt="Frankenstein"><figcaption>Frank</figcaption></figure>
-          <figure><img src="/img/monstros/draculinha.svg" alt="Draculinha"><figcaption>Draculinha</figcaption></figure>
-          <figure><img src="/img/monstros/lobisomem.svg" alt="Lobisomem"><figcaption>Lobi</figcaption></figure>
-          <figure><img src="/img/monstros/mumia.svg" alt="Faraó Múmia"><figcaption>Faraó</figcaption></figure>
-          <figure><img src="/img/monstros/monstro-pantano.svg" alt="Monstro do Pântano"><figcaption>Pântano</figcaption></figure>
-          <figure><img src="/img/monstros/zumbi.svg" alt="Zumbi"><figcaption>Zu</figcaption></figure>
-        </div>
-      </div>
-
       <p class="rodape cadeado">
-        🔒 A área administrativa é restrita ao dono da loja — clientes não a acessam.
+        🔒 Área administrativa é restrita ao dono da loja — clientes não a acessam.
       </p>
     </div>
   </div>
 
+  <!-- Barra flutuante do carrinho: aparece só quando há itens -->
+  <div class="barra-carrinho" id="barra-carrinho" hidden>
+    <div class="resumo">
+      <b id="barra-quantidade">0 itens</b>
+      <span id="barra-total">R$ 0,00</span>
+    </div>
+    <a class="botao" href="/carrinho.html">Ver carrinho ➡️</a>
+  </div>
+
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
+  <script src="/js/carrinho.js"></script>
   <!-- 🎵 Tema 8-bits: toca no site inteiro, sem cortar ao trocar de página -->
   <script type="module" src="/js/musica.js"></script>
   <script>
-    /* =====================================================================
-       Estado da tela
-       ===================================================================== */
-    const reais = (valor) => `R$ ${Number(valor ?? 0).toFixed(2).replace('.', ',')}`;
-    const MASCOTES = ['frank', 'draculinha', 'lobisomem', 'monstro-pantano', 'zumbi', 'mumia', 'fantasma', 'esqueleto', 'bruxa'];
-
-    let usuarioLogado = null;
-    let cardapio = { lanches: [], bebidas: [] };
-    let carrinho = [];
-    let chaveDoCarrinho = 'monsterCarrinho';
-
     const avisoCardapio = document.getElementById('mensagem-cardapio');
-    const avisoCarrinho = document.getElementById('mensagem-carrinho');
-    const avisoConta = document.getElementById('mensagem-conta');
+    let cardapio = { lanches: [], bebidas: [] };
 
-    /* =====================================================================
-       CARDÁPIO — busca os produtos que o dono cadastrou (GET /api/cardapio)
-       ===================================================================== */
-    function criarItemDoCardapio(produto, indice) {
+    function criarItemDoCardapio(produto) {
       const cartao = document.createElement('div');
       cartao.className = 'item-cardapio';
 
-      const mascote = MASCOTES[(produto.id + indice) % MASCOTES.length];
+      const temPromocao = Boolean(produto.percentualDesconto);
+      const precoAntigo = temPromocao
+        ? `<s>${reais(produto.precoOriginal)}</s> `
+        : '';
+
       cartao.innerHTML = `
-        <img src="/img/monstros/${mascote}.svg" alt="">
+        ${temPromocao ? `<span class="selo-promo">-${produto.percentualDesconto}%</span>` : ''}
+        <img src="/img/monstros/${produto.mascote}.svg" alt="">
         <b>${produto.nome}</b>
         <p class="descricao">${produto.descricao ?? ''}</p>
-        <span class="preco">${reais(produto.precoVenda)}</span>
+        <span class="preco">${precoAntigo}${reais(produto.precoVenda)}</span>
       `;
 
       const botao = document.createElement('button');
       botao.className = 'botao';
       botao.textContent = '➕ Adicionar';
-      botao.addEventListener('click', () => adicionarAoCarrinho(produto));
+      botao.addEventListener('click', () => {
+        Carrinho.adicionar(produto);
+        mostrarMensagem(avisoCardapio, `"${produto.nome}" foi para o carrinho! 🛒`, 'sucesso');
+      });
       cartao.appendChild(botao);
 
       return cartao;
     }
 
-    function criarGrupoDoCardapio(titulo, produtos) {
+    function criarGrupo(titulo, produtos) {
       if (produtos.length === 0) return null;
 
       const grupo = document.createElement('div');
@@ -288,10 +120,22 @@
 
       const grade = document.createElement('div');
       grade.className = 'grade';
-      produtos.forEach((produto, indice) => grade.appendChild(criarItemDoCardapio(produto, indice)));
+      produtos.forEach((produto) => grade.appendChild(criarItemDoCardapio(produto)));
       grupo.appendChild(grade);
 
       return grupo;
+    }
+
+    function pintarBarraDoCarrinho() {
+      const barra = document.getElementById('barra-carrinho');
+      const quantidade = Carrinho.quantidade();
+
+      barra.hidden = quantidade === 0;
+      if (quantidade === 0) return;
+
+      document.getElementById('barra-quantidade').textContent =
+        quantidade === 1 ? '1 item' : `${quantidade} itens`;
+      document.getElementById('barra-total').textContent = reais(Carrinho.total());
     }
 
     async function carregarCardapio() {
@@ -301,8 +145,8 @@
         cardapio = await API.get('/api/cardapio');
         container.innerHTML = '';
 
-        const grupoLanches = criarGrupoDoCardapio('🍔 Lanches', cardapio.lanches);
-        const grupoBebidas = criarGrupoDoCardapio('🥤 Bebidas', cardapio.bebidas);
+        const grupoLanches = criarGrupo('🍔 Lanches', cardapio.lanches);
+        const grupoBebidas = criarGrupo('🥤 Bebidas', cardapio.bebidas);
 
         if (!grupoLanches && !grupoBebidas) {
           container.innerHTML = '<p class="ajuda">O dono ainda não cadastrou nenhum produto disponível. Volte mais tarde! 🐻</p>';
@@ -317,495 +161,20 @@
       }
     }
 
-    /* =====================================================================
-       CARRINHO — guardado no navegador (localStorage), separado por usuário
-       ===================================================================== */
-    function carregarCarrinhoSalvo() {
-      try {
-        carrinho = JSON.parse(localStorage.getItem(chaveDoCarrinho)) ?? [];
-      } catch {
-        carrinho = [];
-      }
-    }
-
-    function salvarCarrinho() {
-      try {
-        localStorage.setItem(chaveDoCarrinho, JSON.stringify(carrinho));
-      } catch {
-        /* modo privado: o carrinho funciona na sessão, só não persiste */
-      }
-    }
-
-    function totalDoCarrinho() {
-      return carrinho.reduce((soma, item) => soma + item.precoVenda * item.quantidade, 0);
-    }
-
-    function quantidadeDeItens() {
-      return carrinho.reduce((soma, item) => soma + item.quantidade, 0);
-    }
-
-    function adicionarAoCarrinho(produto) {
-      const existente = carrinho.find((item) => item.produtoId === produto.id);
-
-      if (existente) {
-        existente.quantidade += 1;
-      } else {
-        carrinho.push({
-          produtoId: produto.id,
-          nome: produto.nome,
-          tipo: produto.tipo,
-          precoVenda: produto.precoVenda,
-          quantidade: 1,
-        });
-      }
-
-      salvarCarrinho();
-      renderizarCarrinho();
-      mostrarMensagem(avisoCarrinho, `"${produto.nome}" foi para o carrinho! 🛒`, 'sucesso');
-    }
-
-    /** delta = +1 / -1. Zerar a quantidade remove o item. */
-    function alterarQuantidade(produtoId, delta) {
-      const item = carrinho.find((linha) => linha.produtoId === produtoId);
-      if (!item) return;
-
-      item.quantidade += delta;
-
-      if (item.quantidade <= 0) {
-        carrinho = carrinho.filter((linha) => linha.produtoId !== produtoId);
-      }
-
-      salvarCarrinho();
-      renderizarCarrinho();
-    }
-
-    function removerDoCarrinho(produtoId) {
-      carrinho = carrinho.filter((item) => item.produtoId !== produtoId);
-      salvarCarrinho();
-      renderizarCarrinho();
-      mostrarMensagem(avisoCarrinho, 'Item removido do carrinho.', 'sucesso');
-    }
-
-    function limparCarrinho() {
-      if (carrinho.length === 0) return;
-      if (!confirm('Esvaziar o carrinho?')) return;
-
-      carrinho = [];
-      salvarCarrinho();
-      renderizarCarrinho();
-      avisoCarrinho.className = 'mensagem';
-    }
-
-    function renderizarCarrinho() {
-      const container = document.getElementById('lista-carrinho');
-      container.innerHTML = '';
-
-      document.getElementById('contador-carrinho').textContent = String(quantidadeDeItens());
-      document.getElementById('total-carrinho').textContent = reais(totalDoCarrinho());
-      document.getElementById('botao-finalizar').disabled = carrinho.length === 0;
-
-      if (carrinho.length === 0) {
-        container.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio. Escolha um lanche no cardápio acima! 🍔</p>';
-        return;
-      }
-
-      carrinho.forEach((item) => {
-        const linha = document.createElement('div');
-        linha.className = 'linha-carrinho';
-
-        const info = document.createElement('div');
-        info.className = 'info';
-        info.innerHTML = `<b>${item.nome}</b><span>${reais(item.precoVenda)} × ${item.quantidade}</span>`;
-
-        const quantidade = document.createElement('div');
-        quantidade.className = 'quantidade';
-
-        const botaoMenos = document.createElement('button');
-        botaoMenos.type = 'button';
-        botaoMenos.textContent = '−';
-        botaoMenos.title = 'Diminuir';
-        botaoMenos.addEventListener('click', () => alterarQuantidade(item.produtoId, -1));
-
-        const valor = document.createElement('span');
-        valor.textContent = String(item.quantidade);
-
-        const botaoMais = document.createElement('button');
-        botaoMais.type = 'button';
-        botaoMais.textContent = '+';
-        botaoMais.title = 'Aumentar';
-        botaoMais.addEventListener('click', () => alterarQuantidade(item.produtoId, 1));
-
-        const botaoRemover = document.createElement('button');
-        botaoRemover.type = 'button';
-        botaoRemover.textContent = '🗑️';
-        botaoRemover.title = 'Remover item';
-        botaoRemover.addEventListener('click', () => removerDoCarrinho(item.produtoId));
-
-        quantidade.append(botaoMenos, valor, botaoMais, botaoRemover);
-
-        const subtotal = document.createElement('div');
-        subtotal.className = 'subtotal';
-        subtotal.textContent = reais(item.precoVenda * item.quantidade);
-
-        linha.append(info, quantidade, subtotal);
-        container.appendChild(linha);
-      });
-    }
-
-    document.getElementById('botao-limpar').addEventListener('click', limparCarrinho);
-
-    /* =====================================================================
-       CHECKOUT — cria o pedido e depois confirma o pagamento (simulado)
-       ===================================================================== */
-    const cardCheckout = document.getElementById('card-checkout');
-    const avisoCheckout = document.getElementById('mensagem-checkout');
-    const avisoPedidos = document.getElementById('mensagem-pedidos');
-    const areaFormas = document.getElementById('formas-pagamento');
-    const campoTroco = document.getElementById('campo-troco');
-    const etapaPagamento = document.getElementById('etapa-pagamento');
-
-    const FORMAS = {
-      pix: '🔵 PIX',
-      credito: '💳 Cartão de crédito',
-      debito: '💳 Cartão de débito',
-      dinheiro: '💵 Dinheiro',
-      na_entrega: '🛵 Pagar na entrega',
-    };
-
-    let formaEscolhida = 'pix';
-    let pedidoEmAberto = null;   // pedido criado, aguardando pagamento
-
-    function montarFormasDePagamento() {
-      areaFormas.innerHTML = '';
-
-      Object.entries(FORMAS).forEach(([valor, rotulo]) => {
-        const etiqueta = document.createElement('label');
-        etiqueta.className = `forma-pagamento${valor === formaEscolhida ? ' escolhida' : ''}`;
-
-        const radio = document.createElement('input');
-        radio.type = 'radio';
-        radio.name = 'forma-pagamento';
-        radio.value = valor;
-        radio.checked = valor === formaEscolhida;
-        radio.addEventListener('change', () => {
-          formaEscolhida = valor;
-          campoTroco.hidden = valor !== 'dinheiro';
-          montarFormasDePagamento();
-        });
-
-        etiqueta.append(radio, document.createTextNode(rotulo));
-        areaFormas.appendChild(etiqueta);
-      });
-
-      campoTroco.hidden = formaEscolhida !== 'dinheiro';
-    }
-
-    function abrirCheckout() {
-      if (carrinho.length === 0) return;
-
-      pedidoEmAberto = null;
-      etapaPagamento.hidden = true;
-      avisoCheckout.className = 'mensagem';
-      cardCheckout.hidden = false;
-      formaEscolhida = 'pix';
-      montarFormasDePagamento();
-      renderizarResumoDoCheckout();
-      cardCheckout.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function renderizarResumoDoCheckout() {
-      const container = document.getElementById('resumo-checkout');
-      container.innerHTML = '';
-
-      carrinho.forEach((item) => {
-        const linha = document.createElement('div');
-        linha.className = 'linha-resumo';
-        linha.innerHTML = `<span>${item.quantidade}× ${item.nome}</span><span class="valor">${reais(item.precoVenda * item.quantidade)}</span>`;
-        container.appendChild(linha);
-      });
-
-      const total = document.createElement('div');
-      total.className = 'linha-resumo destaque';
-      total.innerHTML = `<span>Total do pedido</span><span class="valor">${reais(totalDoCarrinho())}</span>`;
-      container.appendChild(total);
-
-      // Aviso de dados de entrega (telefone/endereço são exigidos pelo servidor)
-      const faltando = [];
-      if (!usuarioLogado.telefone) faltando.push('telefone');
-      if (!usuarioLogado.endereco) faltando.push('endereço');
-
-      if (faltando.length > 0) {
-        const aviso = document.createElement('p');
-        aviso.className = 'ajuda';
-        aviso.style.color = 'var(--vermelho-claro)';
-        aviso.innerHTML = `⚠️ Falta ${faltando.join(' e ')} no seu cadastro. Edite em
-          <strong>Minha conta</strong> (logo abaixo) antes de confirmar o pedido.`;
-        container.appendChild(aviso);
-      }
-    }
-
-    document.getElementById('botao-finalizar').addEventListener('click', abrirCheckout);
-    document.getElementById('botao-cancelar-checkout').addEventListener('click', () => {
-      cardCheckout.hidden = true;
-    });
-
-    /* ---------------------- 1) criar o pedido ---------------------- */
-    document.getElementById('botao-confirmar-pedido').addEventListener('click', async () => {
-      const botao = document.getElementById('botao-confirmar-pedido');
-      botao.disabled = true;
-
-      try {
-        const { mensagem, pedido } = await API.post('/api/pedidos', {
-          itens: carrinho.map((item) => ({ produtoId: item.produtoId, quantidade: item.quantidade })),
-          observacao: document.getElementById('pedido-observacao').value,
-        });
-
-        pedidoEmAberto = pedido;
-
-        mostrarMensagem(avisoCheckout, mensagem, 'sucesso');
-        document.getElementById('texto-pagamento').innerHTML =
-          `Pedido <strong>${pedido.codigo}</strong> — total <strong>${reais(pedido.total)}</strong> em ${FORMAS[formaEscolhida]?.replace(/^\S+\s/, '') ?? formaEscolhida}.`;
-
-        etapaPagamento.hidden = false;
-        etapaPagamento.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } catch (erro) {
-        mostrarMensagem(avisoCheckout, erro.message, 'erro');
-      } finally {
-        botao.disabled = false;
-      }
-    });
-
-    /* ---------------- 2) confirmar o pagamento (fake) ---------------- */
-    document.getElementById('botao-pagar').addEventListener('click', async () => {
-      if (!pedidoEmAberto) return;
-
-      const botao = document.getElementById('botao-pagar');
-      botao.disabled = true;
-
-      const precisaTroco = formaEscolhida === 'dinheiro' && document.getElementById('troco-para').value.trim() !== '';
-
-      try {
-        const { mensagem } = await API.post(`/api/pedidos/${pedidoEmAberto.id}/pagar`, {
-          formaPagamento: formaEscolhida,
-          precisaTroco,
-          trocoPara: precisaTroco ? document.getElementById('troco-para').value : null,
-        });
-
-        mostrarMensagem(avisoCheckout, mensagem, 'sucesso');
-
-        // Pedido pago: o carrinho cumpriu sua missão.
-        carrinho = [];
-        salvarCarrinho();
-        renderizarCarrinho();
-        pedidoEmAberto = null;
-        etapaPagamento.hidden = true;
-        document.getElementById('pedido-observacao').value = '';
-
-        await carregarMeusPedidos();
-      } catch (erro) {
-        mostrarMensagem(avisoCheckout, erro.message, 'erro');
-      } finally {
-        botao.disabled = false;
-      }
-    });
-
-    document.getElementById('botao-desistir').addEventListener('click', () => {
-      mostrarMensagem(avisoCheckout, 'Pedido criado e guardado em "Meus pedidos". Você pode pagar depois por lá. 🐻', 'sucesso');
-      etapaPagamento.hidden = true;
-      carregarMeusPedidos();
-    });
-
-    /* --------------------- meus pedidos --------------------- */
-    function renderizarPedidos(pedidos) {
-      const container = document.getElementById('lista-pedidos');
-      container.innerHTML = '';
-
-      if (pedidos.length === 0) {
-        container.innerHTML = '<p class="carrinho-vazio">Você ainda não fez nenhum pedido.</p>';
-        return;
-      }
-
-      pedidos.forEach((pedido) => {
-        const cartao = document.createElement('div');
-        cartao.className = 'pedido-card';
-
-        const itens = pedido.itens
-          .map((item) => `${item.quantidade}× ${item.nome} — ${reais(item.subtotal)}`)
-          .join('<br>');
-
-        cartao.innerHTML = `
-          <div class="pedido-topo">
-            <b>Pedido ${pedido.codigo}</b>
-            <span class="status ${pedido.status}">${pedido.statusLabel}</span>
-          </div>
-          <p class="pedido-itens">${itens}</p>
-          <div class="linha-resumo destaque"><span>Total</span><span class="valor">${reais(pedido.total)}</span></div>
-          ${pedido.formaPagamentoLabel ? `<p class="ajuda" style="margin:6px 0 0">Pago com ${pedido.formaPagamentoLabel}</p>` : ''}
-        `;
-
-        // Pedido aguardando pagamento: dá para pagar por aqui também.
-        if (pedido.status === 'aguardando_pagamento') {
-          const botao = document.createElement('button');
-          botao.className = 'botao pequeno';
-          botao.style.marginTop = '10px';
-          botao.textContent = '💳 Pagar agora';
-          botao.addEventListener('click', () => {
-            cardCheckout.hidden = false;
-            pedidoEmAberto = pedido;
-            formaEscolhida = 'pix';
-            montarFormasDePagamento();
-            renderizarResumoDoCheckout();
-            document.getElementById('texto-pagamento').innerHTML =
-              `Pedido <strong>${pedido.codigo}</strong> — total <strong>${reais(pedido.total)}</strong>.`;
-            etapaPagamento.hidden = false;
-            cardCheckout.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          });
-          cartao.appendChild(botao);
-        }
-
-        container.appendChild(cartao);
-      });
-    }
-
-    async function carregarMeusPedidos() {
-      try {
-        const { pedidos } = await API.get('/api/pedidos/meus');
-        renderizarPedidos(pedidos);
-      } catch (erro) {
-        mostrarMensagem(avisoPedidos, erro.message, 'erro');
-      }
-    }
-
-    /* =====================================================================
-       MINHA CONTA (modo leitura x edição)
-       ===================================================================== */
-    const formConta = document.getElementById('form-conta');
-    const botaoSalvar = document.getElementById('botao-salvar');
-    const botaoEditar = document.getElementById('botao-editar');
-    const botaoCancelar = document.getElementById('botao-cancelar');
-    const campoTelefone = document.getElementById('conta-telefone');
-    const campoCep = document.getElementById('conta-cep');
-    const campoConfirmacao = document.getElementById('confirmacao-exclusao');
-    const botaoExcluir = document.getElementById('botao-excluir');
-
-    let dadosOriginais = null;
-    const camposDaConta = () => formConta.querySelectorAll('input');
-
-    campoTelefone.addEventListener('input', () => {
-      const d = apenasDigitos(campoTelefone.value).slice(0, 11);
-      campoTelefone.value = d.length <= 10
-        ? d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
-        : d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
-    });
-
-    campoCep.addEventListener('input', () => {
-      const d = apenasDigitos(campoCep.value).slice(0, 8);
-      campoCep.value = d.replace(/^(\d{5})(\d)/, '$1-$2');
-    });
-
-    function preencherFormulario(usuario) {
-      document.getElementById('conta-nome').value = usuario.nome ?? '';
-      document.getElementById('conta-telefone').value = usuario.telefone ?? '';
-      document.getElementById('conta-cep').value = usuario.cep ?? '';
-      document.getElementById('conta-endereco').value = usuario.endereco ?? '';
-      document.getElementById('conta-numero').value = usuario.numero ?? '';
-      document.getElementById('conta-complemento').value = usuario.complemento ?? '';
-      document.getElementById('conta-bairro').value = usuario.bairro ?? '';
-      document.getElementById('conta-cidade').value = usuario.cidade ?? '';
-      document.getElementById('cpf-usuario').textContent = formatarCPF(usuario.cpf);
-    }
-
-    function entrarEmModoEdicao() {
-      camposDaConta().forEach((campo) => campo.removeAttribute('readonly'));
-      botaoEditar.hidden = true;
-      botaoSalvar.hidden = false;
-      botaoCancelar.hidden = false;
-      document.getElementById('conta-nome').focus();
-    }
-
-    function sairDoModoEdicao() {
-      camposDaConta().forEach((campo) => campo.setAttribute('readonly', ''));
-      botaoEditar.hidden = false;
-      botaoSalvar.hidden = true;
-      botaoCancelar.hidden = true;
-    }
-
-    botaoEditar.addEventListener('click', entrarEmModoEdicao);
-
-    botaoCancelar.addEventListener('click', () => {
-      if (dadosOriginais) preencherFormulario(dadosOriginais);
-      sairDoModoEdicao();
-      avisoConta.className = 'mensagem';
-    });
-
-    formConta.addEventListener('submit', async (evento) => {
-      evento.preventDefault();
-      botaoSalvar.disabled = true;
-
-      try {
-        const { mensagem, usuario } = await API.patch('/api/auth/minha-conta', {
-          nome: document.getElementById('conta-nome').value,
-          telefone: apenasDigitos(campoTelefone.value),
-          cep: apenasDigitos(campoCep.value),
-          endereco: document.getElementById('conta-endereco').value,
-          numero: document.getElementById('conta-numero').value,
-          complemento: document.getElementById('conta-complemento').value,
-          bairro: document.getElementById('conta-bairro').value,
-          cidade: document.getElementById('conta-cidade').value,
-        });
-
-        mostrarMensagem(avisoConta, mensagem, 'sucesso');
-        dadosOriginais = usuario;
-        preencherFormulario(usuario);
-        sairDoModoEdicao();
-
-        await iniciarPagina('cliente');
-      } catch (erro) {
-        mostrarMensagem(avisoConta, erro.message, 'erro');
-      } finally {
-        botaoSalvar.disabled = false;
-      }
-    });
-
-    /* =====================================================================
-       EXCLUSÃO DA PRÓPRIA CONTA
-       ===================================================================== */
-    campoConfirmacao.addEventListener('input', () => {
-      botaoExcluir.disabled = campoConfirmacao.value.trim().toUpperCase() !== 'EXCLUIR';
-    });
-
-    botaoExcluir.addEventListener('click', async () => {
-      botaoExcluir.disabled = true;
-
-      try {
-        const { mensagem } = await API.delete('/api/auth/minha-conta');
-        mostrarMensagem(avisoConta, mensagem, 'sucesso');
-        setTimeout(() => { window.location.href = '/login.html'; }, 2200);
-      } catch (erro) {
-        mostrarMensagem(avisoConta, erro.message, 'erro');
-        botaoExcluir.disabled = false;
-      }
-    });
-
-    /* =====================================================================
-       Inicialização
-       ===================================================================== */
     (async () => {
-      // 'cliente' aqui significa: precisa estar logado (cliente OU admin).
-      usuarioLogado = await iniciarPagina('cliente');
-      if (!usuarioLogado) return;
+      // 'cliente' = precisa estar logado (cliente OU admin).
+      const usuario = await iniciarPagina('cliente');
+      if (!usuario) return;
 
-      // Carrinho separado por usuário: duas contas na mesma máquina não se misturam.
-      chaveDoCarrinho = `monsterCarrinho:${usuarioLogado.id}`;
-      carregarCarrinhoSalvo();
-      renderizarCarrinho();
+      Carrinho.carregar(usuario.id);
+      Carrinho.assinar(pintarBarraDoCarrinho);
+      pintarBarraDoCarrinho();
 
-      dadosOriginais = usuarioLogado;
-      preencherFormulario(usuarioLogado);
-      sairDoModoEdicao();
+      document.querySelectorAll('[data-aviso-papel]').forEach((el) => {
+        el.hidden = usuario.papel !== 'admin';
+      });
 
       await carregarCardapio();
-      await carregarMeusPedidos();
     })();
   </script>
 </body>

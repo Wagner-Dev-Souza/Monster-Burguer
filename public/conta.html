@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha conta — Monster Burguer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <img src="/img/lanche.svg" alt="">
+      <div>
+        <div class="nome">Monster <b>Burguer</b></div>
+        <div class="slogan">A loja dos monstros famintos</div>
+      </div>
+    </div>
+
+    <nav class="nav" data-nav hidden></nav>
+
+    <div class="acoes-topo">
+      <span class="selo" data-papel-usuario>...</span>
+      <button class="sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="conteudo">
+    <div class="container">
+      <section class="hero">
+        <img class="burguer" src="/img/monstros/fantasma.svg" alt="">
+        <h1>Minha <em>conta</em></h1>
+        <p>Seus dados de contato e entrega. Telefone e endereço são usados no fechamento do pedido. 🙋</p>
+      </section>
+
+      <div class="card">
+        <h2><span class="emoji">🙋</span> Meus dados</h2>
+        <p class="ajuda">
+          Seu código no sistema: <strong data-codigo-usuario>#0000</strong> (é ele que identifica quem fez cada alteração).
+        </p>
+
+        <form id="form-conta">
+          <label for="conta-nome">Nome completo</label>
+          <input id="conta-nome" name="nome" readonly required>
+
+          <label for="conta-telefone">Telefone (DDD + número)</label>
+          <input id="conta-telefone" name="telefone" inputmode="numeric" placeholder="(21) 99999-8888" readonly>
+
+          <div class="grade-formulario" style="margin-top:14px">
+            <div>
+              <label for="conta-cep">CEP</label>
+              <input id="conta-cep" name="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" readonly>
+            </div>
+            <div class="largo">
+              <label for="conta-endereco">Endereço (rua/avenida)</label>
+              <input id="conta-endereco" name="endereco" placeholder="Rua das Assombrações" readonly>
+            </div>
+            <div>
+              <label for="conta-numero">Número</label>
+              <input id="conta-numero" name="numero" placeholder="123" readonly>
+            </div>
+            <div>
+              <label for="conta-complemento">Complemento</label>
+              <input id="conta-complemento" name="complemento" placeholder="apto 42" readonly>
+            </div>
+            <div>
+              <label for="conta-bairro">Bairro</label>
+              <input id="conta-bairro" name="bairro" readonly>
+            </div>
+            <div>
+              <label for="conta-cidade">Cidade</label>
+              <input id="conta-cidade" name="cidade" readonly>
+            </div>
+          </div>
+
+          <p class="ajuda" style="margin-top:14px">CPF: <strong id="cpf-usuario">...</strong></p>
+
+          <div class="acoes-formulario">
+            <button type="button" class="botao" id="botao-editar">✏️ Editar meus dados</button>
+            <button type="submit" class="botao" id="botao-salvar" hidden>💾 Salvar</button>
+            <button type="button" class="botao fantasma" id="botao-cancelar" hidden>✖ Cancelar</button>
+          </div>
+        </form>
+
+        <div class="mensagem" id="mensagem-conta"></div>
+      </div>
+
+      <div class="card zona-perigo">
+        <h2><span class="emoji">⚠️</span> Zona de perigo</h2>
+
+        <p class="ajuda" data-aviso-admin hidden>
+          Você é <strong>administrador</strong>: para excluir sua conta, peça a outro admin para
+          <strong>rebaixar você a cliente</strong> primeiro. É uma proteção para a loja nunca ficar
+          sem ninguém capaz de administrá-la.
+        </p>
+
+        <div data-somente-cliente hidden>
+          <p class="ajuda">
+            Excluir seu cadastro <strong>encerra seu acesso</strong> — você não conseguirá mais entrar com este CPF.
+            Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo.
+          </p>
+
+          <label for="confirmacao-exclusao">Digite EXCLUIR para liberar o botão</label>
+          <input id="confirmacao-exclusao" placeholder="EXCLUIR" autocomplete="off">
+
+          <button class="botao perigo" id="botao-excluir" disabled>🗑️ Excluir meu cadastro</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script type="module" src="/js/musica.js"></script>
+  <script>
+    const avisoConta = document.getElementById('mensagem-conta');
+    const formConta = document.getElementById('form-conta');
+    const botaoSalvar = document.getElementById('botao-salvar');
+    const botaoEditar = document.getElementById('botao-editar');
+    const botaoCancelar = document.getElementById('botao-cancelar');
+    const campoTelefone = document.getElementById('conta-telefone');
+    const campoCep = document.getElementById('conta-cep');
+    const campoConfirmacao = document.getElementById('confirmacao-exclusao');
+    const botaoExcluir = document.getElementById('botao-excluir');
+
+    let dadosOriginais = null;
+    let usuarioLogado = null;
+    const camposDaConta = () => formConta.querySelectorAll('input');
+
+    campoTelefone.addEventListener('input', () => {
+      const d = apenasDigitos(campoTelefone.value).slice(0, 11);
+      campoTelefone.value = d.length <= 10
+        ? d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
+        : d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+    });
+
+    campoCep.addEventListener('input', () => {
+      const d = apenasDigitos(campoCep.value).slice(0, 8);
+      campoCep.value = d.replace(/^(\d{5})(\d)/, '$1-$2');
+    });
+
+    function preencherFormulario(usuario) {
+      document.getElementById('conta-nome').value = usuario.nome ?? '';
+      document.getElementById('conta-telefone').value = usuario.telefone ?? '';
+      document.getElementById('conta-cep').value = usuario.cep ?? '';
+      document.getElementById('conta-endereco').value = usuario.endereco ?? '';
+      document.getElementById('conta-numero').value = usuario.numero ?? '';
+      document.getElementById('conta-complemento').value = usuario.complemento ?? '';
+      document.getElementById('conta-bairro').value = usuario.bairro ?? '';
+      document.getElementById('conta-cidade').value = usuario.cidade ?? '';
+      document.getElementById('cpf-usuario').textContent = formatarCPF(usuario.cpf);
+    }
+
+    function entrarEmModoEdicao() {
+      camposDaConta().forEach((campo) => campo.removeAttribute('readonly'));
+      botaoEditar.hidden = true;
+      botaoSalvar.hidden = false;
+      botaoCancelar.hidden = false;
+      document.getElementById('conta-nome').focus();
+    }
+
+    function sairDoModoEdicao() {
+      camposDaConta().forEach((campo) => campo.setAttribute('readonly', ''));
+      botaoEditar.hidden = false;
+      botaoSalvar.hidden = true;
+      botaoCancelar.hidden = true;
+    }
+
+    botaoEditar.addEventListener('click', entrarEmModoEdicao);
+
+    botaoCancelar.addEventListener('click', () => {
+      if (dadosOriginais) preencherFormulario(dadosOriginais);
+      sairDoModoEdicao();
+      avisoConta.className = 'mensagem';
+    });
+
+    formConta.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      botaoSalvar.disabled = true;
+
+      try {
+        const { mensagem, usuario } = await API.patch('/api/auth/minha-conta', {
+          nome: document.getElementById('conta-nome').value,
+          telefone: apenasDigitos(campoTelefone.value),
+          cep: apenasDigitos(campoCep.value),
+          endereco: document.getElementById('conta-endereco').value,
+          numero: document.getElementById('conta-numero').value,
+          complemento: document.getElementById('conta-complemento').value,
+          bairro: document.getElementById('conta-bairro').value,
+          cidade: document.getElementById('conta-cidade').value,
+        });
+
+        mostrarMensagem(avisoConta, mensagem, 'sucesso');
+        dadosOriginais = usuario;
+        usuarioLogado = usuario;
+        preencherFormulario(usuario);
+        sairDoModoEdicao();
+      } catch (erro) {
+        mostrarMensagem(avisoConta, erro.message, 'erro');
+      } finally {
+        botaoSalvar.disabled = false;
+      }
+    });
+
+    campoConfirmacao.addEventListener('input', () => {
+      botaoExcluir.disabled = campoConfirmacao.value.trim().toUpperCase() !== 'EXCLUIR';
+    });
+
+    botaoExcluir.addEventListener('click', async () => {
+      botaoExcluir.disabled = true;
+
+      try {
+        const { mensagem } = await API.delete('/api/auth/minha-conta');
+        mostrarMensagem(avisoConta, mensagem, 'sucesso');
+        setTimeout(() => { window.location.href = '/login.html'; }, 2200);
+      } catch (erro) {
+        mostrarMensagem(avisoConta, erro.message, 'erro');
+        botaoExcluir.disabled = false;
+      }
+    });
+
+    (async () => {
+      usuarioLogado = await iniciarPagina('cliente');
+      if (!usuarioLogado) return;
+
+      dadosOriginais = usuarioLogado;
+      preencherFormulario(usuarioLogado);
+      sairDoModoEdicao();
+    })();
+  </script>
+</body>
+</html>

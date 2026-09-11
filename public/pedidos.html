@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus pedidos — Monster Burguer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <img src="/img/lanche.svg" alt="">
+      <div>
+        <div class="nome">Monster <b>Burguer</b></div>
+        <div class="slogan">A loja dos monstros famintos</div>
+      </div>
+    </div>
+
+    <nav class="nav" data-nav hidden></nav>
+
+    <div class="acoes-topo">
+      <span class="selo" data-papel-usuario>...</span>
+      <button class="sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="conteudo">
+    <div class="container">
+      <section class="hero">
+        <img class="burguer" src="/img/monstros/mumia.svg" alt="">
+        <h1>Meus <em>pedidos</em></h1>
+        <p>Tudo o que você já pediu, com o status de cada pedido. 📋</p>
+      </section>
+
+      <div class="card">
+        <h2><span class="emoji">📋</span> Histórico</h2>
+
+        <div class="mensagem" id="mensagem-pedidos"></div>
+        <div id="lista-pedidos"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/carrinho.js"></script>
+  <script type="module" src="/js/musica.js"></script>
+  <script>
+    const avisoPedidos = document.getElementById('mensagem-pedidos');
+    const lista = document.getElementById('lista-pedidos');
+
+    /** Etapas que o cliente acompanha (a ordem importa: é a linha do tempo). */
+    const ETAPAS = [
+      { status: 'pago', rotulo: 'Pago', icone: '💳' },
+      { status: 'em_preparo', rotulo: 'Em preparo', icone: '👨‍🍳' },
+      { status: 'pronto', rotulo: 'Pronto', icone: '✅' },
+      { status: 'saiu_entrega', rotulo: 'Saiu para entrega', icone: '🛵' },
+      { status: 'entregue', rotulo: 'Entregue', icone: '📦' },
+    ];
+
+    function desenharTimeline(pedido) {
+      const indiceAtual = ETAPAS.findIndex((etapa) => etapa.status === pedido.status);
+
+      const trilha = document.createElement('div');
+      trilha.className = 'linha-do-tempo';
+
+      ETAPAS.forEach((etapa, indice) => {
+        const passo = document.createElement('div');
+        const estado = indice < indiceAtual ? 'concluida' : indice === indiceAtual ? 'atual' : 'futura';
+        passo.className = `etapa ${estado}`;
+        passo.innerHTML = `<span class="bolinha">${etapa.icone}</span><span class="rotulo">${etapa.rotulo}</span>`;
+        trilha.appendChild(passo);
+      });
+
+      return trilha;
+    }
+
+    function desenharPedidos(pedidos) {
+      lista.innerHTML = '';
+
+      if (pedidos.length === 0) {
+        lista.innerHTML = '<p class="carrinho-vazio">Você ainda não fez nenhum pedido. <a href="/loja.html">Ver o cardápio 🍔</a></p>';
+        return;
+      }
+
+      pedidos.forEach((pedido) => {
+        const cartao = document.createElement('div');
+        cartao.className = 'pedido-card';
+
+        const itens = pedido.itens
+          .map((item) => {
+            const original = item.precoOriginal ? ` <s>${reais(item.precoOriginal)}</s>` : '';
+            return `${item.quantidade}× ${item.nome}${original} — ${reais(item.subtotal)}`;
+          })
+          .join('<br>');
+
+        cartao.innerHTML = `
+          <div class="pedido-topo">
+            <b>Pedido ${pedido.codigo}</b>
+            <span class="status ${pedido.status}">${pedido.statusLabel}</span>
+          </div>
+          <p class="pedido-itens">${itens}</p>
+          ${pedido.cupomCodigo ? `<p class="ajuda" style="margin:4px 0 0">🎟️ Cupom ${pedido.cupomCodigo} (-${pedido.cupomPercentual}%)</p>` : ''}
+          <div class="linha-resumo destaque"><span>Total</span><span class="valor">${reais(pedido.total)}</span></div>
+          ${pedido.formaPagamentoLabel ? `<p class="ajuda" style="margin:6px 0 0">Pago com ${pedido.formaPagamentoLabel}</p>` : ''}
+          ${pedido.observacao ? `<p class="ajuda" style="margin:4px 0 0">📝 ${pedido.observacao}</p>` : ''}
+        `;
+
+        // A linha do tempo aparece nos pedidos que estão a caminho.
+        if (pedido.status !== 'aguardando_pagamento' && pedido.status !== 'cancelado') {
+          cartao.appendChild(desenharTimeline(pedido));
+        }
+
+        const acoes = document.createElement('div');
+        acoes.className = 'acoes-formulario';
+
+        if (pedido.status === 'aguardando_pagamento') {
+          const pagar = document.createElement('a');
+          pagar.className = 'botao pequeno';
+          pagar.href = `/checkout.html?pedido=${pedido.id}`;
+          pagar.textContent = '💳 Pagar agora';
+          acoes.appendChild(pagar);
+        } else {
+          const acompanhar = document.createElement('a');
+          acompanhar.className = 'botao pequeno fantasma';
+          acompanhar.href = `/acompanhar.html?pedido=${pedido.id}`;
+          acompanhar.textContent = '🚚 Acompanhar';
+          acoes.appendChild(acompanhar);
+        }
+
+        cartao.appendChild(acoes);
+        lista.appendChild(cartao);
+      });
+    }
+
+    (async () => {
+      const usuario = await iniciarPagina('cliente');
+      if (!usuario) return;
+
+      Carrinho.carregar(usuario.id);
+
+      try {
+        const { pedidos } = await API.get('/api/pedidos/meus');
+        desenharPedidos(pedidos);
+      } catch (erro) {
+        mostrarMensagem(avisoPedidos, erro.message, 'erro');
+      }
+    })();
+  </script>
+</body>
+</html>

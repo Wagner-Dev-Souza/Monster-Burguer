@@ -19,12 +19,7 @@
       </div>
     </div>
 
-    <nav class="nav">
-      <a href="/admin/painel.html">👑 Painel</a>
-      <a href="/admin/produtos.html">🍔 Produtos</a>
-      <a href="/admin/compras.html" class="ativo">📦 Compras</a>
-      <a href="/loja.html">🛍️ Ver a loja</a>
-    </nav>
+    <nav class="nav" data-nav hidden></nav>
 
     <div class="acoes-topo">
       <span class="selo" data-papel-usuario>...</span>
@@ -146,7 +141,8 @@
   <!-- 🎵 Tema 8-bits: toca no site inteiro, sem cortar ao trocar de página -->
   <script type="module" src="/js/musica.js"></script>
   <script>
-    const reais = (valor) => `R$ ${Number(valor ?? 0).toFixed(2).replace('.', ',')}`;
+    // `reais()` (formatação em R$) vem do layout.js — declarar aqui
+    // de novo colidiria com o escopo global e mataria o script da página.
     const avisoCompra = document.getElementById('mensagem-compra');
     const avisoHistorico = document.getElementById('mensagem-historico');
 

@@ -19,12 +19,7 @@
       </div>
     </div>
 
-    <nav class="nav">
-      <a href="/admin/painel.html">👑 Painel</a>
-      <a href="/admin/produtos.html" class="ativo">🍔 Produtos</a>
-      <a href="/admin/compras.html">📦 Compras</a>
-      <a href="/loja.html">🛍️ Ver a loja</a>
-    </nav>
+    <nav class="nav" data-nav hidden></nav>
 
     <div class="acoes-topo">
       <span class="selo" data-papel-usuario>...</span>
@@ -133,6 +128,14 @@
           <label for="produto-descricao">Descrição (opcional)</label>
           <input id="produto-descricao" placeholder="Pão brioche, dois hambúrgueres, cheddar...">
 
+          <!-- ARTE DO PRODUTO: o dono escolhe o mascote (senão dois produtos ficam
+               com a mesma cara, ou o nome não combina com a imagem). -->
+          <label>Arte do produto (mascote)</label>
+          <p class="ajuda" style="margin:0">
+            Escolha o monstro que representa este produto no cardápio. Sem escolha, o sistema usa uma arte fixa pelo código do produto.
+          </p>
+          <div class="grade-mascotes" id="grade-mascotes"></div>
+
           <div class="acoes-formulario">
             <button type="submit" class="botao" id="botao-produto">➕ Cadastrar produto</button>
             <button type="button" class="botao fantasma" id="botao-cancelar-produto" hidden>✖ Cancelar edição</button>
@@ -212,7 +215,8 @@
     const avisoProduto = document.getElementById('mensagem-produto');
     const avisoFicha = document.getElementById('mensagem-ficha');
 
-    const reais = (valor) => `R$ ${Number(valor ?? 0).toFixed(2).replace('.', ',')}`;
+    // `reais()` (formatação em R$) vem do layout.js — declarar aqui
+    // de novo colidiria com o escopo global e mataria o script da página.
 
     /* =====================================================================
        INGREDIENTES
@@ -363,7 +367,10 @@
 
         const linha = document.createElement('tr');
         linha.innerHTML = `
-          <td>${produto.nome}${etiquetaFicha}</td>
+          <td>
+            <img class="mini-mascote" src="/img/monstros/${produto.mascote}.svg" alt="">
+            ${produto.nome}${etiquetaFicha}
+          </td>
           <td>${produto.tipo === 'lanche' ? '🍔 lanche' : '🥤 bebida'}</td>
           <td>${reais(produto.precoVenda)}</td>
           <td>${reais(produto.custo)}</td>
@@ -411,6 +418,56 @@
       renderizarProdutos();
     }
 
+    /* ---------------------------------------------------------------------
+       ARTE DO PRODUTO (mascote): grade de opções com a imagem de verdade.
+       A lista precisa ser IGUAL à do servidor (utils/mascotes.js) — se alguém
+       acrescentar um monstro novo lá, acrescenta aqui também.
+       --------------------------------------------------------------------- */
+    const MASCOTES = [
+      { valor: 'frank', rotulo: 'Frank' },
+      { valor: 'draculinha', rotulo: 'Draculinha' },
+      { valor: 'lobisomem', rotulo: 'Lobi' },
+      { valor: 'monstro-pantano', rotulo: 'Pântano' },
+      { valor: 'zumbi', rotulo: 'Zu' },
+      { valor: 'mumia', rotulo: 'Faraó' },
+      { valor: 'fantasma', rotulo: 'Fantasma' },
+      { valor: 'esqueleto', rotulo: 'Esqueleto' },
+      { valor: 'bruxa', rotulo: 'Bruxa' },
+    ];
+
+    let mascoteEscolhido = null;
+
+    function montarGradeDeMascotes() {
+      const grade = document.getElementById('grade-mascotes');
+      grade.innerHTML = '';
+
+      MASCOTES.forEach((mascote) => {
+        const opcao = document.createElement('label');
+        opcao.className = `mascote-opcao${mascoteEscolhido === mascote.valor ? ' escolhido' : ''}`;
+
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'mascote';
+        radio.value = mascote.valor;
+        radio.checked = mascoteEscolhido === mascote.valor;
+        radio.addEventListener('change', () => {
+          // Clicar de novo no mesmo mascote desmarca (volta a usar a arte automática).
+          mascoteEscolhido = mascoteEscolhido === mascote.valor ? null : mascote.valor;
+          montarGradeDeMascotes();
+        });
+
+        const imagem = document.createElement('img');
+        imagem.src = `/img/monstros/${mascote.valor}.svg`;
+        imagem.alt = mascote.rotulo;
+
+        const nome = document.createElement('span');
+        nome.textContent = mascote.rotulo;
+
+        opcao.append(radio, imagem, nome);
+        grade.appendChild(opcao);
+      });
+    }
+
     function carregarProdutoNoFormulario(produto) {
       idProdutoEmEdicao = produto.id;
       document.getElementById('produto-nome').value = produto.nome;
@@ -419,6 +476,11 @@
       document.getElementById('produto-descricao').value = produto.descricao ?? '';
       document.getElementById('produto-custo-compra').value = produto.custoCompra != null ? String(produto.custoCompra).replace('.', ',') : '';
       document.getElementById('produto-estoque').value = produto.estoque ?? 0;
+
+      // Se a arte exibida é a automática (o dono nunca escolheu), a grade fica
+      // sem seleção — assim ele percebe que ainda não escolheu.
+      mascoteEscolhido = produto.mascoteEscolhido ? produto.mascote : null;
+      montarGradeDeMascotes();
       ajustarCamposPorTipo();
 
       document.getElementById('botao-produto').textContent = '💾 Salvar alterações';
@@ -429,6 +491,8 @@
     function limparFormularioProduto() {
       idProdutoEmEdicao = null;
       document.getElementById('form-produto').reset();
+      mascoteEscolhido = null;
+      montarGradeDeMascotes();
       ajustarCamposPorTipo();
       document.getElementById('botao-produto').textContent = '➕ Cadastrar produto';
       document.getElementById('botao-cancelar-produto').hidden = true;
@@ -448,6 +512,7 @@
         descricao: document.getElementById('produto-descricao').value,
         custoCompra: document.getElementById('produto-custo-compra').value || 0,
         estoque: document.getElementById('produto-estoque').value || 0,
+        mascote: mascoteEscolhido,   // null = usa a arte automática
       };
 
       try {
@@ -618,6 +683,7 @@
       if (!usuario) return;
 
       ajustarCamposPorTipo();
+      montarGradeDeMascotes(); // a arte do produto já aparece como opção
       await carregarIngredientes();
       await carregarProdutos();
     })();

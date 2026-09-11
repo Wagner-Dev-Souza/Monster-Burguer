@@ -1,5 +1,9 @@
 import * as pedidosRepo from '../repositories/pedidos.repository.js';
 import * as produtosRepo from '../repositories/produtos.repository.js';
+import * as promocoesRepo from '../repositories/promocoes.repository.js';
+import * as cuponsRepo from '../repositories/cupons.repository.js';
+import * as cuponsService from './cupons.service.js';
+import { precoVigente } from './promocoes.service.js';
 import { centavosParaReais, reaisParaCentavos } from '../utils/moeda.js';
 import { limitarTexto } from '../utils/texto.js';
 import { ErroNaoEncontrado, ErroProibido, ErroValidacao, ErroConflito } from '../utils/errors.js';
@@ -32,8 +36,26 @@ export const FORMAS_PAGAMENTO = {
   credito: 'Cartão de crédito',
   debito: 'Cartão de débito',
   dinheiro: 'Dinheiro',
-  na_entrega: 'Pagar na entrega',
 };
+
+/**
+ * FASE 6 — o caminho que o pedido percorre. Um pedido só anda para FRENTE (e
+ * pode ser cancelado enquanto não saiu para entrega). Ter o mapa explícito aqui
+ * evita que alguém "pule" de aguardando_pagamento direto para entregue, o que
+ * deixaria buracos no histórico e na baixa de estoque.
+ */
+export const PROXIMOS_STATUS = {
+  aguardando_pagamento: ['cancelado'],
+  pago: ['em_preparo', 'cancelado'],
+  em_preparo: ['pronto', 'cancelado'],
+  pronto: ['saiu_entrega'],
+  saiu_entrega: ['entregue'],
+  entregue: [],
+  cancelado: [],
+};
+
+/** Etapas que o cliente acompanha na tela (sem o cancelamento, que é exceção). */
+export const ETAPAS_ACOMPANHAMENTO = ['pago', 'em_preparo', 'pronto', 'saiu_entrega', 'entregue'];
 
 const LIMITE_LINHAS = 40;
 const LIMITE_QUANTIDADE_POR_ITEM = 50;
@@ -51,6 +73,8 @@ function paraPublico(pedido) {
     trocoPara: centavosParaReais(pedido.trocoParaCentavos),
     subtotal: centavosParaReais(pedido.subtotalCentavos),
     desconto: centavosParaReais(pedido.descontoCentavos),
+    cupomCodigo: pedido.cupomCodigo,
+    cupomPercentual: pedido.cupomPercentual,
     total: centavosParaReais(pedido.totalCentavos),
     observacao: pedido.observacao,
     criadoEm: pedido.criadoEm,
@@ -59,10 +83,17 @@ function paraPublico(pedido) {
       produtoId: item.produtoId,
       nome: item.nome,
       tipo: item.tipo,
+      mascote: item.mascote,
       quantidade: item.quantidade,
       precoUnitario: centavosParaReais(item.precoUnitarioCentavos),
+      precoOriginal: item.precoOriginalCentavos === item.precoUnitarioCentavos
+        ? null
+        : centavosParaReais(item.precoOriginalCentavos),
       subtotal: centavosParaReais(item.subtotalCentavos),
     })),
+    // FASE 6: onde o pedido está e quais são os próximos passos possíveis.
+    proximos: PROXIMOS_STATUS[pedido.status] ?? [],
+    etapas: ETAPAS_ACOMPANHAMENTO,
   };
 }
 
@@ -116,6 +147,9 @@ export function criarPedido(usuario, dados) {
     );
   }
 
+  // Promoções vigentes numa consulta só (evita uma por item).
+  const promocoesVigentes = new Map(promocoesRepo.listarVigentes().map((promocao) => [promocao.produtoId, promocao]));
+
   const itens = consolidarItens(itensBrutos).map((item) => {
     const produto = produtosRepo.buscarPorId(item.produtoId);
 
@@ -128,23 +162,42 @@ export function criarPedido(usuario, dados) {
       );
     }
 
+    // FASE 7: o preço que vale AGORA — a promoção é congelada no item junto com o
+    // preço normal, para o relatório saber quanto de desconto foi dado.
+    const preco = precoVigente(produto, promocoesVigentes.get(produto.id) ?? null);
+
     return {
       produtoId: produto.id,
-      nomeProduto: produto.nome,               // CONGELADO
+      nomeProduto: produto.nome,                          // CONGELADO
       tipo: produto.tipo,
       quantidade: item.quantidade,
-      precoUnitarioCentavos: produto.precoVendaCentavos, // CONGELADO
+      precoUnitarioCentavos: preco.precoCentavos,         // CONGELADO (já com promoção)
+      precoOriginalCentavos: preco.precoOriginalCentavos ?? preco.precoCentavos,
     };
   });
 
   const subtotalCentavos = itens.reduce((soma, item) => soma + item.precoUnitarioCentavos * item.quantidade, 0);
-  const descontoCentavos = 0; // Fase 7 (cupons) entra aqui
+
+  // FASE 7: cupom de desconto (revalidado aqui, não só na tela do checkout).
+  let descontoCentavos = 0;
+  let cupomCodigo = null;
+  let cupomPercentual = null;
+
+  if (dados?.cupom) {
+    const avaliado = cuponsService.avaliarCupom(dados.cupom, subtotalCentavos);
+
+    descontoCentavos = avaliado.descontoCentavos;
+    cupomCodigo = avaliado.cupom.codigo;
+    cupomPercentual = avaliado.percentual;
+  }
 
   const pedido = pedidosRepo.criar({
     usuarioId: usuario.id,
     itens,
     subtotalCentavos,
     descontoCentavos,
+    cupomCodigo,
+    cupomPercentual,
     totalCentavos: subtotalCentavos - descontoCentavos,
     observacao: limitarTexto(dados?.observacao, 200) || null,
   });
@@ -225,9 +278,56 @@ export function pagarPedido(usuario, id, dados) {
 
   const pago = pedidosRepo.marcarPago(pedido.id, { formaPagamento, precisaTroco, trocoParaCentavos });
 
+  // FASE 7: cupom usado com pagamento confirmado conta um uso. Registrar aqui (e
+  // não na criação do pedido) evita queimar o cupom de um carrinho abandonado.
+  if (pedido.cupomCodigo) {
+    const cupom = cuponsRepo.buscarPorCodigo(pedido.cupomCodigo);
+    if (cupom) cuponsRepo.registrarUso(cupom.id);
+  }
+
   return paraPublico(pago);
 }
 
+/**
+ * FASE 6 — avança o status do pedido (preparo → entrega).
+ *
+ * Duas regras importantes:
+ *  1. só anda para FRENTE, seguindo o mapa PROXIMOS_STATUS (sem pular etapas);
+ *  2. cancelar um pedido que JÁ BAIXOU estoque de bebida devolve o estoque —
+ *     senão a loja perderia a contagem de latas por causa de um cancelamento.
+ */
+export function avancarStatus(usuario, id, novoStatus) {
+  const pedido = pedidosRepo.buscarPorId(Number(id));
+  if (!pedido) throw new ErroNaoEncontrado('Pedido não encontrado.');
+
+  if (usuario?.papel !== 'admin') {
+    throw new ErroProibido('Apenas a loja pode avançar o status do pedido.');
+  }
+
+  const permitidos = PROXIMOS_STATUS[pedido.status] ?? [];
+  if (!permitidos.includes(novoStatus)) {
+    const rotulos = permitidos.map((status) => STATUS[status] ?? status).join(', ') || 'nenhum';
+
+    throw new ErroValidacao(
+      `Não dá para ir de "${STATUS[pedido.status] ?? pedido.status}" para "${STATUS[novoStatus] ?? novoStatus}". ` +
+      `Próximo passo possível: ${rotulos}.`,
+    );
+  }
+
+  // Devolve o estoque das bebidas quando o pedido é cancelado depois de pago.
+  const baixouEstoque = Boolean(pedido.pagoEm);
+  if (novoStatus === 'cancelado' && baixouEstoque) {
+    for (const item of pedido.itens) {
+      if (item.tipo === 'bebida' && item.produtoId) {
+        produtosRepo.ajustarEstoque(item.produtoId, item.quantidade);
+      }
+    }
+  }
+
+  return paraPublico(pedidosRepo.atualizarStatus(pedido.id, novoStatus));
+}
+
+/** Resumo das vendas (receita) — a Fase 8 usa isso no fluxo de caixa. */
 export function resumoVendas() {
   const resumo = pedidosRepo.resumo();
 

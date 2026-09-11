@@ -17,6 +17,8 @@ function mapearPedido(linha) {
     trocoParaCentavos: linha.troco_para,
     subtotalCentavos: linha.subtotal,
     descontoCentavos: linha.desconto,
+    cupomCodigo: linha.cupom_codigo,
+    cupomPercentual: linha.cupom_percentual,
     totalCentavos: linha.total,
     observacao: linha.observacao,
     criadoEm: linha.criado_em,
@@ -32,7 +34,10 @@ function mapearItem(linha) {
     tipo: linha.tipo,
     quantidade: linha.quantidade,
     precoUnitarioCentavos: linha.preco_unitario,
+    // Preço "de" (antes da promoção). Igual ao unitário quando não houve promoção.
+    precoOriginalCentavos: linha.preco_original ?? linha.preco_unitario,
     subtotalCentavos: linha.subtotal,
+    mascote: linha.mascote ?? null,
   };
 }
 
@@ -42,9 +47,21 @@ const SELECT_PEDIDO = `
     LEFT JOIN usuarios u ON u.id = p.usuario_id
 `;
 
+/**
+ * Itens do pedido com a arte do produto (LEFT JOIN).
+ * O nome e o preço são cópias gravadas no pedido (preço congelado), mas a ARTE
+ * vem do produto atual: se o dono trocar o mascote, os pedidos antigos acompanham
+ * — é enfeite de tela, não valor cobrado.
+ */
 export function listarItens(pedidoId) {
   return db
-    .prepare('SELECT * FROM pedido_itens WHERE pedido_id = ? ORDER BY id')
+    .prepare(`
+      SELECT pi.*, p.mascote AS mascote
+        FROM pedido_itens pi
+        LEFT JOIN produtos p ON p.id = pi.produto_id
+       WHERE pi.pedido_id = ?
+       ORDER BY pi.id
+    `)
     .all(pedidoId)
     .map(mapearItem);
 }
@@ -61,19 +78,36 @@ export function buscarPorId(id) {
  * Por quê? Pedido sem itens (ou item sem pedido) é dado corrompido. Ou grava
  * tudo, ou não grava nada.
  */
-export function criar({ usuarioId, itens, subtotalCentavos, totalCentavos, descontoCentavos = 0, observacao = null }) {
+export function criar({
+  usuarioId,
+  itens,
+  subtotalCentavos,
+  totalCentavos,
+  descontoCentavos = 0,
+  cupomCodigo = null,
+  cupomPercentual = null,
+  observacao = null,
+}) {
   const inserirPedido = db.prepare(`
-    INSERT INTO pedidos (usuario_id, status, subtotal, desconto, total, observacao)
-    VALUES (?, 'aguardando_pagamento', ?, ?, ?, ?)
+    INSERT INTO pedidos (usuario_id, status, subtotal, desconto, cupom_codigo, cupom_percentual, total, observacao)
+    VALUES (?, 'aguardando_pagamento', ?, ?, ?, ?, ?, ?)
   `);
 
   const inserirItem = db.prepare(`
-    INSERT INTO pedido_itens (pedido_id, produto_id, nome_produto, tipo, quantidade, preco_unitario, subtotal)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO pedido_itens (pedido_id, produto_id, nome_produto, tipo, quantidade, preco_unitario, preco_original, subtotal)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const transacao = db.transaction(() => {
-    const resultado = inserirPedido.run(usuarioId, subtotalCentavos, descontoCentavos, totalCentavos, observacao);
+    const resultado = inserirPedido.run(
+      usuarioId,
+      subtotalCentavos,
+      descontoCentavos,
+      cupomCodigo,
+      cupomPercentual,
+      totalCentavos,
+      observacao,
+    );
     const pedidoId = resultado.lastInsertRowid;
 
     for (const item of itens) {
@@ -84,6 +118,7 @@ export function criar({ usuarioId, itens, subtotalCentavos, totalCentavos, desco
         item.tipo,
         item.quantidade,
         item.precoUnitarioCentavos,
+        item.precoOriginalCentavos ?? item.precoUnitarioCentavos,
         item.precoUnitarioCentavos * item.quantidade,
       );
     }

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acompanhar pedido — Monster Burguer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <img src="/img/lanche.svg" alt="">
+      <div>
+        <div class="nome">Monster <b>Burguer</b></div>
+        <div class="slogan">A loja dos monstros famintos</div>
+      </div>
+    </div>
+
+    <nav class="nav" data-nav hidden></nav>
+
+    <div class="acoes-topo">
+      <span class="selo" data-papel-usuario>...</span>
+      <button class="sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="conteudo">
+    <div class="container">
+      <section class="hero">
+        <img class="burguer" src="/img/monstros/zumbi.svg" alt="">
+        <h1>Acompanhe seu <em>pedido</em></h1>
+        <p>Esta tela se atualiza sozinha a cada 10 segundos — dá para deixar aberta enquanto o monstro trabalha. 🍔</p>
+      </section>
+
+      <div class="card">
+        <h2><span class="emoji">🚚</span> Status ao vivo</h2>
+
+        <div class="mensagem" id="mensagem-acompanhar"></div>
+        <div id="seletor-pedidos"></div>
+        <div id="acompanhamento"></div>
+
+        <div class="acoes-formulario">
+          <button type="button" class="botao fantasma" id="botao-atualizar">🔄 Atualizar agora</button>
+          <a class="botao fantasma" href="/pedidos.html">📋 Ver todos os pedidos</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/carrinho.js"></script>
+  <script type="module" src="/js/musica.js"></script>
+  <script>
+    const aviso = document.getElementById('mensagem-acompanhar');
+    const area = document.getElementById('acompanhamento');
+    const seletor = document.getElementById('seletor-pedidos');
+
+    const ETAPAS = [
+      { status: 'pago', rotulo: 'Pago', icone: '💳', descricao: 'A loja recebeu seu pagamento.' },
+      { status: 'em_preparo', rotulo: 'Em preparo', icone: '👨‍🍳', descricao: 'Os monstros estão montando seu lanche.' },
+      { status: 'pronto', rotulo: 'Pronto', icone: '✅', descricao: 'Pedido pronto e embalado.' },
+      { status: 'saiu_entrega', rotulo: 'Saiu para entrega', icone: '🛵', descricao: 'A caminho do seu endereço.' },
+      { status: 'entregue', rotulo: 'Entregue', icone: '📦', descricao: 'Bom apetite! 🍔' },
+    ];
+
+    const idPedido = Number(new URLSearchParams(window.location.search).get('pedido')) || null;
+
+    let pedidoAtual = null;
+    let relogio = null;
+
+    function desenharAcompanhamento(pedido) {
+      area.innerHTML = '';
+
+      const indiceAtual = ETAPAS.findIndex((etapa) => etapa.status === pedido.status);
+
+      const cabecalho = document.createElement('div');
+      cabecalho.className = 'pedido-topo';
+      cabecalho.innerHTML = `
+        <b>Pedido ${pedido.codigo}</b>
+        <span class="status ${pedido.status}">${pedido.statusLabel}</span>
+      `;
+      area.appendChild(cabecalho);
+
+      const itens = document.createElement('p');
+      itens.className = 'pedido-itens';
+      itens.innerHTML = pedido.itens
+        .map((item) => `${item.quantidade}× ${item.nome} — ${reais(item.subtotal)}`)
+        .join('<br>');
+      area.appendChild(itens);
+
+      // Linha do tempo vertical: onde o pedido está, com o que já passou.
+      const trilha = document.createElement('div');
+      trilha.className = 'linha-do-tempo vertical';
+
+      ETAPAS.forEach((etapa, indice) => {
+        const passo = document.createElement('div');
+        const estado = indice < indiceAtual ? 'concluida' : indice === indiceAtual ? 'atual' : 'futura';
+        passo.className = `etapa ${estado}`;
+        passo.innerHTML = `
+          <span class="bolinha">${etapa.icone}</span>
+          <div>
+            <b>${etapa.rotulo}</b>
+            <span class="ajuda" style="display:block; margin:0">${etapa.descricao}</span>
+          </div>
+        `;
+        trilha.appendChild(passo);
+      });
+
+      area.appendChild(trilha);
+
+      const total = document.createElement('div');
+      total.className = 'linha-resumo destaque';
+      total.innerHTML = `<span>Total</span><span class="valor">${reais(pedido.total)}</span>`;
+      area.appendChild(total);
+
+      const detalhes = document.createElement('p');
+      detalhes.className = 'ajuda';
+      detalhes.style.marginTop = '10px';
+      detalhes.textContent = pedido.formaPagamentoLabel
+        ? `Pagamento: ${pedido.formaPagamentoLabel}${pedido.precisaTroco ? ` · troco para ${reais(pedido.trocoPara)}` : ''}`
+        : 'Aguardando pagamento.';
+      area.appendChild(detalhes);
+    }
+
+    function mostrarVazio(mensagem) {
+      area.innerHTML = `<p class="carrinho-vazio">${mensagem}</p>`;
+    }
+
+    async function carregar() {
+      try {
+        if (pedidoAtual) {
+          // Atualização "ao vivo" de um pedido específico.
+          const { pedido } = await API.get(`/api/pedidos/${pedidoAtual.id}`);
+          pedidoAtual = pedido;
+
+          if (pedido.status === 'cancelado') {
+            mostrarVazio('Este pedido foi cancelado. Se tiver dúvida, fale com a loja. 😔');
+            return;
+          }
+
+          desenharAcompanhamento(pedido);
+
+          // Chegou ao fim: para de atualizar e comemora.
+          if (pedido.status === 'entregue') {
+            pararRelogio();
+            mostrarMensagem(aviso, 'Pedido entregue! Bom apetite. 🎉', 'sucesso');
+          }
+          return;
+        }
+
+        // Sem pedido escolhido: procura o que está a caminho.
+        const { pedidos } = await API.get('/api/pedidos/meus');
+        const aCaminho = pedidos.filter((pedido) => !['entregue', 'cancelado', 'aguardando_pagamento'].includes(pedido.status));
+
+        if (aCaminho.length === 0) {
+          pararRelogio();
+
+          const pendentes = pedidos.filter((pedido) => pedido.status === 'aguardando_pagamento');
+          if (pendentes.length > 0) {
+            mostrarVazio(`Você tem ${pendentes.length} pedido(s) aguardando pagamento. <a href="/checkout.html?pedido=${pendentes[0].id}">Pagar agora 💳</a>`);
+            return;
+          }
+
+          mostrarVazio('Nenhum pedido a caminho agora. <a href="/loja.html">Ver o cardápio 🍔</a>');
+          return;
+        }
+
+        pedidoAtual = aCaminho[0];
+        desenharSeletor(aCaminho);
+        desenharAcompanhamento(pedidoAtual);
+      } catch (erro) {
+        mostrarMensagem(aviso, erro.message, 'erro');
+      }
+    }
+
+    function desenharSeletor(pedidos) {
+      seletor.innerHTML = '';
+      if (pedidos.length < 2) return;
+
+      const etiqueta = document.createElement('p');
+      etiqueta.className = 'ajuda';
+      etiqueta.textContent = 'Você tem mais de um pedido a caminho. Escolha qual acompanhar:';
+      seletor.appendChild(etiqueta);
+
+      const botoes = document.createElement('div');
+      botoes.className = 'acoes-formulario';
+
+      pedidos.forEach((pedido) => {
+        const botao = document.createElement('button');
+        botao.className = `botao pequeno${pedido.id === pedidoAtual?.id ? '' : ' fantasma'}`;
+        botao.textContent = `${pedido.codigo} · ${pedido.statusLabel}`;
+        botao.addEventListener('click', () => {
+          pedidoAtual = pedido;
+          desenharSeletor(pedidos);
+          desenharAcompanhamento(pedido);
+        });
+        botoes.appendChild(botao);
+      });
+
+      seletor.appendChild(botoes);
+    }
+
+    function pararRelogio() {
+      if (relogio) clearInterval(relogio);
+      relogio = null;
+    }
+
+    (async () => {
+      const usuario = await iniciarPagina('cliente');
+      if (!usuario) return;
+
+      Carrinho.carregar(usuario.id);
+
+      // ?pedido=ID mata a busca automática (o cliente escolheu qual ver).
+      if (idPedido) {
+        pedidoAtual = { id: idPedido };
+      }
+
+      await carregar();
+      relogio = setInterval(carregar, 10000);
+    })();
+
+    document.getElementById('botao-atualizar').addEventListener('click', carregar);
+    window.addEventListener('pagehide', pararRelogio);
+  </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrinho — Monster Burguer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <img src="/img/lanche.svg" alt="">
+      <div>
+        <div class="nome">Monster <b>Burguer</b></div>
+        <div class="slogan">A loja dos monstros famintos</div>
+      </div>
+    </div>
+
+    <nav class="nav" data-nav hidden></nav>
+
+    <div class="acoes-topo">
+      <span class="selo" data-papel-usuario>...</span>
+      <button class="sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="conteudo">
+    <div class="container">
+      <section class="hero">
+        <img class="burguer" src="/img/monstros/lobisomem.svg" alt="">
+        <h1>Seu <em>carrinho</em></h1>
+        <p>Ajuste as quantidades ou remova o que não quiser. O pedido só é fechado na próxima tela. 🛒</p>
+      </section>
+
+      <div class="card">
+        <h2><span class="emoji">🛒</span> Itens escolhidos</h2>
+
+        <div class="mensagem" id="mensagem-carrinho"></div>
+        <div id="lista-carrinho"></div>
+
+        <div class="total-carrinho">
+          <span>Total do pedido</span>
+          <span class="valor" id="total-carrinho">R$ 0,00</span>
+        </div>
+
+        <div class="acoes-formulario">
+          <a class="botao" id="botao-pagamento" href="/checkout.html">➡️ Ir para o pagamento</a>
+          <a class="botao fantasma" href="/loja.html">🍔 Continuar escolhendo</a>
+          <button type="button" class="botao fantasma" id="botao-limpar">🗑️ Limpar carrinho</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/carrinho.js"></script>
+  <script type="module" src="/js/musica.js"></script>
+  <script>
+    const avisoCarrinho = document.getElementById('mensagem-carrinho');
+    const lista = document.getElementById('lista-carrinho');
+
+    function desenhar() {
+      const itens = Carrinho.listar();
+      const vazio = Carrinho.vazio();
+
+      lista.innerHTML = '';
+      document.getElementById('total-carrinho').textContent = reais(Carrinho.total());
+      document.getElementById('botao-pagamento').classList.toggle('desabilitado', vazio);
+      document.getElementById('botao-pagamento').setAttribute('aria-disabled', String(vazio));
+
+      if (vazio) {
+        lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio. <a href="/loja.html">Escolher lanches 🍔</a></p>';
+        return;
+      }
+
+      itens.forEach((item) => {
+        const linha = document.createElement('div');
+        linha.className = 'linha-carrinho';
+
+        const info = document.createElement('div');
+        info.className = 'info';
+        info.innerHTML = `
+          <img class="miniatura" src="/img/monstros/${item.mascote ?? 'frank'}.svg" alt="">
+          <div><b>${item.nome}</b><span>${reais(item.precoVenda)} × ${item.quantidade}</span></div>
+        `;
+
+        const quantidade = document.createElement('div');
+        quantidade.className = 'quantidade';
+
+        const menos = document.createElement('button');
+        menos.type = 'button';
+        menos.textContent = '−';
+        menos.title = 'Diminuir';
+        menos.addEventListener('click', () => Carrinho.alterarQuantidade(item.produtoId, -1));
+
+        const valor = document.createElement('span');
+        valor.textContent = String(item.quantidade);
+
+        const mais = document.createElement('button');
+        mais.type = 'button';
+        mais.textContent = '+';
+        mais.title = 'Aumentar';
+        mais.addEventListener('click', () => Carrinho.alterarQuantidade(item.produtoId, 1));
+
+        const remover = document.createElement('button');
+        remover.type = 'button';
+        remover.textContent = '🗑️';
+        remover.title = 'Remover item';
+        remover.addEventListener('click', () => Carrinho.remover(item.produtoId));
+
+        quantidade.append(menos, valor, mais, remover);
+
+        const subtotal = document.createElement('div');
+        subtotal.className = 'subtotal';
+        subtotal.textContent = reais(item.precoVenda * item.quantidade);
+
+        linha.append(info, quantidade, subtotal);
+        lista.appendChild(linha);
+      });
+    }
+
+    document.getElementById('botao-limpar').addEventListener('click', () => {
+      if (Carrinho.vazio()) return;
+      if (!confirm('Esvaziar o carrinho?')) return;
+
+      Carrinho.limpar();
+      mostrarMensagem(avisoCarrinho, 'Carrinho esvaziado.', 'sucesso');
+    });
+
+    // Se o carrinho estiver vazio, não faz sentido ir para o pagamento.
+    document.getElementById('botao-pagamento').addEventListener('click', (evento) => {
+      if (Carrinho.vazio()) {
+        evento.preventDefault();
+        mostrarMensagem(avisoCarrinho, 'Escolha pelo menos um item no cardápio antes de pagar. 🍔', 'erro');
+      }
+    });
+
+    (async () => {
+      const usuario = await iniciarPagina('cliente');
+      if (!usuario) return;
+
+      Carrinho.carregar(usuario.id);
+      Carrinho.assinar(desenhar);
+      desenhar();
+    })();
+  </script>
+</body>
+</html>

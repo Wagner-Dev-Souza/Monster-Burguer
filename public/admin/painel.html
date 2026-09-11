@@ -20,12 +20,7 @@
       </div>
     </div>
 
-    <nav class="nav">
-      <a href="/admin/painel.html" class="ativo">👑 Painel</a>
-      <a href="/admin/produtos.html">🍔 Produtos</a>
-      <a href="/admin/compras.html">📦 Compras</a>
-      <a href="/loja.html">🛍️ Ver a loja</a>
-    </nav>
+    <nav class="nav" data-nav hidden></nav>
 
     <div class="acoes-topo">
       <span class="selo" data-papel-usuario>...</span>
@@ -122,24 +117,27 @@
         </div>
       </div>
 
-      <!-- ============ FASES SEGUINTES (ainda não implementadas) ============ -->
+      <!-- ============ ATALHOS PARA AS OUTRAS TELAS DO PAINEL ============ -->
       <div class="grade">
         <div class="card">
           <h2><span class="emoji">🍔</span> Produtos e ingredientes</h2>
-          <p class="ajuda" style="margin:0 0 14px">Cadastro de produtos com ficha técnica e margem calculada.</p>
+          <p class="ajuda" style="margin:0 0 14px">Cadastro de produtos, arte (mascote), ficha técnica e margem calculada.</p>
           <a class="botao" href="/admin/produtos.html" style="text-decoration:none; width:auto; margin:0">Abrir Produtos</a>
         </div>
-        <div class="card embreve">
+        <div class="card">
+          <h2><span class="emoji">🎟️</span> Promoções e cupons</h2>
+          <p class="ajuda" style="margin:0 0 14px">Descontos por produto e códigos de cupom com regras (mínimo, validade, usos).</p>
+          <a class="botao" href="/admin/promocoes.html" style="text-decoration:none; width:auto; margin:0">Abrir Promoções</a>
+        </div>
+        <div class="card">
           <h2><span class="emoji">📦</span> Compras e estoque</h2>
-          <p class="ajuda" style="margin:0">Despesas com fornecedores, custo médio e estoque — <strong>Fase 3</strong>.</p>
+          <p class="ajuda" style="margin:0 0 14px">Despesas com fornecedores, custo médio ponderado e estoque das bebidas.</p>
+          <a class="botao" href="/admin/compras.html" style="text-decoration:none; width:auto; margin:0">Abrir Compras</a>
         </div>
-        <div class="card embreve">
-          <h2><span class="emoji">🧾</span> Pedidos confirmados</h2>
-          <p class="ajuda" style="margin:0">Acompanhar e avançar o status dos pedidos — <strong>Fase 6</strong>.</p>
-        </div>
-        <div class="card embreve">
-          <h2><span class="emoji">📊</span> Fluxo de caixa</h2>
-          <p class="ajuda" style="margin:0">Receitas, despesas, saldo e relatórios — <strong>Fase 8</strong>.</p>
+        <div class="card">
+          <h2><span class="emoji">💰</span> Fluxo de caixa</h2>
+          <p class="ajuda" style="margin:0 0 14px">Receita, despesas, saldo por dia/mês/ano e lucro por produto.</p>
+          <a class="botao" href="/admin/caixa.html" style="text-decoration:none; width:auto; margin:0">Abrir Caixa</a>
         </div>
       </div>
 
@@ -259,7 +257,8 @@
        --------------------------------------------------------------------- */
     const avisoPedidosAdmin = document.getElementById('mensagem-pedidos-admin');
     const corpoPedidosAdmin = document.getElementById('lista-pedidos-admin');
-    const reais = (valor) => `R$ ${Number(valor ?? 0).toFixed(2).replace('.', ',')}`;
+    // `reais()` (formatação em R$) vem do layout.js — declarar aqui
+    // de novo colidiria com o escopo global e mataria o script da página.
 
     function renderizarPedidosAdmin(pedidos) {
       corpoPedidosAdmin.innerHTML = '';
@@ -285,13 +284,63 @@
           <p class="ajuda" style="margin:6px 0 0">
             Cliente: ${pedido.cliente.nome ?? '-'} (${pedido.cliente.codigo})
             · ${pedido.formaPagamentoLabel ?? 'sem pagamento ainda'}
+            ${pedido.precisaTroco ? ` · troco para ${reais(pedido.trocoPara)}` : ''}
           </p>
           <p class="pedido-itens">${itens}</p>
+          ${pedido.cupomCodigo ? `<p class="ajuda" style="margin:4px 0 0">🎟️ Cupom ${pedido.cupomCodigo} (-${pedido.cupomPercentual}%) — desconto de ${reais(pedido.desconto)}</p>` : ''}
+          ${pedido.observacao ? `<p class="ajuda" style="margin:4px 0 0">📝 ${pedido.observacao}</p>` : ''}
           <div class="linha-resumo destaque"><span>Total</span><span class="valor">${reais(pedido.total)}</span></div>
         `;
 
+        // FASE 6: botões para a loja avisar o cliente sobre a entrega.
+        // Os passos possíveis vêm do PRÓPRIO servidor (mapa de transições),
+        // então a tela nunca oferece um caminho que a API vai recusar.
+        if (pedido.proximos.length > 0) {
+          const acoes = document.createElement('div');
+          acoes.className = 'acoes-formulario';
+
+          const ROTULOS = {
+            em_preparo: '👨‍🍳 Iniciar preparo',
+            pronto: '✅ Marcar pronto',
+            saiu_entrega: '🛵 Saiu para entrega',
+            entregue: '📦 Entregue',
+            cancelado: '🚫 Cancelar pedido',
+          };
+
+          pedido.proximos.forEach((proximoStatus) => {
+            const botao = document.createElement('button');
+            botao.className = `botao pequeno${proximoStatus === 'cancelado' ? ' perigo' : ' fantasma'}`;
+            botao.textContent = ROTULOS[proximoStatus] ?? proximoStatus;
+            botao.addEventListener('click', () => avancarStatus(pedido, proximoStatus));
+            acoes.appendChild(botao);
+          });
+
+          cartao.appendChild(acoes);
+        }
+
         corpoPedidosAdmin.appendChild(cartao);
       });
+    }
+
+    async function avancarStatus(pedido, novoStatus) {
+      const ROTULOS = {
+        em_preparo: 'iniciar o preparo',
+        pronto: 'marcar como pronto',
+        saiu_entrega: 'avisar que saiu para entrega',
+        entregue: 'marcar como entregue',
+        cancelado: 'CANCELAR (o estoque das bebidas volta)',
+      };
+
+      if (!confirm(`Pedido ${pedido.codigo}: ${ROTULOS[novoStatus] ?? novoStatus}?`)) return;
+
+      try {
+        const { mensagem } = await API.patch(`/api/pedidos/${pedido.id}/status`, { status: novoStatus });
+        mostrarMensagem(avisoPedidosAdmin, mensagem, 'sucesso');
+        await carregarPedidos();
+        await carregarHistorico();
+      } catch (erro) {
+        mostrarMensagem(avisoPedidosAdmin, erro.message, 'erro');
+      }
     }
 
     async function carregarPedidos() {

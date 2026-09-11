@@ -46,14 +46,20 @@ describe('Interface — elementos obrigatórios', () => {
     assert.match(login.text, /get\('cadastro'\)/);
   });
 
-  it('as ABAS de navegação são exclusivas do admin (cliente não transita)', async () => {
-    const resposta = await request(app).get('/loja.html');
+  it('as ABAS de navegação são montadas conforme o papel (cliente não vê o painel)', async () => {
+    const loja = await request(app).get('/loja.html');
+    const layout = await request(app).get('/js/layout.js');
 
-    assert.equal(resposta.status, 200);
-    // As duas abas ficam dentro do bloco que só o admin vê.
-    assert.match(resposta.text, /<nav class="nav" data-somente-admin hidden>/);
-    assert.match(resposta.text, /href="\/admin\/painel.html"/);
-    assert.match(resposta.text, /href="\/loja.html" class="ativo"/);
+    // A navegação da loja nasce como um contêiner vazio...
+    assert.match(loja.text, /<nav class="nav" data-nav hidden><\/nav>/);
+
+    // ...e o layout.js monta as abas do papel: o cliente NÃO tem aba de painel.
+    assert.match(layout.text, /PAGINAS_POR_PAPEL/);
+    assert.match(layout.text, /cliente: \[/);
+    assert.match(layout.text, /admin: \[/);
+    // a aba do painel só existe no conjunto do admin
+    const blocoAdmin = layout.text.slice(layout.text.indexOf('admin: ['));
+    assert.match(blocoAdmin, /\/admin\/painel\.html/);
   });
 
   it('o botão Sair fica no canto superior direito (bloco de ações do topo)', async () => {
@@ -63,7 +69,7 @@ describe('Interface — elementos obrigatórios', () => {
   });
 
   it('o cliente tem a opção de excluir o próprio cadastro (com confirmação)', async () => {
-    const resposta = await request(app).get('/loja.html');
+    const resposta = await request(app).get('/conta.html');
 
     assert.match(resposta.text, /zona-perigo/);
     assert.match(resposta.text, /confirmacao-exclusao/);
@@ -165,7 +171,7 @@ describe('Interface — elementos obrigatórios', () => {
   });
 
   it('Minha conta tem formulário editável (nome, telefone e endereço)', async () => {
-    const resposta = await request(app).get('/loja.html');
+    const resposta = await request(app).get('/conta.html');
 
     assert.match(resposta.text, /id="form-conta"/);
     assert.match(resposta.text, /id="conta-nome"/);
@@ -175,14 +181,14 @@ describe('Interface — elementos obrigatórios', () => {
   });
 
   it('a exclusão de conta é oferecida só ao cliente (admin vê a explicação)', async () => {
-    const resposta = await request(app).get('/loja.html');
+    const resposta = await request(app).get('/conta.html');
 
     assert.match(resposta.text, /data-somente-cliente[\s\S]*id="botao-excluir"/);
     assert.match(resposta.text, /data-aviso-admin[\s\S]*rebaixar você a cliente/);
   });
 
   it('Minha conta começa em MODO LEITURA (campos travados, só o Editar visível)', async () => {
-    const resposta = await request(app).get('/loja.html');
+    const resposta = await request(app).get('/conta.html');
 
     // os campos nascem com readOnly
     assert.match(resposta.text, /id="conta-nome"[^>]*readonly/);
@@ -249,9 +255,16 @@ describe('Interface — elementos obrigatórios', () => {
       'login.html',
       'cadastro.html',
       'loja.html',
+      'carrinho.html',
+      'checkout.html',
+      'pedidos.html',
+      'acompanhar.html',
+      'conta.html',
       'admin/painel.html',
       'admin/produtos.html',
       'admin/compras.html',
+      'admin/promocoes.html',
+      'admin/caixa.html',
     ];
 
     for (const pagina of paginas) {
@@ -306,30 +319,65 @@ describe('Interface — elementos obrigatórios', () => {
     assert.match(resposta.text, /\.musica-botao/);
   });
 
-  it('FASE 4: a loja tem cardápio dinâmico e carrinho', async () => {
+  it('FASE 4: o cardápio tem promoção com "de/por" e a barra do carrinho', async () => {
     const resposta = await request(app).get('/loja.html');
 
-    // cardápio montado a partir da API
     assert.match(resposta.text, /id="cardapio"/);
     assert.match(resposta.text, /API\.get\('\/api\/cardapio'\)/);
-    // carrinho: contador, lista, total e as ações de mexer no pedido
-    assert.match(resposta.text, /id="contador-carrinho"/);
-    assert.match(resposta.text, /id="lista-carrinho"/);
-    assert.match(resposta.text, /id="total-carrinho"/);
-    assert.match(resposta.text, /function adicionarAoCarrinho/);
-    assert.match(resposta.text, /function alterarQuantidade/);
-    assert.match(resposta.text, /function removerDoCarrinho/);
-    assert.match(resposta.text, /function limparCarrinho/);
-    // carrinho separado por usuário e guardado no navegador
-    assert.match(resposta.text, /localStorage/);
-    assert.match(resposta.text, /monsterCarrinho:/);
+    // selo de desconto e preço antigo riscado (Fase 7)
+    assert.match(resposta.text, /selo-promo/);
+    assert.match(resposta.text, /precoOriginal/);
+    // barra flutuante que leva ao carrinho
+    assert.match(resposta.text, /id="barra-carrinho"/);
+    assert.match(resposta.text, /href="\/carrinho.html"/);
   });
 
-  it('o código do usuário (#0000) aparece na loja e no selo do topo', async () => {
-    const loja = await request(app).get('/loja.html');
+  it('FASE 4: o carrinho virou uma página própria com quantidades e total', async () => {
+    const resposta = await request(app).get('/carrinho.html');
+
+    assert.match(resposta.text, /id="lista-carrinho"/);
+    assert.match(resposta.text, /id="total-carrinho"/);
+    assert.match(resposta.text, /Carrinho\.alterarQuantidade/);
+    assert.match(resposta.text, /Carrinho\.remover/);
+    assert.match(resposta.text, /Carrinho\.limpar/);
+    assert.match(resposta.text, /href="\/checkout.html"/);
+  });
+
+  it('o carrinho é compartilhado entre as páginas (módulo carrinho.js)', async () => {
+    const resposta = await request(app).get('/js/carrinho.js');
+
+    assert.equal(resposta.status, 200);
+    // guardado por usuário, no navegador
+    assert.match(resposta.text, /monsterCarrinho:/);
+    assert.match(resposta.text, /localStorage/);
+    // namespace único (um só morador no escopo global)
+    assert.match(resposta.text, /window\.Carrinho = /);
+    assert.match(resposta.text, /Carrinho|assinar/);
+  });
+
+  it('a área do cliente é dividida em JANELAS separadas (sem poluir a home)', async () => {
     const layout = await request(app).get('/js/layout.js');
 
-    assert.match(loja.text, /data-codigo-usuario/);
+    // o mapa de telas do cliente tem uma página para cada assunto
+    assert.match(layout.text, /\/loja\.html', rotulo: '🍔 Cardápio/);
+    assert.match(layout.text, /\/carrinho\.html', rotulo: '🛒 Carrinho/);
+    assert.match(layout.text, /\/pedidos\.html', rotulo: '📋 Meus pedidos/);
+    assert.match(layout.text, /\/acompanhar\.html', rotulo: '🚚 Acompanhar/);
+    assert.match(layout.text, /\/conta\.html', rotulo: '🙋 Minha conta/);
+
+    // e cada página existe de verdade
+    const paginas = ['loja.html', 'carrinho.html', 'pedidos.html', 'acompanhar.html', 'conta.html'];
+    for (const pagina of paginas) {
+      const resposta = await request(app).get(`/${pagina}`);
+      assert.equal(resposta.status, 200, `esperava a página ${pagina}`);
+    }
+  });
+
+  it('o código do usuário (#0000) aparece em Minha conta e no selo do topo', async () => {
+    const conta = await request(app).get('/conta.html');
+    const layout = await request(app).get('/js/layout.js');
+
+    assert.match(conta.text, /data-codigo-usuario/);
     assert.match(layout.text, /usuario\.codigo/);
   });
 
@@ -350,19 +398,88 @@ describe('Interface — elementos obrigatórios', () => {
     assert.match(html, /\/api\/auditoria/);
   });
 
-  it('FASE 5: a loja tem checkout com formas de pagamento e botão de pagamento', async () => {
-    const resposta = await request(app).get('/loja.html');
+  it('FASE 5: o pagamento é uma página própria com formas e botão de pagamento', async () => {
+    const resposta = await request(app).get('/checkout.html');
 
-    assert.match(resposta.text, /id="card-checkout"/);
     assert.match(resposta.text, /id="formas-pagamento"/);
     assert.match(resposta.text, /id="campo-troco"/);
     assert.match(resposta.text, /id="botao-confirmar-pedido"/);
     assert.match(resposta.text, /id="botao-pagar"/);
-    assert.match(resposta.text, /id="lista-pedidos"/);
     assert.match(resposta.text, /API\.post\('\/api\/pedidos'/);
     assert.match(resposta.text, /\/pagar`/);
     // a loja é de teste: nada de dados de cartão
     assert.match(resposta.text, /não pedimos número de cartão/i);
+    // aceita pagar um pedido já criado (?pedido=ID) vindo de "Meus pedidos"
+    assert.match(resposta.text, /\.get\('pedido'\)/);
+  });
+
+  it('pagamento na entrega saiu da lista (crédito/débito/dinheiro já são na entrega)', async () => {
+    const resposta = await request(app).get('/checkout.html');
+
+    assert.ok(!/na_entrega/.test(resposta.text), 'a opção "pagar na entrega" não deve mais existir');
+    assert.ok(!/Pagar na entrega/i.test(resposta.text));
+    // as quatro formas que continuam:
+    assert.match(resposta.text, /pix: '🔵 PIX'/);
+    assert.match(resposta.text, /dinheiro: '💵 Dinheiro'/);
+  });
+
+  it('FASE 6: a página de acompanhamento mostra a linha do tempo do pedido', async () => {
+    const resposta = await request(app).get('/acompanhar.html');
+
+    assert.match(resposta.text, /linha-do-tempo/);
+    assert.match(resposta.text, /'em_preparo', rotulo: 'Em preparo'/);
+    assert.match(resposta.text, /'saiu_entrega'/);
+    // se atualiza sozinha (o cliente deixa aberta esperando o lanche)
+    assert.match(resposta.text, /setInterval\(carregar, 10000\)/);
+  });
+
+  it('o painel do dono tem os botões de avançar o pedido (Fase 6)', async () => {
+    const fs = await import('node:fs/promises');
+    const html = await fs.readFile(new URL('../public/admin/painel.html', import.meta.url), 'utf8');
+
+    assert.match(html, /\/status`/);
+    assert.match(html, /👨‍🍳 Iniciar preparo/);
+    assert.match(html, /🛵 Saiu para entrega/);
+    // os passos possíveis vêm do servidor (não inventamos no front)
+    assert.match(html, /pedido\.proximos/);
+  });
+
+  it('FASE 7: a página de promoções e cupons existe no painel', async () => {
+    const fs = await import('node:fs/promises');
+    const html = await fs.readFile(new URL('../public/admin/promocoes.html', import.meta.url), 'utf8');
+
+    assert.match(html, /id="form-promocao"/);
+    assert.match(html, /id="form-cupom"/);
+    assert.match(html, /id="lista-promocoes"/);
+    assert.match(html, /id="lista-cupons"/);
+    assert.match(html, /'\/api\/promocoes'/);
+    assert.match(html, /'\/api\/cupons'/);
+  });
+
+  it('FASE 8: a página de caixa mostra receita, despesa e saldo', async () => {
+    const fs = await import('node:fs/promises');
+    const html = await fs.readFile(new URL('../public/admin/caixa.html', import.meta.url), 'utf8');
+
+    assert.match(html, /id="resumo-receita"/);
+    assert.match(html, /id="resumo-despesas"/);
+    assert.match(html, /id="resumo-saldo"/);
+    assert.match(html, /id="lista-periodos"/);
+    assert.match(html, /id="lista-produtos"/);
+    assert.match(html, /\/api\/relatorios\/caixa/);
+    assert.match(html, /\/api\/relatorios\/produtos/);
+  });
+
+  it('o painel do dono permite escolher a ARTE do produto (mascote)', async () => {
+    const fs = await import('node:fs/promises');
+    const html = await fs.readFile(new URL('../public/admin/produtos.html', import.meta.url), 'utf8');
+
+    assert.match(html, /id="grade-mascotes"/);
+    assert.match(html, /function montarGradeDeMascotes/);
+    assert.match(html, /mascote: mascoteEscolhido/);
+    // a mesma lista de monstros do servidor
+    for (const mascote of ['frank', 'draculinha', 'lobisomem', 'monstro-pantano', 'zumbi', 'mumia', 'fantasma', 'esqueleto', 'bruxa']) {
+      assert.ok(html.includes(mascote), `esperava o mascote ${mascote} na grade de opções`);
+    }
   });
 
   it('FASE 3: a página de compras existe com formulário e histórico', async () => {
@@ -380,9 +497,11 @@ describe('Interface — elementos obrigatórios', () => {
   it('o painel mostra os pedidos dos clientes e a receita', async () => {
     const fs = await import('node:fs/promises');
     const html = await fs.readFile(new URL('../public/admin/painel.html', import.meta.url), 'utf8');
+    const layout = await fs.readFile(new URL('../public/js/layout.js', import.meta.url), 'utf8');
 
     assert.match(html, /id="lista-pedidos-admin"/);
     assert.match(html, /id="receita-total"/);
-    assert.match(html, /href="\/admin\/compras\.html"/);
+    // o link para Compras vive no mapa de telas do admin (layout.js)
+    assert.match(layout, /\/admin\/compras\.html/);
   });
 });

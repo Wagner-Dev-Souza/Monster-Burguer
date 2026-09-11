@@ -14,6 +14,7 @@ function mapear(linha) {
     precoVendaCentavos: linha.preco_venda,
     custoCompraCentavos: linha.custo_compra,
     estoque: linha.estoque,
+    mascote: linha.mascote,
     ativo: Boolean(linha.ativo),
     // Campos calculados que vêm junto na consulta (SUM da ficha técnica):
     custoFichaCentavos: linha.custo_ficha_centavos ?? 0,
@@ -38,13 +39,13 @@ const SELECT_COM_CUSTO = `
     LEFT JOIN ingredientes i          ON i.id = pi.ingrediente_id
 `;
 
-export function criar({ nome, descricao, tipo, precoVendaCentavos, custoCompraCentavos, estoque }) {
+export function criar({ nome, descricao, tipo, precoVendaCentavos, custoCompraCentavos, estoque, mascote }) {
   const resultado = db
     .prepare(`
-      INSERT INTO produtos (nome, descricao, tipo, preco_venda, custo_compra, estoque)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO produtos (nome, descricao, tipo, preco_venda, custo_compra, estoque, mascote)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `)
-    .run(nome, descricao, tipo, precoVendaCentavos, custoCompraCentavos, estoque);
+    .run(nome, descricao, tipo, precoVendaCentavos, custoCompraCentavos, estoque, mascote);
 
   return buscarPorId(resultado.lastInsertRowid);
 }
@@ -77,12 +78,12 @@ export function listar({ tipo, incluirInativos = false } = {}) {
     .map(mapear);
 }
 
-export function atualizar(id, { nome, descricao, tipo, precoVendaCentavos, custoCompraCentavos, estoque }) {
+export function atualizar(id, { nome, descricao, tipo, precoVendaCentavos, custoCompraCentavos, estoque, mascote }) {
   db.prepare(`
     UPDATE produtos SET nome = ?, descricao = ?, tipo = ?, preco_venda = ?, custo_compra = ?, estoque = ?,
-           atualizado_em = datetime('now')
+           mascote = ?, atualizado_em = datetime('now')
     WHERE id = ?
-  `).run(nome, descricao, tipo, precoVendaCentavos, custoCompraCentavos, estoque, id);
+  `).run(nome, descricao, tipo, precoVendaCentavos, custoCompraCentavos, estoque, mascote, id);
 
   return buscarPorId(id);
 }

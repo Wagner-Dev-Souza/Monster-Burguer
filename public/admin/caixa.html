@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fluxo de Caixa — Monster Burguer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <img src="/img/lanche.svg" alt="">
+      <div>
+        <div class="nome">Fluxo de <b>Caixa</b></div>
+        <div class="slogan">Gestão da Monster Burguer</div>
+      </div>
+    </div>
+
+    <nav class="nav" data-nav hidden></nav>
+
+    <div class="acoes-topo">
+      <span class="selo" data-papel-usuario>...</span>
+      <button class="sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="conteudo">
+    <div class="container">
+      <section class="hero">
+        <img class="burguer" src="/img/monstros/mumia.svg" alt="">
+        <h1>A conta <em>fecha</em>?</h1>
+        <p>
+          Receita (pedidos pagos) <strong>−</strong> Despesas (compras dos fornecedores) <strong>=</strong> Saldo.
+          É o retrato do dinheiro da loja. 💰
+        </p>
+      </section>
+
+      <!-- ========================== RESUMO ========================== -->
+      <div class="grade">
+        <div class="card">
+          <h2><span class="emoji">💚</span> Receita</h2>
+          <p style="margin:0; font-size:1.5rem; font-weight:800; color:var(--verde-brilho)" id="resumo-receita">R$ 0,00</p>
+          <p class="ajuda" style="margin:6px 0 0" id="resumo-pedidos">0 pedidos pagos</p>
+        </div>
+        <div class="card">
+          <h2><span class="emoji">💸</span> Despesas</h2>
+          <p style="margin:0; font-size:1.5rem; font-weight:800; color:var(--vermelho-claro)" id="resumo-despesas">R$ 0,00</p>
+          <p class="ajuda" style="margin:6px 0 0" id="resumo-compras">0 compras</p>
+        </div>
+        <div class="card">
+          <h2><span class="emoji">⚖️</span> Saldo</h2>
+          <p style="margin:0; font-size:1.5rem; font-weight:800" id="resumo-saldo">R$ 0,00</p>
+          <p class="ajuda" style="margin:6px 0 0" id="resumo-extra">ticket médio R$ 0,00</p>
+        </div>
+      </div>
+
+      <!-- ==================== POR PERÍODO ==================== -->
+      <div class="card">
+        <h2><span class="emoji">📅</span> Por período</h2>
+
+        <div class="acoes-formulario" style="margin-top:0">
+          <label for="agrupamento" style="margin:0; align-self:center">Ver por:</label>
+          <select id="agrupamento" style="max-width:180px">
+            <option value="dia">Dia</option>
+            <option value="mes">Mês</option>
+            <option value="ano">Ano</option>
+          </select>
+          <button type="button" class="botao pequeno" id="botao-atualizar">🔄 Atualizar</button>
+        </div>
+
+        <div class="mensagem" id="mensagem-caixa"></div>
+
+        <div class="tabela-rolagem">
+          <table>
+            <thead>
+              <tr>
+                <th>Período</th>
+                <th>Receita</th>
+                <th>Despesas</th>
+                <th>Saldo</th>
+                <th>Pedidos</th>
+              </tr>
+            </thead>
+            <tbody id="lista-periodos">
+              <tr><td colspan="5" style="color:var(--texto-suave)">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===================== POR PRODUTO ===================== -->
+      <div class="card">
+        <h2><span class="emoji">🏆</span> Lucro por produto</h2>
+        <p class="ajuda">
+          Quanto cada item vendeu e quanto sobrou depois do custo. O custo usado é o de <strong>hoje</strong>
+          (estimativa gerencial, não contabilidade histórica).
+        </p>
+
+        <div class="tabela-rolagem">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Vendidos</th>
+                <th>Receita</th>
+                <th>Custo total</th>
+                <th>Lucro</th>
+              </tr>
+            </thead>
+            <tbody id="lista-produtos">
+              <tr><td colspan="5" style="color:var(--texto-suave)">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================== EXTRATO ======================== -->
+      <div class="card">
+        <h2><span class="emoji">🧾</span> Últimas movimentações</h2>
+        <p class="ajuda">Entradas (pedidos pagos) e saídas (compras), do mais recente para o mais antigo.</p>
+
+        <div id="lista-extrato"></div>
+      </div>
+
+      <p class="rodape cadeado">🔒 Faturamento e lucro: só admin acessa.</p>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script type="module" src="/js/musica.js"></script>
+  <script>
+    const avisoCaixa = document.getElementById('mensagem-caixa');
+
+    function pintarSaldo(elemento, valor, positivo) {
+      elemento.textContent = reais(valor);
+      elemento.style.color = positivo ? 'var(--verde-brilho)' : 'var(--vermelho-claro)';
+    }
+
+    function renderizarPeriodos(periodos) {
+      const corpo = document.getElementById('lista-periodos');
+      corpo.innerHTML = '';
+
+      if (periodos.length === 0) {
+        corpo.innerHTML = '<tr><td colspan="5" style="color:var(--texto-suave)">Nada registrado ainda. Faça uma venda ou registre uma compra.</td></tr>';
+        return;
+      }
+
+      periodos.forEach((linhaPeriodo) => {
+        const linha = document.createElement('tr');
+        const cor = linhaPeriodo.positivo ? 'var(--verde-brilho)' : 'var(--vermelho-claro)';
+
+        linha.innerHTML = `
+          <td>${linhaPeriodo.rotulo}</td>
+          <td style="color:var(--verde-brilho)">${reais(linhaPeriodo.receita)}</td>
+          <td style="color:var(--vermelho-claro)">${reais(linhaPeriodo.despesas)}</td>
+          <td style="color:${cor}; font-weight:800">${reais(linhaPeriodo.saldo)}</td>
+          <td>${linhaPeriodo.pedidos}</td>
+        `;
+
+        corpo.appendChild(linha);
+      });
+    }
+
+    function renderizarProdutos(produtos) {
+      const corpo = document.getElementById('lista-produtos');
+      corpo.innerHTML = '';
+
+      if (produtos.length === 0) {
+        corpo.innerHTML = '<tr><td colspan="5" style="color:var(--texto-suave)">Nenhum produto vendido ainda.</td></tr>';
+        return;
+      }
+
+      produtos.forEach((produto) => {
+        const linha = document.createElement('tr');
+        const cor = Number(produto.lucro) >= 0 ? 'var(--verde-brilho)' : 'var(--vermelho-claro)';
+
+        linha.innerHTML = `
+          <td>${produto.nome}${produto.aindaNoCardapio ? '' : ' <span class="etiqueta cliente">fora do cardápio</span>'}</td>
+          <td>${produto.quantidadeVendida}</td>
+          <td>${reais(produto.receita)}</td>
+          <td>${reais(produto.custoTotal)}</td>
+          <td style="color:${cor}; font-weight:800">
+            ${reais(produto.lucro)}
+            ${produto.lucroPercentual !== null ? `<span class="ajuda">(${produto.lucroPercentual}%)</span>` : ''}
+          </td>
+        `;
+
+        corpo.appendChild(linha);
+      });
+    }
+
+    function renderizarExtrato(movimentacoes) {
+      const container = document.getElementById('lista-extrato');
+      container.innerHTML = '';
+
+      if (movimentacoes.length === 0) {
+        container.innerHTML = '<p class="ajuda">Nada movimentado ainda.</p>';
+        return;
+      }
+
+      movimentacoes.forEach((movimentacao) => {
+        const linha = document.createElement('div');
+        linha.className = 'linha-resumo';
+        linha.innerHTML = `
+          <span>${movimentacao.entrada ? '⬆️' : '⬇️'} ${movimentacao.descricao}
+            <span class="ajuda" style="display:block; margin:0">${(movimentacao.quando ?? '').slice(0, 16)}</span>
+          </span>
+          <span class="valor" style="color:${movimentacao.entrada ? 'var(--verde-brilho)' : 'var(--vermelho-claro)'}">
+            ${reais(movimentacao.valor)}
+          </span>
+        `;
+
+        container.appendChild(linha);
+      });
+    }
+
+    async function carregar() {
+      const agrupamento = document.getElementById('agrupamento').value;
+
+      try {
+        const dados = await API.get(`/api/relatorios/caixa?agrupamento=${agrupamento}&limite=30&extrato=12`);
+
+        document.getElementById('resumo-receita').textContent = reais(dados.resumo.receita);
+        document.getElementById('resumo-pedidos').textContent =
+          `${dados.resumo.pedidosPagos} pedido(s) pago(s) · ${dados.resumo.aguardandoPagamento} aguardando pagamento`;
+
+        document.getElementById('resumo-despesas').textContent = reais(dados.resumo.despesas);
+        document.getElementById('resumo-compras').textContent =
+          `${dados.resumo.compras} compra(s) · descontos dados: ${reais(dados.resumo.descontosDados)}`;
+
+        pintarSaldo(document.getElementById('resumo-saldo'), dados.resumo.saldo, dados.resumo.positivo);
+        document.getElementById('resumo-extra').textContent = `ticket médio: ${reais(dados.resumo.ticketMedio)}`;
+
+        renderizarPeriodos(dados.periodos);
+        renderizarExtrato(dados.extrato);
+
+        const produtos = await API.get('/api/relatorios/produtos');
+        renderizarProdutos(produtos.produtos);
+      } catch (erro) {
+        mostrarMensagem(avisoCaixa, erro.message, 'erro');
+      }
+    }
+
+    document.getElementById('agrupamento').addEventListener('change', carregar);
+    document.getElementById('botao-atualizar').addEventListener('click', carregar);
+
+    (async () => {
+      const usuario = await iniciarPagina('admin');
+      if (!usuario) return;
+
+      await carregar();
+    })();
+  </script>
+</body>
+</html>

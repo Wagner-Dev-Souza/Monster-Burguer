@@ -7,20 +7,26 @@ import rotasCardapio from './cardapio.routes.js';
 import rotasAuditoria from './auditoria.routes.js';
 import rotasCompras from './compras.routes.js';
 import rotasPedidos from './pedidos.routes.js';
+import rotasPromocoes from './promocoes.routes.js';
+import rotasCupons from './cupons.routes.js';
+import rotasRelatorios from './relatorios.routes.js';
 
 /**
  * Agregador de rotas da API. Tudo que é API vive sob /api.
- * Próximas fases entram aqui: /relatorios (caixa).
+ * Legenda: 🌍 público · 👤 cliente logado · 🔒 admin
  */
 const rotas = Router();
 
 rotas.use('/auth', rotasAuth);
-rotas.use('/usuarios', rotasUsuarios);
-rotas.use('/ingredientes', rotasIngredientes);
-rotas.use('/produtos', rotasProdutos);
-rotas.use('/cardapio', rotasCardapio);   // 🌍 público
-rotas.use('/auditoria', rotasAuditoria); // 🔒 admin
-rotas.use('/compras', rotasCompras);     // 🔒 admin (despesas)
-rotas.use('/pedidos', rotasPedidos);     // 👤 cliente + 🔒 admin
+rotas.use('/usuarios', rotasUsuarios);       // 🔒
+rotas.use('/ingredientes', rotasIngredientes); // 🔒
+rotas.use('/produtos', rotasProdutos);         // 🔒
+rotas.use('/cardapio', rotasCardapio);         // 🌍 público
+rotas.use('/auditoria', rotasAuditoria);       // 🔒
+rotas.use('/compras', rotasCompras);           // 🔒 despesas
+rotas.use('/pedidos', rotasPedidos);           // 👤 + 🔒
+rotas.use('/promocoes', rotasPromocoes);       // 🔒
+rotas.use('/cupons', rotasCupons);             // 👤 validar + 🔒 CRUD
+rotas.use('/relatorios', rotasRelatorios);     // 🔒 fluxo de caixa
 
 export default rotas;

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento — Monster Burguer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <img src="/img/lanche.svg" alt="">
+      <div>
+        <div class="nome">Monster <b>Burguer</b></div>
+        <div class="slogan">A loja dos monstros famintos</div>
+      </div>
+    </div>
+
+    <nav class="nav" data-nav hidden></nav>
+
+    <div class="acoes-topo">
+      <span class="selo" data-papel-usuario>...</span>
+      <button class="sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="conteudo">
+    <div class="container">
+      <section class="hero">
+        <img class="burguer" src="/img/monstros/draculinha.svg" alt="">
+        <h1>Fechar o <em>pedido</em></h1>
+        <p>Confira os itens, aplique um cupom se tiver e escolha como vai pagar. 💳</p>
+      </section>
+
+      <!-- ============================ RESUMO ============================ -->
+      <div class="card">
+        <h2><span class="emoji">🧾</span> Resumo do pedido</h2>
+
+        <div class="mensagem" id="mensagem-checkout"></div>
+        <div id="resumo-checkout"></div>
+
+        <!-- Cupom de desconto (Fase 7) -->
+        <div id="area-cupom">
+          <label for="cupom">Cupom de desconto (opcional)</label>
+          <div class="linha-cupom">
+            <input id="cupom" placeholder="MONSTER10" autocomplete="off">
+            <button type="button" class="botao fantasma" id="botao-aplicar-cupom">Aplicar</button>
+            <button type="button" class="botao fantasma" id="botao-remover-cupom" hidden>Remover</button>
+          </div>
+          <p class="ajuda" id="aviso-cupom"></p>
+        </div>
+
+        <label for="observacao">Observação (opcional)</label>
+        <input id="observacao" placeholder="ex.: sem cebola, apartamento 302...">
+
+        <div class="acoes-formulario" id="acoes-pedido">
+          <button type="button" class="botao" id="botao-confirmar-pedido">✅ Confirmar pedido</button>
+          <a class="botao fantasma" href="/carrinho.html">✖ Voltar ao carrinho</a>
+        </div>
+      </div>
+
+      <!-- ========================== PAGAMENTO =========================== -->
+      <div class="card" id="card-pagamento" hidden>
+        <h2><span class="emoji">💳</span> Forma de pagamento</h2>
+        <p class="ajuda" id="texto-pagamento"></p>
+
+        <div class="formas-pagamento" id="formas-pagamento"></div>
+
+        <div id="campo-troco" hidden style="margin-top:14px">
+          <label for="troco-para">Troco para quanto? (R$)</label>
+          <input id="troco-para" inputmode="decimal" placeholder="50,00">
+          <p class="ajuda" style="margin-top:6px">Deixe em branco se não precisar de troco.</p>
+        </div>
+
+        <p class="ajuda" style="color:var(--texto-suave); margin-top:14px">
+          Loja de teste: não pedimos número de cartão nem dados bancários. O botão apenas formaliza a compra.
+        </p>
+
+        <div class="acoes-formulario">
+          <button type="button" class="botao" id="botao-pagar">💳 Confirmar pagamento</button>
+          <a class="botao fantasma" href="/pedidos.html">Pagar depois</a>
+        </div>
+      </div>
+
+      <div class="card" id="card-sucesso" hidden>
+        <h2><span class="emoji">🎉</span> Pedido pago!</h2>
+        <p id="texto-sucesso"></p>
+        <div class="acoes-formulario">
+          <a class="botao" href="/acompanhar.html">🚚 Acompanhar meu pedido</a>
+          <a class="botao fantasma" href="/loja.html">🍔 Pedir mais alguma coisa</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/carrinho.js"></script>
+  <script type="module" src="/js/musica.js"></script>
+  <script>
+    /* =====================================================================
+       Esta tela tem DOIS modos de uso:
+        1. Pedido novo   -> vem do carrinho (checkout.html)
+        2. Pagar pendente -> vem de "Meus pedidos" (checkout.html?pedido=7)
+
+       Por quê os dois no mesmo arquivo? A parte difícil (formas de pagamento,
+       troco, confirmação) é IDÊNTICA nos dois casos. Duplicar a tela seria
+       duplicar a regra — e uma hora as duas versões divergem.
+       ===================================================================== */
+    const FORMAS = {
+      pix: '🔵 PIX',
+      credito: '💳 Cartão de crédito',
+      debito: '💳 Cartão de débito',
+      dinheiro: '💵 Dinheiro',
+    };
+
+    const idPendente = Number(new URLSearchParams(window.location.search).get('pedido')) || null;
+
+    let pedidoEmAberto = null;
+    let formaEscolhida = 'pix';
+    let subtotalAtual = 0;
+    let cupomAplicado = null;
+
+    const avisoCheckout = document.getElementById('mensagem-checkout');
+    const areaResumo = document.getElementById('resumo-checkout');
+    const avisoCupom = document.getElementById('aviso-cupom');
+    const campoTroco = document.getElementById('campo-troco');
+    const cardPagamento = document.getElementById('card-pagamento');
+    const cardSucesso = document.getElementById('card-sucesso');
+
+    function linhaResumo(texto, valor, destaque = false) {
+      const linha = document.createElement('div');
+      linha.className = `linha-resumo${destaque ? ' destaque' : ''}`;
+      linha.innerHTML = `<span>${texto}</span><span class="valor">${reais(valor)}</span>`;
+      return linha;
+    }
+
+    /* ------------------------- resumo do carrinho ------------------------- */
+    function desenharResumoDoCarrinho() {
+      areaResumo.innerHTML = '';
+      const itens = Carrinho.listar();
+      subtotalAtual = Carrinho.total();
+
+      if (itens.length === 0) {
+        areaResumo.innerHTML = '<p class="ajuda">Seu carrinho está vazio. <a href="/loja.html">Escolher lanches 🍔</a></p>';
+        document.getElementById('botao-confirmar-pedido').disabled = true;
+        return;
+      }
+
+      itens.forEach((item) => {
+        areaResumo.appendChild(linhaResumo(`${item.quantidade}× ${item.nome}`, item.precoVenda * item.quantidade));
+      });
+
+      areaResumo.appendChild(linhaResumo('Subtotal', subtotalAtual));
+
+      if (cupomAplicado) {
+        const desconto = (subtotalAtual * cupomAplicado.percentual) / 100;
+        const linhaDesconto = linhaResumo(`Cupom ${cupomAplicado.codigo} (-${cupomAplicado.percentual}%)`, -desconto);
+        linhaDesconto.querySelector('.valor').style.color = 'var(--amarelo)';
+        areaResumo.appendChild(linhaDesconto);
+        areaResumo.appendChild(linhaResumo('Total', subtotalAtual - desconto, true));
+      } else {
+        areaResumo.appendChild(linhaResumo('Total', subtotalAtual, true));
+      }
+
+      // Aviso dos dados de entrega (o servidor exige telefone e endereço).
+      const faltando = [];
+      if (!usuarioLogado.telefone) faltando.push('telefone');
+      if (!usuarioLogado.endereco) faltando.push('endereço');
+
+      if (faltando.length > 0) {
+        const aviso = document.createElement('p');
+        aviso.className = 'ajuda';
+        aviso.style.color = 'var(--vermelho-claro)';
+        aviso.innerHTML = `⚠️ Falta ${faltando.join(' e ')} no seu cadastro. Preencha em
+          <a href="/conta.html">Minha conta</a> antes de confirmar o pedido.`;
+        areaResumo.appendChild(aviso);
+      }
+    }
+
+    /* --------------------- resumo de um pedido já criado -------------------- */
+    function desenharResumoDoPedido(pedido) {
+      areaResumo.innerHTML = '';
+
+      pedido.itens.forEach((item) => {
+        const precoAntigo = item.precoOriginal
+          ? ` <s>${reais(item.precoOriginal)}</s>`
+          : '';
+        const linha = document.createElement('div');
+        linha.className = 'linha-resumo';
+        linha.innerHTML = `<span>${item.quantidade}× ${item.nome}${precoAntigo}</span><span class="valor">${reais(item.subtotal)}</span>`;
+        areaResumo.appendChild(linha);
+      });
+
+      areaResumo.appendChild(linhaResumo('Subtotal', pedido.subtotal));
+      if (pedido.desconto > 0) {
+        areaResumo.appendChild(linhaResumo(`Cupom ${pedido.cupomCodigo} (-${pedido.cupomPercentual}%)`, -pedido.desconto));
+      }
+      areaResumo.appendChild(linhaResumo('Total', pedido.total, true));
+    }
+
+    /* ------------------------- formas de pagamento ------------------------- */
+    function montarFormas() {
+      const area = document.getElementById('formas-pagamento');
+      area.innerHTML = '';
+
+      Object.entries(FORMAS).forEach(([valor, rotulo]) => {
+        const etiqueta = document.createElement('label');
+        etiqueta.className = `forma-pagamento${valor === formaEscolhida ? ' escolhida' : ''}`;
+
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'forma-pagamento';
+        radio.value = valor;
+        radio.checked = valor === formaEscolhida;
+        radio.addEventListener('change', () => {
+          formaEscolhida = valor;
+          campoTroco.hidden = valor !== 'dinheiro';
+          montarFormas();
+        });
+
+        etiqueta.append(radio, document.createTextNode(rotulo));
+        area.appendChild(etiqueta);
+      });
+
+      campoTroco.hidden = formaEscolhida !== 'dinheiro';
+    }
+
+    function mostrarPagamento(pedido) {
+      pedidoEmAberto = pedido;
+      cardPagamento.hidden = false;
+      montarFormas();
+      document.getElementById('texto-pagamento').innerHTML =
+        `Pedido <strong>${pedido.codigo}</strong> — total <strong>${reais(pedido.total)}</strong>.`;
+      cardPagamento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* ------------------------------ cupom --------------------------------- */
+    document.getElementById('botao-aplicar-cupom').addEventListener('click', async () => {
+      const codigo = document.getElementById('cupom').value.trim();
+
+      if (!codigo) {
+        avisoCupom.textContent = 'Digite o código do cupom.';
+        return;
+      }
+      if (Carrinho.vazio()) {
+        avisoCupom.textContent = 'Escolha itens no cardápio antes de aplicar o cupom.';
+        return;
+      }
+
+      try {
+        const resposta = await API.post('/api/cupons/validar', { codigo, subtotal: subtotalAtual });
+
+        cupomAplicado = { codigo: resposta.codigo, percentual: resposta.percentual };
+        avisoCupom.textContent = resposta.mensagem;
+        avisoCupom.style.color = 'var(--verde-brilho)';
+
+        document.getElementById('botao-aplicar-cupom').hidden = true;
+        document.getElementById('botao-remover-cupom').hidden = false;
+        document.getElementById('cupom').readOnly = true;
+
+        desenharResumoDoCarrinho();
+      } catch (erro) {
+        cupomAplicado = null;
+        avisoCupom.textContent = erro.message;
+        avisoCupom.style.color = 'var(--vermelho-claro)';
+        desenharResumoDoCarrinho();
+      }
+    });
+
+    document.getElementById('botao-remover-cupom').addEventListener('click', () => {
+      cupomAplicado = null;
+      avisoCupom.textContent = '';
+      document.getElementById('cupom').value = '';
+      document.getElementById('cupom').readOnly = false;
+      document.getElementById('botao-aplicar-cupom').hidden = false;
+      document.getElementById('botao-remover-cupom').hidden = true;
+      desenharResumoDoCarrinho();
+    });
+
+    /* --------------------------- confirmar pedido -------------------------- */
+    document.getElementById('botao-confirmar-pedido').addEventListener('click', async () => {
+      const botao = document.getElementById('botao-confirmar-pedido');
+      botao.disabled = true;
+
+      try {
+        const { mensagem, pedido } = await API.post('/api/pedidos', {
+          itens: Carrinho.paraPedido(),
+          observacao: document.getElementById('observacao').value,
+          cupom: cupomAplicado?.codigo ?? null,
+        });
+
+        mostrarMensagem(avisoCheckout, mensagem, 'sucesso');
+        document.getElementById('acoes-pedido').hidden = true;
+        document.getElementById('area-cupom').hidden = true;
+        document.getElementById('observacao').hidden = true;
+        desenharResumoDoPedido(pedido);
+        mostrarPagamento(pedido);
+      } catch (erro) {
+        mostrarMensagem(avisoCheckout, erro.message, 'erro');
+      } finally {
+        botao.disabled = false;
+      }
+    });
+
+    /* --------------------------- confirmar pagamento ----------------------- */
+    document.getElementById('botao-pagar').addEventListener('click', async () => {
+      if (!pedidoEmAberto) return;
+
+      const botao = document.getElementById('botao-pagar');
+      botao.disabled = true;
+
+      const valorTroco = document.getElementById('troco-para').value.trim();
+      const precisaTroco = formaEscolhida === 'dinheiro' && valorTroco !== '';
+
+      try {
+        const { mensagem, pedido } = await API.post(`/api/pedidos/${pedidoEmAberto.id}/pagar`, {
+          formaPagamento: formaEscolhida,
+          precisaTroco,
+          trocoPara: precisaTroco ? valorTroco : null,
+        });
+
+        // O carrinho cumpriu a missão dele.
+        Carrinho.limpar();
+
+        cardPagamento.hidden = true;
+        document.getElementById('texto-sucesso').innerHTML =
+          `${mensagem}<br><br>Total: <strong>${reais(pedido.total)}</strong> em ${pedido.formaPagamentoLabel}.`;
+
+        cardSucesso.hidden = false;
+        cardSucesso.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (erro) {
+        mostrarMensagem(avisoCheckout, erro.message, 'erro');
+      } finally {
+        botao.disabled = false;
+      }
+    });
+
+    /* ----------------------------- inicial --------------------------------- */
+    let usuarioLogado = null;
+
+    (async () => {
+      usuarioLogado = await iniciarPagina('cliente');
+      if (!usuarioLogado) return;
+
+      Carrinho.carregar(usuarioLogado.id);
+
+      if (idPendente) {
+        // Modo 2: pagar um pedido que ficou aguardando.
+        try {
+          const { pedido } = await API.get(`/api/pedidos/${idPendente}`);
+
+          if (pedido.status !== 'aguardando_pagamento') {
+            mostrarMensagem(avisoCheckout, `Este pedido já está como "${pedido.statusLabel}". Confira em Meus pedidos.`, 'erro');
+            document.getElementById('acoes-pedido').hidden = true;
+            desenharResumoDoPedido(pedido);
+            return;
+          }
+
+          document.getElementById('acoes-pedido').hidden = true;
+          document.getElementById('area-cupom').hidden = true;
+          desenharResumoDoPedido(pedido);
+          mostrarPagamento(pedido);
+        } catch (erro) {
+          mostrarMensagem(avisoCheckout, erro.message, 'erro');
+        }
+        return;
+      }
+
+      // Modo 1: pedido novo, vindo do carrinho.
+      desenharResumoDoCarrinho();
+    })();
+  </script>
+</body>
+</html>

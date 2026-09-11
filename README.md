@@ -109,6 +109,18 @@ Troque em produção!
 | GET    | `/api/pedidos/:id`          | dono/admin | Detalhe do pedido                        |
 | POST   | `/api/pedidos/:id/pagar`    | cliente | **Pagamento simulado** → vira receita e baixa estoque de bebida |
 | GET    | `/api/pedidos`              | admin   | Todos os pedidos + resumo de receita       |
+| PATCH  | `/api/pedidos/:id/status`   | admin   | **Fase 6**: avança o pedido (preparo → pronto → saiu → entregue), com cancelamento que devolve estoque |
+| GET    | `/api/promocoes`            | admin   | Promoções por produto — `?ativas=1`        |
+| POST   | `/api/promocoes`            | admin   | Cria promoção (produto + % + período opcional) |
+| PUT    | `/api/promocoes/:id`        | admin   | Atualiza / ativa / desativa promoção       |
+| DELETE | `/api/promocoes/:id`        | admin   | Exclui promoção                            |
+| POST   | `/api/cupons/validar`       | cliente | Confere um cupom no checkout (botão "Aplicar") |
+| GET    | `/api/cupons`               | admin   | Lista cupons (com usos e situação)         |
+| POST   | `/api/cupons`               | admin   | Cria cupom (código, %, mínimo, usos, validade) |
+| PUT    | `/api/cupons/:id`           | admin   | Atualiza / ativa / desativa cupom          |
+| DELETE | `/api/cupons/:id`           | admin   | Exclui cupom                               |
+| GET    | `/api/relatorios/caixa`     | admin   | **Fase 8**: receita, despesas, saldo e extrato — `?agrupamento=dia\|mes\|ano` |
+| GET    | `/api/relatorios/produtos`  | admin   | Quanto cada produto vendeu e lucrou        |
 
 ## 🎨 Identidade visual
 
@@ -218,3 +230,25 @@ Troque em produção!
   única fonte da verdade e a posição é sempre `Date.now() - inicioEm`.
 - **Uma aba só toca a música** (trava no `localStorage` + batida de coração): com
   duas abas abertas a mesma trilha sairia fora de fase e viraria um som sujo.
+- **Área do cliente dividida em PÁGINAS, não em cards empilhados**: cardápio,
+  carrinho, pagamento, meus pedidos, acompanhar e minha conta são telas próprias.
+  Uma home com seis blocos vira poluição; cada assunto na sua janela é mais fácil
+  de usar no celular — e o carrinho sobrevive à navegação (por isso ele vive no
+  `localStorage` com chave por usuário, no módulo `carrinho.js`).
+- **Preço com promoção é decidido por UMA função** (`promocoes.service.precoVigente`),
+  usada pelo cardápio E pelo pedido. Se cada tela calculasse o desconto por conta
+  própria, uma hora o preço mostrado divergiria do cobrado.
+- **Cupom é revalidado ao CRIAR o pedido**, não só no botão "Aplicar": sem isso,
+  daria para aplicar na tela, deixar o cupom vencer/esgotar e mandar o pedido.
+- **Uso de cupom só conta quando o pedido é PAGO** — carrinho abandonado não queima
+  o cupom de ninguém.
+- **Status do pedido só anda para frente** (mapa `PROXIMOS_STATUS`): pular de "pago"
+  direto para "entregue" deixaria buracos no histórico. Cancelar um pedido pago
+  **devolve o estoque** das bebidas.
+- **Arte do produto é uma lista fechada no código** (`utils/mascotes.js`): o nome do
+  mascote aponta para um arquivo SVG, então texto livre quebraria a imagem. Sem
+  escolha do dono, a arte é derivada do id — nunca fica tudo igual, e não troca a
+  cada visita.
+- **`reais()` e a navegação vivem no `layout.js`**, e as páginas NÃO redeclaram nada
+  disso (colisão de escopo global mata o script inteiro em silêncio — ver o teste
+  `tests/escopo-global.test.js`, feito depois de esse bug morder duas vezes).

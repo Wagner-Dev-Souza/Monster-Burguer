@@ -518,6 +518,97 @@ input[readonly] + .cadeado-campo { display: inline; }
 .linha-resumo.destaque { border-top: 2px dashed var(--borda); margin-top: 8px; padding-top: 12px; font-size: 1.15rem; font-weight: 800; }
 .linha-resumo .valor { color: var(--verde-brilho); }
 
+/* ============================================================
+   Cliente: cardápio com promoção, barra do carrinho e linha do tempo
+   ============================================================ */
+.item-cardapio { position: relative; }
+
+.selo-promo {
+  position: absolute; top: 10px; right: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--vermelho);
+  color: #fff;
+  font-size: .74rem; font-weight: 800;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, .3);
+}
+
+.item-cardapio .preco s { color: var(--texto-suave); font-size: .82em; font-weight: 600; }
+
+/* Barra flutuante do carrinho (cardápio) */
+.barra-carrinho {
+  position: fixed; left: 50%; bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex; align-items: center; gap: 18px;
+  width: min(680px, calc(100vw - 32px));
+  padding: 12px 16px;
+  border-radius: 16px;
+  border: 2px solid var(--verde-monstro);
+  background: linear-gradient(180deg, #1d3a12, #14280c);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .45);
+}
+.barra-carrinho .resumo { display: flex; flex-direction: column; flex: 1; }
+.barra-carrinho .resumo b { font-size: 1rem; }
+.barra-carrinho .resumo span { color: var(--verde-brilho); font-weight: 800; }
+
+/* Miniatura do mascote nas linhas de carrinho/pedido */
+.miniatura { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
+.linha-carrinho .info { display: flex; align-items: center; gap: 10px; }
+
+/* Cupom no checkout */
+.linha-cupom { display: flex; gap: 10px; align-items: center; }
+.linha-cupom input { flex: 1; margin: 0; }
+.linha-cupom .botao { white-space: nowrap; }
+
+/* Linha do tempo do pedido (Fase 6) */
+.linha-do-tempo { display: flex; gap: 8px; margin: 14px 0 4px; flex-wrap: wrap; }
+.linha-do-tempo.vertical { flex-direction: column; gap: 14px; }
+.linha-do-tempo .etapa {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .82rem; font-weight: 700;
+  color: var(--texto-suave);
+}
+.linha-do-tempo.vertical .etapa { align-items: flex-start; }
+.linha-do-tempo .etapa .bolinha {
+  display: grid; place-items: center;
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: 999px;
+  border: 2px solid var(--borda);
+  background: rgba(255, 255, 255, .04);
+  font-size: .95rem;
+}
+.linha-do-tempo .etapa.concluida { color: var(--verde); }
+.linha-do-tempo .etapa.concluida .bolinha { border-color: var(--verde); background: rgba(53, 196, 107, .16); }
+.linha-do-tempo .etapa.atual { color: var(--amarelo); }
+.linha-do-tempo .etapa.atual .bolinha {
+  border-color: var(--amarelo);
+  background: rgba(255, 214, 10, .18);
+  animation: pulsar 1.6s ease-in-out infinite;
+}
+@keyframes pulsar {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 214, 10, .45); }
+  50% { transform: scale(1.07); box-shadow: 0 0 0 10px rgba(255, 214, 10, 0); }
+}
+
+/* Escolha do mascote no painel (arte do produto) */
+.grade-mascotes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.mascote-opcao {
+  display: grid; place-items: center; gap: 4px;
+  width: 86px; padding: 8px 6px;
+  border-radius: 12px;
+  border: 2px solid var(--borda);
+  background: rgba(255, 255, 255, .04);
+  cursor: pointer;
+  font-size: .68rem; font-weight: 700; color: var(--texto-suave);
+}
+.mascote-opcao img { width: 46px; height: 46px; object-fit: contain; }
+.mascote-opcao.escolhido { border-color: var(--verde-monstro); background: rgba(106, 195, 14, .16); color: var(--texto); }
+.mascote-opcao input { display: none; }
+
+.mini-mascote { width: 34px; height: 34px; object-fit: contain; vertical-align: middle; }
+.desabilitado { opacity: .45; pointer-events: none; }
+
 @media (max-width: 640px) {
   .linha-carrinho { grid-template-columns: 1fr auto; }
   .linha-carrinho .subtotal { grid-column: 1 / -1; text-align: left; }

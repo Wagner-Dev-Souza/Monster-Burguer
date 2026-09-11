@@ -53,6 +53,21 @@ export function pagar(req, res) {
 
 /* ----------------------------- área admin ----------------------------- */
 
+/** FASE 6: a loja avança o pedido (pago → em preparo → pronto → saiu → entregue). */
+export function avancarStatus(req, res) {
+  const pedido = pedidosService.avancarStatus(req.usuario, req.params.id, req.body?.status);
+
+  auditoria.registrar({
+    usuario: req.usuario,
+    acao: 'status',
+    entidade: 'pedido',
+    entidadeId: pedido.id,
+    detalhe: `${pedido.codigo} agora está como "${pedido.statusLabel}"`,
+  });
+
+  return res.json({ mensagem: `Pedido ${pedido.codigo}: ${pedido.statusLabel}.`, pedido });
+}
+
 export function listarTodos(req, res) {
   const status = req.query.status;
   const limite = Number(req.query.limite) || 50;
@@ -61,6 +76,8 @@ export function listarTodos(req, res) {
     pedidos: pedidosService.listarTodosPedidos({ status, limite }),
     resumo: pedidosService.resumoVendas(),
     status: pedidosService.STATUS,
+    proximosStatus: pedidosService.PROXIMOS_STATUS,
+    etapas: pedidosService.ETAPAS_ACOMPANHAMENTO,
   });
 }
 

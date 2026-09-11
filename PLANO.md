@@ -44,14 +44,14 @@ revisão dos itens, escolha da forma de pagamento (PIX, crédito, débito, dinhe
 com troco, na entrega) e botão de **confirmar pagamento (simulado)** → o pedido
 vira receita da loja.
 
-## Fase 6 — Acompanhamento do Pedido 🛵
+## Fase 6 — Acompanhamento do Pedido 🛵 — ✅ CONCLUÍDA
 Fluxo de status: `aguardando_pagamento → pago → em_preparo → pronto →
 saiu_entrega → entregue`. O cliente acompanha; o admin avança o status.
 
-## Fase 7 — Promoções e Cupons 🎟️
+## Fase 7 — Promoções e Cupons 🎟️ — ✅ CONCLUÍDA
 Promoção por produto (desconto %) e cupom de desconto (código, %, validade),
 aplicados no total do pedido.
 
-## Fase 8 — Relatórios Financeiros 📊
+## Fase 8 — Relatórios Financeiros 📊 — ✅ CONCLUÍDA
 Dashboard do dono: receita (pedidos pagos), despesa (compras), saldo, histórico
 por pedido com filtro por dia/mês/ano e margem por produto.

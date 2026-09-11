@@ -72,7 +72,12 @@ describe('Cardápio público (Fase 4)', () => {
     assert.equal(itemDoCliente.custoCompra, undefined);
 
     // só o que o cliente precisa saber:
-    assert.deepEqual(Object.keys(itemDoCliente).sort(), ['descricao', 'id', 'nome', 'precoVenda', 'tipo']);
+    // id, nome, descrição, tipo, arte do mascote, preço com promoção aplicada
+    // e os campos que permitem mostrar "de/por" na tela.
+    assert.deepEqual(
+      Object.keys(itemDoCliente).sort(),
+      ['descricao', 'id', 'mascote', 'nome', 'percentualDesconto', 'precoOriginal', 'precoVenda', 'tipo'],
+    );
   });
 
   it('bebida sem estoque sai do cardápio (não tem como vender)', async () => {

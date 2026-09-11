@@ -24,4 +24,7 @@ rotas.get('/', somenteAdmin, assincrono(pedidosController.listarTodos));
 rotas.get('/:id', assincrono(pedidosController.buscar));
 rotas.post('/:id/pagar', assincrono(pedidosController.pagar));
 
+// 🔒 FASE 6: só a loja avança o status (preparo, pronto, saiu, entregue, cancelado).
+rotas.patch('/:id/status', somenteAdmin, assincrono(pedidosController.avancarStatus));
+
 export default rotas;
