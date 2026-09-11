@@ -59,6 +59,31 @@ export function desativar(id) {
   return buscarPorId(id);
 }
 
+/**
+ * EXCLUSÃO DE VERDADE do ingrediente.
+ *
+ * Por que aqui pode ser DELETE (e produto não)? Porque ingrediente não tem
+ * histórico: nenhum pedido/venda aponta para ele. Já o produto vai aparecer nos
+ * pedidos das próximas fases — apagar de verdade quebraria o histórico.
+ * O service só permite excluir quando NENHUMA ficha técnica usa o ingrediente.
+ */
+export function excluir(id) {
+  db.prepare('DELETE FROM ingredientes WHERE id = ?').run(id);
+}
+
+/** Produtos cuja ficha técnica usa este ingrediente (para avisar antes de excluir). */
+export function listarProdutosQueUsam(ingredienteId) {
+  return db
+    .prepare(`
+      SELECT p.id, p.nome
+        FROM produto_ingredientes pi
+        JOIN produtos p ON p.id = pi.produto_id
+       WHERE pi.ingrediente_id = ?
+       ORDER BY p.nome COLLATE NOCASE
+    `)
+    .all(ingredienteId);
+}
+
 /** Quantos itens de ficha técnica usam este ingrediente (para avisar antes de desativar). */
 export function contarUsos(id) {
   return db

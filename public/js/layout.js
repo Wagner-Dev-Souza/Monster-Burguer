@@ -39,12 +39,20 @@ function exibirUsuario(usuario) {
   });
 
   // O selo no canto superior direito mostra o NOME da pessoa (com o ícone do
-  // papel), e não a palavra "cliente"/"admin" solta.
+  // papel) e o ID simples dela (#0001, #0002...), para identificar na conversa
+  // quem fez cada coisa no sistema.
   document.querySelectorAll('[data-papel-usuario]').forEach((el) => {
     const icone = usuario.papel === 'admin' ? '👑' : '🙋';
-    el.textContent = `${icone} ${usuario.nome}`;
+    el.textContent = `${icone} ${usuario.nome} · ${usuario.codigo}`;
     el.className = `selo ${usuario.papel}`;
-    el.title = usuario.papel === 'admin' ? 'Administrador da loja' : 'Cliente';
+    el.title = usuario.papel === 'admin'
+      ? `Administrador da loja (${usuario.codigo})`
+      : `Cliente ${usuario.codigo}`;
+  });
+
+  // Onde aparecer só o código (ex.: "Minha conta")
+  document.querySelectorAll('[data-codigo-usuario]').forEach((el) => {
+    el.textContent = usuario.codigo;
   });
 
   // Avisos que só fazem sentido para admin (ex.: regra de exclusão de conta).

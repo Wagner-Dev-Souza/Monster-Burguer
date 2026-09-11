@@ -35,6 +35,10 @@ const API = {
     return this.requisitar(caminho, { method: 'POST', body: JSON.stringify(corpo ?? {}) });
   },
 
+  put(caminho, corpo) {
+    return this.requisitar(caminho, { method: 'PUT', body: JSON.stringify(corpo ?? {}) });
+  },
+
   patch(caminho, corpo) {
     return this.requisitar(caminho, { method: 'PATCH', body: JSON.stringify(corpo ?? {}) });
   },

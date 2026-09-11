@@ -1,5 +1,6 @@
 import * as authService from '../services/auth.service.js';
 import * as usuariosService from '../services/usuarios.service.js';
+import * as auditoria from '../services/auditoria.service.js';
 import { env } from '../config/env.js';
 import { usuarioPublico } from '../utils/publico.js';
 
@@ -31,6 +32,14 @@ export async function registrar(req, res) {
   const { nome, cpf, senha } = req.body ?? {};
   const { usuario } = await authService.registrar({ nome, cpf, senha });
 
+  auditoria.registrar({
+    usuario,
+    acao: 'cadastro',
+    entidade: 'usuario',
+    entidadeId: usuario.id,
+    detalhe: `Novo cadastro: ${usuario.nome} (${usuario.codigo})`,
+  });
+
   // Decisão de produto: cadastro NÃO loga automaticamente.
   // O front-end encaminha o novo usuário para a tela de login.
   return res.status(201).json({
@@ -42,6 +51,15 @@ export async function registrar(req, res) {
 export async function login(req, res) {
   const { cpf, senha } = req.body ?? {};
   const { usuario, token } = await authService.login({ cpf, senha });
+
+  // Registramos a ENTRADA: útil para saber quem estava operando o sistema.
+  auditoria.registrar({
+    usuario,
+    acao: 'entrar',
+    entidade: 'sessao',
+    entidadeId: usuario.id,
+    detalhe: `${usuario.papel} entrou no sistema`,
+  });
 
   res.cookie(NOME_COOKIE, token, opcoesDoCookie());
   return res.json({ mensagem: `Bem-vindo(a) de volta, ${usuario.nome}!`, usuario });
@@ -64,6 +82,15 @@ export function eu(req, res) {
  */
 export function atualizarMinhaConta(req, res) {
   const usuario = usuariosService.atualizarMeusDados(req.usuario, req.body ?? {});
+
+  auditoria.registrar({
+    usuario: req.usuario,
+    acao: 'atualizar',
+    entidade: 'minha-conta',
+    entidadeId: usuario.id,
+    detalhe: `${usuario.codigo} atualizou os próprios dados (telefone/endereço)`,
+  });
+
   return res.json({ mensagem: 'Seus dados foram atualizados com sucesso! ✅', usuario });
 }
 
@@ -73,6 +100,14 @@ export function atualizarMinhaConta(req, res) {
  */
 export async function excluirMinhaConta(req, res) {
   const { nome } = await usuariosService.excluirMinhaConta(req.usuario);
+
+  auditoria.registrar({
+    usuario: req.usuario,
+    acao: 'excluir',
+    entidade: 'minha-conta',
+    entidadeId: req.usuario.id,
+    detalhe: `${nome} (${req.usuario.codigo ?? ''}) excluiu o próprio cadastro`,
+  });
 
   res.clearCookie(NOME_COOKIE, { path: '/' });
   return res.json({

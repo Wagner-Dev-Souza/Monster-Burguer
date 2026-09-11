@@ -12,6 +12,7 @@ rotas.use(autenticar, somenteAdmin);
 rotas.get('/', assincrono(ingredientesController.listar));
 rotas.post('/', assincrono(ingredientesController.criar));
 rotas.put('/:id', assincrono(ingredientesController.atualizar));
-rotas.delete('/:id', assincrono(ingredientesController.desativar));
+rotas.patch('/:id/desativar', assincrono(ingredientesController.desativar));
+rotas.delete('/:id', assincrono(ingredientesController.excluir));
 
 export default rotas;

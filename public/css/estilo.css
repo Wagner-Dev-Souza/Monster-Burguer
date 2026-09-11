@@ -402,6 +402,78 @@ input[readonly] + .cadeado-campo { display: inline; }
 .musica-botao:hover { transform: translateY(-2px) scale(1.04); filter: brightness(1.08); }
 .musica-botao:active { transform: translateY(2px); box-shadow: 0 3px 0 rgba(0, 0, 0, .35); }
 
+/* ============================================================
+   FASE 4 — Cardápio e carrinho (loja do cliente)
+   ============================================================ */
+.cardapio-grupo { margin-top: 18px; }
+.cardapio-grupo > h3 {
+  margin: 0 0 12px;
+  font-size: .85rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--amarelo);
+}
+
+.item-cardapio .descricao {
+  font-size: .82rem;
+  color: var(--texto-suave);
+  margin: 4px 0 8px;
+  min-height: 2.4em;
+}
+.item-cardapio .preco { font-size: 1.1rem; }
+.item-cardapio .botao { margin-top: 10px; padding: 10px 14px; font-size: .88rem; }
+.item-cardapio.esgotado { opacity: .55; }
+
+/* Linhas do carrinho */
+.linha-carrinho {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .10);
+}
+.linha-carrinho .info b { display: block; }
+.linha-carrinho .info span { font-size: .82rem; color: var(--texto-suave); }
+.linha-carrinho .quantidade { display: flex; align-items: center; gap: 8px; }
+.linha-carrinho .quantidade button {
+  width: 34px; height: 34px; margin: 0; padding: 0;
+  display: grid; place-items: center;
+  font-size: 1rem; font-weight: 800;
+  border-radius: 10px;
+  border: 2px solid var(--borda);
+  background: rgba(255, 255, 255, .08);
+  color: var(--texto);
+  cursor: pointer;
+}
+.linha-carrinho .quantidade button:hover { background: rgba(255, 255, 255, .18); }
+.linha-carrinho .quantidade span { min-width: 26px; text-align: center; font-weight: 800; }
+.linha-carrinho .subtotal { font-weight: 800; color: var(--verde-brilho); min-width: 90px; text-align: right; }
+
+.carrinho-vazio { color: var(--texto-suave); font-size: .92rem; }
+
+.total-carrinho {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-top: 16px; padding-top: 16px;
+  border-top: 2px dashed var(--borda);
+  font-size: 1.15rem; font-weight: 800;
+}
+.total-carrinho .valor { color: var(--verde-brilho); }
+
+.contador-carrinho {
+  display: inline-grid; place-items: center;
+  min-width: 22px; height: 22px; padding: 0 6px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: var(--amarelo); color: #4a3700;
+  font-size: .74rem; font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .linha-carrinho { grid-template-columns: 1fr auto; }
+  .linha-carrinho .subtotal { grid-column: 1 / -1; text-align: left; }
+}
+
 @media (max-width: 640px) {
   .marca .slogan { display: none; }
   .marca img { width: 42px; height: 42px; }

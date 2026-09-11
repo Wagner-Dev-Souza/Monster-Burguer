@@ -70,6 +70,33 @@
         </div>
       </div>
 
+      <!-- ============ HISTÓRICO DE ALTERAÇÕES (auditoria) ============ -->
+      <div class="card">
+        <h2><span class="emoji">📜</span> Histórico de alterações</h2>
+        <p class="ajuda">
+          Quem fez o quê, com data e hora. Cada pessoa tem um <strong>código</strong> (ex.: #0001),
+          que aparece no topo da tela ao lado do nome.
+        </p>
+
+        <div class="mensagem" id="mensagem-auditoria"></div>
+
+        <div class="tabela-rolagem">
+          <table>
+            <thead>
+              <tr>
+                <th>Quando</th>
+                <th>Quem</th>
+                <th>Ação</th>
+                <th>Detalhe</th>
+              </tr>
+            </thead>
+            <tbody id="lista-auditoria">
+              <tr><td colspan="4" style="color:var(--texto-suave)">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- ============ FASES SEGUINTES (ainda não implementadas) ============ -->
       <div class="grade">
         <div class="card">
@@ -155,8 +182,48 @@
         const { mensagem } = await API.patch(`/api/usuarios/${id}/papel`, { papel });
         mostrarMensagem(aviso, mensagem, 'sucesso');
         await carregarUsuarios();
+        await carregarHistorico(); // a promoção acabou de entrar no histórico
       } catch (erro) {
         mostrarMensagem(aviso, erro.message, 'erro');
+      }
+    }
+
+    /* ---------------------------------------------------------------------
+       Histórico de alterações (auditoria): quem fez o quê, com data e hora.
+       --------------------------------------------------------------------- */
+    const avisoAuditoria = document.getElementById('mensagem-auditoria');
+    const corpoAuditoria = document.getElementById('lista-auditoria');
+
+    function formatarDataHora(texto) {
+      // O banco guarda "AAAA-MM-DD HH:MM:SS" (UTC); mostramos em formato BR.
+      const [data, hora] = String(texto ?? '').split(' ');
+      if (!data || !hora) return texto ?? '';
+      const [ano, mes, dia] = data.split('-');
+      return `${dia}/${mes}/${ano} às ${hora.slice(0, 5)}`;
+    }
+
+    async function carregarHistorico() {
+      try {
+        const { historico } = await API.get('/api/auditoria?limite=30');
+        corpoAuditoria.innerHTML = '';
+
+        if (historico.length === 0) {
+          corpoAuditoria.innerHTML = '<tr><td colspan="4" style="color:var(--texto-suave)">Nada registrado ainda.</td></tr>';
+          return;
+        }
+
+        historico.forEach((registro) => {
+          const linha = document.createElement('tr');
+          linha.innerHTML = `
+            <td>${formatarDataHora(registro.criadoEm)}</td>
+            <td>${registro.usuarioNome} <span style="color:var(--texto-suave)">(${registro.usuarioCodigo})</span></td>
+            <td><span class="etiqueta ${registro.usuarioPapel}">${registro.acao}</span></td>
+            <td>${registro.entidade}${registro.entidadeId ? ` #${registro.entidadeId}` : ''} — ${registro.detalhe ?? ''}</td>
+          `;
+          corpoAuditoria.appendChild(linha);
+        });
+      } catch (erro) {
+        mostrarMensagem(avisoAuditoria, erro.message, 'erro');
       }
     }
 
@@ -164,6 +231,7 @@
       usuarioLogado = await iniciarPagina('admin'); // 🔒 barreira do painel
       if (!usuarioLogado) return;
       await carregarUsuarios();
+      await carregarHistorico();
     })();
   </script>
 </body>

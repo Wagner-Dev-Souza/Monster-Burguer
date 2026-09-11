@@ -11,6 +11,9 @@
 export function usuarioPublico(usuario) {
   return {
     id: usuario.id,
+    // "ID simples" para conversa do dia a dia: #0001, #0002...
+    // É o mesmo id do banco, só formatado de um jeito legível para humanos.
+    codigo: `#${String(usuario.id).padStart(4, '0')}`,
     nome: usuario.nome,
     cpf: usuario.cpf,
     papel: usuario.papel,

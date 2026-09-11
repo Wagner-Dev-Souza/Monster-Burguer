@@ -20,17 +20,14 @@
       </div>
     </div>
 
-    <!--
-      ABAS: visíveis SOMENTE para admin (o cliente não transita entre áreas).
-      O `hidden` é removido pelo js/layout.js quando o papel é admin.
-    -->
+    <!-- ABAS: visíveis SOMENTE para admin (o cliente não transita entre áreas) -->
     <nav class="nav" data-somente-admin hidden>
       <a href="/loja.html" class="ativo">🍔 Loja</a>
       <a href="/admin/painel.html">👑 Painel do Dono</a>
     </nav>
 
-    <!-- Canto superior direito: usuário + sair -->
     <div class="acoes-topo">
+      <a href="#carrinho" class="selo cliente" style="text-decoration:none">🛒 Carrinho <span class="contador-carrinho" id="contador-carrinho">0</span></a>
       <span class="selo" data-papel-usuario>...</span>
       <button class="sair" onclick="sair()">Sair</button>
     </div>
@@ -51,66 +48,50 @@
         <img class="burguer" src="/img/lanche.svg" alt="">
         <h1>Fome de <em>monstro</em>?</h1>
         <p>
-          Olá, <strong data-primeiro-nome>cliente</strong>! Este é o seu espaço: escolha os lanches,
-          monte seu carrinho e acompanhe seu pedido até a entrega.
+          Olá, <strong data-primeiro-nome>cliente</strong>! Escolha seus lanches, monte o carrinho
+          e acompanhe o total na hora. 🍔
         </p>
       </section>
 
-      <!-- ======================= CARDÁPIO (Fase 4) ======================= -->
+      <!-- ====================== CARDÁPIO (Fase 4) ====================== -->
       <div class="card">
         <h2><span class="emoji">🍔</span> Cardápio</h2>
-        <p class="ajuda">Os lanches e bebidas cadastrados pelo dono vão aparecer aqui — <strong>Fase 4</strong>.</p>
+        <p class="ajuda">Tudo o que o dono cadastrou e está disponível hoje.</p>
 
-        <div class="grade">
-          <div class="item-cardapio">
-            <img src="/img/monstros/frank.svg" alt="Frank">
-            <b>Monster do Frank</b>
-            <span class="preco">R$ --,--</span>
-            <span class="selo-breve">em breve</span>
-          </div>
-          <div class="item-cardapio">
-            <img src="/img/monstros/draculinha.svg" alt="Draculinha">
-            <b>Draculinha Bacon</b>
-            <span class="preco">R$ --,--</span>
-            <span class="selo-breve">em breve</span>
-          </div>
-          <div class="item-cardapio">
-            <img src="/img/monstros/lobisomem.svg" alt="Lobisomem">
-            <b>Lobo Duplo</b>
-            <span class="preco">R$ --,--</span>
-            <span class="selo-breve">em breve</span>
-          </div>
-          <div class="item-cardapio">
-            <img src="/img/monstros/monstro-pantano.svg" alt="Monstro do Pântano">
-            <b>Pântano Verde</b>
-            <span class="preco">R$ --,--</span>
-            <span class="selo-breve">em breve</span>
-          </div>
+        <div class="mensagem" id="mensagem-cardapio"></div>
+        <div id="cardapio">
+          <p class="ajuda">Carregando o cardápio...</p>
         </div>
       </div>
 
-      <!-- ==================== PRÓXIMAS FASES (vitrine) ==================== -->
-      <div class="grade">
-        <div class="card embreve">
-          <h2><span class="emoji">🛒</span> Carrinho</h2>
-          <p class="ajuda" style="margin:0">Adicionar, remover e alterar quantidades — <strong>Fase 4</strong>.</p>
+      <!-- ====================== CARRINHO (Fase 4) ====================== -->
+      <div class="card" id="carrinho">
+        <h2><span class="emoji">🛒</span> Meu carrinho</h2>
+        <p class="ajuda">Ajuste as quantidades, remova o que não quiser ou clique de novo no cardápio para somar mais itens.</p>
+
+        <div class="mensagem" id="mensagem-carrinho"></div>
+        <div id="lista-carrinho"></div>
+
+        <div class="total-carrinho">
+          <span>Total do pedido</span>
+          <span class="valor" id="total-carrinho">R$ 0,00</span>
         </div>
-        <div class="card embreve">
-          <h2><span class="emoji">💳</span> Pedido e pagamento</h2>
-          <p class="ajuda" style="margin:0">Confirmar pedido e escolher a forma de pagamento — <strong>Fase 5</strong>.</p>
+
+        <div class="acoes-formulario">
+          <button type="button" class="botao" id="botao-finalizar" disabled>➡️ Finalizar pedido (Fase 5)</button>
+          <button type="button" class="botao fantasma" id="botao-limpar">🗑️ Limpar carrinho</button>
         </div>
-        <div class="card embreve">
-          <h2><span class="emoji">🛵</span> Acompanhamento</h2>
-          <p class="ajuda" style="margin:0">"Seu pedido está sendo preparado..." — <strong>Fase 6</strong>.</p>
-        </div>
+        <p class="ajuda" style="margin-top:12px">
+          O fechamento do pedido (forma de pagamento e confirmação) chega na <strong>Fase 5</strong>.
+        </p>
       </div>
 
       <!-- ============ MINHA CONTA: dados editáveis (Fase 1) ============ -->
       <div class="card">
         <h2><span class="emoji">🙋</span> Minha conta</h2>
         <p class="ajuda">
-          Telefone e endereço são usados no fechamento do pedido (entrega) — mantenha sempre atualizados.
-          O <strong>CPF não pode ser alterado</strong>, porque é a sua identificação de login.
+          Seu código no sistema: <strong data-codigo-usuario>#0000</strong> (é ele que identifica quem fez cada
+          alteração). Telefone e endereço são usados no fechamento do pedido — mantenha atualizados.
         </p>
 
         <form id="form-conta">
@@ -149,12 +130,6 @@
 
           <p class="ajuda" style="margin-top:14px">CPF: <strong id="cpf-usuario">...</strong></p>
 
-          <!--
-            Modo leitura x modo edição:
-              * os campos nascem com `readonly` (travados)
-              * "Editar" destrava e revela Salvar/Cancelar
-              * ao salvar (ou cancelar), os campos voltam a ficar travados
-          -->
           <div class="acoes-formulario">
             <button type="button" class="botao" id="botao-editar">✏️ Editar meus dados</button>
             <button type="submit" class="botao" id="botao-salvar" hidden>💾 Salvar</button>
@@ -169,14 +144,12 @@
       <div class="card zona-perigo">
         <h2><span class="emoji">⚠️</span> Zona de perigo</h2>
 
-        <!-- Explicação que só o ADMIN vê (regra de negócio do servidor) -->
         <p class="ajuda" data-aviso-admin hidden>
           Você é <strong>administrador</strong>: para excluir sua conta, peça a outro admin para
           <strong>rebaixar você a cliente</strong> primeiro. É uma proteção para a loja nunca ficar
           sem ninguém capaz de administrá-la.
         </p>
 
-        <!-- Só o CLIENTE vê o formulário de exclusão -->
         <div data-somente-cliente hidden>
           <p class="ajuda">
             Excluir seu cadastro <strong>encerra seu acesso</strong> — você não conseguirá mais entrar com este CPF.
@@ -214,16 +187,241 @@
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
   <script>
+    /* =====================================================================
+       Estado da tela
+       ===================================================================== */
+    const reais = (valor) => `R$ ${Number(valor ?? 0).toFixed(2).replace('.', ',')}`;
+    const MASCOTES = ['frank', 'draculinha', 'lobisomem', 'monstro-pantano', 'zumbi', 'mumia', 'fantasma', 'esqueleto', 'bruxa'];
+
+    let usuarioLogado = null;
+    let cardapio = { lanches: [], bebidas: [] };
+    let carrinho = [];
+    let chaveDoCarrinho = 'monsterCarrinho';
+
+    const avisoCardapio = document.getElementById('mensagem-cardapio');
+    const avisoCarrinho = document.getElementById('mensagem-carrinho');
     const avisoConta = document.getElementById('mensagem-conta');
-    const campoConfirmacao = document.getElementById('confirmacao-exclusao');
-    const botaoExcluir = document.getElementById('botao-excluir');
+
+    /* =====================================================================
+       CARDÁPIO — busca os produtos que o dono cadastrou (GET /api/cardapio)
+       ===================================================================== */
+    function criarItemDoCardapio(produto, indice) {
+      const cartao = document.createElement('div');
+      cartao.className = 'item-cardapio';
+
+      const mascote = MASCOTES[(produto.id + indice) % MASCOTES.length];
+      cartao.innerHTML = `
+        <img src="/img/monstros/${mascote}.svg" alt="">
+        <b>${produto.nome}</b>
+        <p class="descricao">${produto.descricao ?? ''}</p>
+        <span class="preco">${reais(produto.precoVenda)}</span>
+      `;
+
+      const botao = document.createElement('button');
+      botao.className = 'botao';
+      botao.textContent = '➕ Adicionar';
+      botao.addEventListener('click', () => adicionarAoCarrinho(produto));
+      cartao.appendChild(botao);
+
+      return cartao;
+    }
+
+    function criarGrupoDoCardapio(titulo, produtos) {
+      if (produtos.length === 0) return null;
+
+      const grupo = document.createElement('div');
+      grupo.className = 'cardapio-grupo';
+
+      const cabecalho = document.createElement('h3');
+      cabecalho.textContent = titulo;
+      grupo.appendChild(cabecalho);
+
+      const grade = document.createElement('div');
+      grade.className = 'grade';
+      produtos.forEach((produto, indice) => grade.appendChild(criarItemDoCardapio(produto, indice)));
+      grupo.appendChild(grade);
+
+      return grupo;
+    }
+
+    async function carregarCardapio() {
+      const container = document.getElementById('cardapio');
+
+      try {
+        cardapio = await API.get('/api/cardapio');
+        container.innerHTML = '';
+
+        const grupoLanches = criarGrupoDoCardapio('🍔 Lanches', cardapio.lanches);
+        const grupoBebidas = criarGrupoDoCardapio('🥤 Bebidas', cardapio.bebidas);
+
+        if (!grupoLanches && !grupoBebidas) {
+          container.innerHTML = '<p class="ajuda">O dono ainda não cadastrou nenhum produto disponível. Volte mais tarde! 🐻</p>';
+          return;
+        }
+
+        if (grupoLanches) container.appendChild(grupoLanches);
+        if (grupoBebidas) container.appendChild(grupoBebidas);
+      } catch (erro) {
+        container.innerHTML = '';
+        mostrarMensagem(avisoCardapio, `Não consegui carregar o cardápio: ${erro.message}`, 'erro');
+      }
+    }
+
+    /* =====================================================================
+       CARRINHO — guardado no navegador (localStorage), separado por usuário
+       ===================================================================== */
+    function carregarCarrinhoSalvo() {
+      try {
+        carrinho = JSON.parse(localStorage.getItem(chaveDoCarrinho)) ?? [];
+      } catch {
+        carrinho = [];
+      }
+    }
+
+    function salvarCarrinho() {
+      try {
+        localStorage.setItem(chaveDoCarrinho, JSON.stringify(carrinho));
+      } catch {
+        /* modo privado: o carrinho funciona na sessão, só não persiste */
+      }
+    }
+
+    function totalDoCarrinho() {
+      return carrinho.reduce((soma, item) => soma + item.precoVenda * item.quantidade, 0);
+    }
+
+    function quantidadeDeItens() {
+      return carrinho.reduce((soma, item) => soma + item.quantidade, 0);
+    }
+
+    function adicionarAoCarrinho(produto) {
+      const existente = carrinho.find((item) => item.produtoId === produto.id);
+
+      if (existente) {
+        existente.quantidade += 1;
+      } else {
+        carrinho.push({
+          produtoId: produto.id,
+          nome: produto.nome,
+          tipo: produto.tipo,
+          precoVenda: produto.precoVenda,
+          quantidade: 1,
+        });
+      }
+
+      salvarCarrinho();
+      renderizarCarrinho();
+      mostrarMensagem(avisoCarrinho, `"${produto.nome}" foi para o carrinho! 🛒`, 'sucesso');
+    }
+
+    /** delta = +1 / -1. Zerar a quantidade remove o item. */
+    function alterarQuantidade(produtoId, delta) {
+      const item = carrinho.find((linha) => linha.produtoId === produtoId);
+      if (!item) return;
+
+      item.quantidade += delta;
+
+      if (item.quantidade <= 0) {
+        carrinho = carrinho.filter((linha) => linha.produtoId !== produtoId);
+      }
+
+      salvarCarrinho();
+      renderizarCarrinho();
+    }
+
+    function removerDoCarrinho(produtoId) {
+      carrinho = carrinho.filter((item) => item.produtoId !== produtoId);
+      salvarCarrinho();
+      renderizarCarrinho();
+      mostrarMensagem(avisoCarrinho, 'Item removido do carrinho.', 'sucesso');
+    }
+
+    function limparCarrinho() {
+      if (carrinho.length === 0) return;
+      if (!confirm('Esvaziar o carrinho?')) return;
+
+      carrinho = [];
+      salvarCarrinho();
+      renderizarCarrinho();
+      avisoCarrinho.className = 'mensagem';
+    }
+
+    function renderizarCarrinho() {
+      const container = document.getElementById('lista-carrinho');
+      container.innerHTML = '';
+
+      document.getElementById('contador-carrinho').textContent = String(quantidadeDeItens());
+      document.getElementById('total-carrinho').textContent = reais(totalDoCarrinho());
+      document.getElementById('botao-finalizar').disabled = carrinho.length === 0;
+
+      if (carrinho.length === 0) {
+        container.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio. Escolha um lanche no cardápio acima! 🍔</p>';
+        return;
+      }
+
+      carrinho.forEach((item) => {
+        const linha = document.createElement('div');
+        linha.className = 'linha-carrinho';
+
+        const info = document.createElement('div');
+        info.className = 'info';
+        info.innerHTML = `<b>${item.nome}</b><span>${reais(item.precoVenda)} × ${item.quantidade}</span>`;
+
+        const quantidade = document.createElement('div');
+        quantidade.className = 'quantidade';
+
+        const botaoMenos = document.createElement('button');
+        botaoMenos.type = 'button';
+        botaoMenos.textContent = '−';
+        botaoMenos.title = 'Diminuir';
+        botaoMenos.addEventListener('click', () => alterarQuantidade(item.produtoId, -1));
+
+        const valor = document.createElement('span');
+        valor.textContent = String(item.quantidade);
+
+        const botaoMais = document.createElement('button');
+        botaoMais.type = 'button';
+        botaoMais.textContent = '+';
+        botaoMais.title = 'Aumentar';
+        botaoMais.addEventListener('click', () => alterarQuantidade(item.produtoId, 1));
+
+        const botaoRemover = document.createElement('button');
+        botaoRemover.type = 'button';
+        botaoRemover.textContent = '🗑️';
+        botaoRemover.title = 'Remover item';
+        botaoRemover.addEventListener('click', () => removerDoCarrinho(item.produtoId));
+
+        quantidade.append(botaoMenos, valor, botaoMais, botaoRemover);
+
+        const subtotal = document.createElement('div');
+        subtotal.className = 'subtotal';
+        subtotal.textContent = reais(item.precoVenda * item.quantidade);
+
+        linha.append(info, quantidade, subtotal);
+        container.appendChild(linha);
+      });
+    }
+
+    document.getElementById('botao-limpar').addEventListener('click', limparCarrinho);
+    document.getElementById('botao-finalizar').addEventListener('click', () => {
+      mostrarMensagem(avisoCarrinho, 'O fechamento do pedido chega na Fase 5! Por enquanto seu carrinho fica guardado. 🛒🐻', 'sucesso');
+    });
+
+    /* =====================================================================
+       MINHA CONTA (modo leitura x edição)
+       ===================================================================== */
     const formConta = document.getElementById('form-conta');
     const botaoSalvar = document.getElementById('botao-salvar');
-
+    const botaoEditar = document.getElementById('botao-editar');
+    const botaoCancelar = document.getElementById('botao-cancelar');
     const campoTelefone = document.getElementById('conta-telefone');
     const campoCep = document.getElementById('conta-cep');
+    const campoConfirmacao = document.getElementById('confirmacao-exclusao');
+    const botaoExcluir = document.getElementById('botao-excluir');
 
-    /* ---------------------- máscaras de digitação ---------------------- */
+    let dadosOriginais = null;
+    const camposDaConta = () => formConta.querySelectorAll('input');
+
     campoTelefone.addEventListener('input', () => {
       const d = apenasDigitos(campoTelefone.value).slice(0, 11);
       campoTelefone.value = d.length <= 10
@@ -236,7 +434,6 @@
       campoCep.value = d.replace(/^(\d{5})(\d)/, '$1-$2');
     });
 
-    /* --------------------- preenche o formulário ----------------------- */
     function preencherFormulario(usuario) {
       document.getElementById('conta-nome').value = usuario.nome ?? '';
       document.getElementById('conta-telefone').value = usuario.telefone ?? '';
@@ -248,15 +445,6 @@
       document.getElementById('conta-cidade').value = usuario.cidade ?? '';
       document.getElementById('cpf-usuario').textContent = formatarCPF(usuario.cpf);
     }
-
-    /* --------------------- modo leitura x modo edição ------------------ */
-    const botaoEditar = document.getElementById('botao-editar');
-    const botaoCancelar = document.getElementById('botao-cancelar');
-
-    // Cópia dos dados atuais: é o que o "Cancelar" restaura se a pessoa desistir.
-    let dadosOriginais = null;
-
-    const camposDaConta = () => formConta.querySelectorAll('input');
 
     function entrarEmModoEdicao() {
       camposDaConta().forEach((campo) => campo.removeAttribute('readonly'));
@@ -278,10 +466,9 @@
     botaoCancelar.addEventListener('click', () => {
       if (dadosOriginais) preencherFormulario(dadosOriginais);
       sairDoModoEdicao();
-      avisoConta.className = 'mensagem'; // limpa avisos anteriores
+      avisoConta.className = 'mensagem';
     });
 
-    /* ----------------------- salvar meus dados ------------------------- */
     formConta.addEventListener('submit', async (evento) => {
       evento.preventDefault();
       botaoSalvar.disabled = true;
@@ -299,13 +486,10 @@
         });
 
         mostrarMensagem(avisoConta, mensagem, 'sucesso');
-
-        // Fecha o modo edição: campos voltam a ficar travados e o botão Salvar some.
         dadosOriginais = usuario;
         preencherFormulario(usuario);
         sairDoModoEdicao();
 
-        // Recarrega o usuário: o selo do topo passa a mostrar o novo nome.
         await iniciarPagina('cliente');
       } catch (erro) {
         mostrarMensagem(avisoConta, erro.message, 'erro');
@@ -314,9 +498,9 @@
       }
     });
 
-    /* -------------------- excluir meu cadastro ------------------------- */
-    // O botão só destrava quando a pessoa digita a palavra de confirmação.
-    // É uma trava "anti-clique-por-engano".
+    /* =====================================================================
+       EXCLUSÃO DA PRÓPRIA CONTA
+       ===================================================================== */
     campoConfirmacao.addEventListener('input', () => {
       botaoExcluir.disabled = campoConfirmacao.value.trim().toUpperCase() !== 'EXCLUIR';
     });
@@ -327,8 +511,6 @@
       try {
         const { mensagem } = await API.delete('/api/auth/minha-conta');
         mostrarMensagem(avisoConta, mensagem, 'sucesso');
-
-        // A sessão acabou: depois de um instante, volta para o login.
         setTimeout(() => { window.location.href = '/login.html'; }, 2200);
       } catch (erro) {
         mostrarMensagem(avisoConta, erro.message, 'erro');
@@ -336,14 +518,24 @@
       }
     });
 
+    /* =====================================================================
+       Inicialização
+       ===================================================================== */
     (async () => {
       // 'cliente' aqui significa: precisa estar logado (cliente OU admin).
-      const usuario = await iniciarPagina('cliente');
-      if (!usuario) return;
+      usuarioLogado = await iniciarPagina('cliente');
+      if (!usuarioLogado) return;
 
-      dadosOriginais = usuario;
-      preencherFormulario(usuario);
-      sairDoModoEdicao(); // começa sempre no modo leitura
+      // Carrinho separado por usuário: duas contas na mesma máquina não se misturam.
+      chaveDoCarrinho = `monsterCarrinho:${usuarioLogado.id}`;
+      carregarCarrinhoSalvo();
+      renderizarCarrinho();
+
+      dadosOriginais = usuarioLogado;
+      preencherFormulario(usuarioLogado);
+      sairDoModoEdicao();
+
+      await carregarCardapio();
     })();
   </script>
 </body>

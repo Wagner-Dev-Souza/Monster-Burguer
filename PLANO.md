@@ -31,9 +31,12 @@ Tabela `compras` (ingrediente, quantidade, valor, fornecedor, data). Cada compra
 recalcula o **custo médio ponderado** do ingrediente. Controle de estoque,
 inclusive das bebidas.
 
-## Fase 4 — Loja do Cliente: cardápio e carrinho 🛒
+## Fase 4 — Loja do Cliente: cardápio e carrinho 🛒 — ✅ CONCLUÍDA
 Endpoints do cardápio (lanches + bebidas ativos). Carrinho no navegador:
 adicionar, remover item, alterar quantidade e voltar ao cardápio.
+
+> Observação: entregue antes da Fase 3 (a pedido do cliente). A Fase 3
+> (compras/despesas + custo médio + movimentação de estoque) segue pendente.
 
 ## Fase 5 — Pedidos, Checkout e Pagamento Simulado 💳
 Tabelas `pedidos` e `pedido_itens` (com preço congelado). Confirmação do pedido,

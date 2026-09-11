@@ -1,4 +1,5 @@
 import * as produtosService from '../services/produtos.service.js';
+import * as auditoria from '../services/auditoria.service.js';
 
 /** Controllers de produtos e ficha técnica (área administrativa). */
 
@@ -16,22 +17,57 @@ export function buscar(req, res) {
 export function criar(req, res) {
   const produto = produtosService.criarProduto(req.body ?? {});
   const emoji = produto.tipo === 'lanche' ? '🍔' : '🥤';
+
+  auditoria.registrar({
+    usuario: req.usuario,
+    acao: 'criar',
+    entidade: 'produto',
+    entidadeId: produto.id,
+    detalhe: `${produto.nome} (${produto.tipo}) a R$ ${produto.precoVenda}`,
+  });
+
   return res.status(201).json({ mensagem: `${emoji} "${produto.nome}" cadastrado!`, produto });
 }
 
 export function atualizar(req, res) {
   const produto = produtosService.atualizarProduto(Number(req.params.id), req.body ?? {});
+
+  auditoria.registrar({
+    usuario: req.usuario,
+    acao: 'atualizar',
+    entidade: 'produto',
+    entidadeId: produto.id,
+    detalhe: `${produto.nome} — venda R$ ${produto.precoVenda}, custo R$ ${produto.custo}`,
+  });
+
   return res.json({ mensagem: `"${produto.nome}" atualizado.`, produto });
 }
 
 export function desativar(req, res) {
   const produto = produtosService.desativarProduto(Number(req.params.id));
+
+  auditoria.registrar({
+    usuario: req.usuario,
+    acao: 'desativar',
+    entidade: 'produto',
+    entidadeId: produto.id,
+    detalhe: produto.nome,
+  });
+
   return res.json({ mensagem: `"${produto.nome}" saiu do cardápio (pode ser reativado depois).`, produto });
 }
 
 /** PUT /api/produtos/:id/composicao — salva a ficha técnica inteira. */
 export function definirComposicao(req, res) {
   const produto = produtosService.definirComposicao(Number(req.params.id), req.body?.itens);
+
+  auditoria.registrar({
+    usuario: req.usuario,
+    acao: 'ficha-tecnica',
+    entidade: 'produto',
+    entidadeId: produto.id,
+    detalhe: `${produto.nome}: ${produto.itensFicha} item(ns), custo R$ ${produto.custo}, margem ${produto.margemPercentual}%`,
+  });
 
   return res.json({
     mensagem: `Ficha técnica de "${produto.nome}" salva! Custo de produção: R$ ${produto.custo.toFixed(2)} · Margem: ${produto.margemPercentual}%`,

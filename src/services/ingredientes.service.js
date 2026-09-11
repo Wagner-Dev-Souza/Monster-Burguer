@@ -75,10 +75,31 @@ export function atualizarIngrediente(id, dados) {
 }
 
 /**
- * Desativa o ingrediente (exclusão lógica).
- * Devolve também quantas fichas técnicas usam o ingrediente — informação útil
- * para o dono entender que aquele custo continua aparecendo nos lanches.
+ * EXCLUI o ingrediente de verdade.
+ *
+ * Regra: só pode excluir se NENHUMA ficha técnica estiver usando. Sem isso, o
+ * lanche perderia o custo de um componente sem ninguém perceber (e o banco
+ * recusaria a operação pela chave estrangeira — melhor dar uma mensagem clara
+ * do que deixar o erro técnico aparecer).
  */
+export function excluirIngrediente(id) {
+  const ingrediente = buscarIngrediente(id);
+  const produtosQueUsam = ingredientesRepo.listarProdutosQueUsam(id);
+
+  if (produtosQueUsam.length > 0) {
+    const nomes = produtosQueUsam.slice(0, 3).map((produto) => produto.nome).join(', ');
+    const restantes = produtosQueUsam.length > 3 ? ` e mais ${produtosQueUsam.length - 3}` : '';
+
+    throw new ErroConflito(
+      `"${ingrediente.nome}" está na ficha técnica de: ${nomes}${restantes}. Remova o ingrediente desses lanches antes de excluí-lo.`,
+    );
+  }
+
+  ingredientesRepo.excluir(id);
+  return { ingrediente: paraPublico(ingrediente) };
+}
+
+/** Mantido para compatibilidade: desativação (usada como alternativa à exclusão). */
 export function desativarIngrediente(id) {
   const atual = buscarIngrediente(id);
 

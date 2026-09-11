@@ -247,12 +247,12 @@
         editar.textContent = '✏️ Editar';
         editar.addEventListener('click', () => carregarIngredienteNoFormulario(ingrediente));
 
-        const desativar = document.createElement('button');
-        desativar.className = 'botao pequeno perigo';
-        desativar.textContent = '🚫 Desativar';
-        desativar.addEventListener('click', () => desativarIngrediente(ingrediente));
+        const excluir = document.createElement('button');
+        excluir.className = 'botao pequeno perigo';
+        excluir.textContent = '🗑️ Excluir';
+        excluir.addEventListener('click', () => excluirIngrediente(ingrediente));
 
-        grupo.append(editar, desativar);
+        grupo.append(editar, excluir);
         acoes.appendChild(grupo);
         linha.appendChild(acoes);
         corpo.appendChild(linha);
@@ -306,11 +306,25 @@
 
     document.getElementById('botao-cancelar-ingrediente').addEventListener('click', limparFormularioIngrediente);
 
+    async function excluirIngrediente(ingrediente) {
+      if (!confirm(`Excluir "${ingrediente.nome}"? Essa ação não pode ser desfeita.\n\n(Se ele estiver em alguma ficha técnica, o sistema avisa e não exclui.)`)) return;
+
+      try {
+        const resposta = await API.delete(`/api/ingredientes/${ingrediente.id}`);
+        mostrarMensagem(avisoIngrediente, resposta.mensagem, 'sucesso');
+        await carregarIngredientes();
+      } catch (erro) {
+        // 409 = está em uso em alguma ficha técnica (a mensagem diz quais lanches)
+        mostrarMensagem(avisoIngrediente, erro.message, 'erro');
+      }
+    }
+
+    /** Desativar continua disponível como alternativa (o item sai da lista, mas o histórico fica). */
     async function desativarIngrediente(ingrediente) {
       if (!confirm(`Desativar "${ingrediente.nome}"? Ele sai da lista mas continua no custo dos lanches que já usam.`)) return;
 
       try {
-        const resposta = await API.delete(`/api/ingredientes/${ingrediente.id}`);
+        const resposta = await API.patch(`/api/ingredientes/${ingrediente.id}/desativar`, {});
         mostrarMensagem(avisoIngrediente, resposta.mensagem, 'sucesso');
         await carregarIngredientes();
       } catch (erro) {

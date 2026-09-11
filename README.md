@@ -91,13 +91,16 @@ Troque em produção!
 | GET    | `/api/ingredientes`         | admin   | Lista ingredientes (+ unidades permitidas) — `?todos=1` inclui inativos |
 | POST   | `/api/ingredientes`         | admin   | Cadastra ingrediente (nome, unidade, custo) |
 | PUT    | `/api/ingredientes/:id`     | admin   | Atualiza ingrediente                       |
-| DELETE | `/api/ingredientes/:id`     | admin   | Desativa ingrediente (exclusão lógica)     |
+| PATCH  | `/api/ingredientes/:id/desativar` | admin | Desativa (alternativa à exclusão)      |
+| DELETE | `/api/ingredientes/:id`     | admin   | **Exclui de verdade** — bloqueado (409) se estiver em alguma ficha técnica |
 | GET    | `/api/produtos`             | admin   | Lista produtos com **custo e margem** — `?tipo=lanche\|bebida`, `?todos=1` |
 | GET    | `/api/produtos/:id`         | admin   | Produto + ficha técnica completa           |
 | POST   | `/api/produtos`             | admin   | Cadastra produto (lanche ou bebida)        |
 | PUT    | `/api/produtos/:id`         | admin   | Atualiza produto                           |
 | PUT    | `/api/produtos/:id/composicao` | admin | Salva a **ficha técnica** inteira (itens: ingrediente + quantidade) |
 | DELETE | `/api/produtos/:id`         | admin   | Desativa produto (soft delete)             |
+| GET    | `/api/cardapio`             | 🌍 público | Cardápio do cliente final (lanches + bebidas disponíveis) — **sem custo/margem** |
+| GET    | `/api/auditoria`            | admin   | Histórico de quem fez o quê — `?limite=30`, `?entidade=produto` |
 
 ## 🎨 Identidade visual
 
@@ -168,3 +171,17 @@ Troque em produção!
   ativos com o mesmo nome, mas libera o nome quando o item é desativado.
 - **Soma do custo no SQL** (`LEFT JOIN` + `GROUP BY`): evita o problema "N+1"
   (uma consulta por produto) ao listar o cardápio.
+- **Ingrediente pode ser EXCLUÍDO de verdade; produto não.** Ingrediente não tem
+  histórico (nenhum pedido aponta para ele) — então `DELETE` apaga. Produto vai
+  aparecer nos pedidos, então desativar é o caminho. A exclusão de ingrediente é
+  bloqueada (409) se ele estiver em alguma ficha técnica, com a lista dos lanches.
+- **Auditoria é fotografia, não espelho** (`auditoria`): guardamos uma cópia do
+  nome e do papel de quem agiu. Se a pessoa mudar de nome ou virar admin depois,
+  o registro de ontem continua contando a história de ontem.
+- **ID simples do usuário** (`#0001`, `#0002`...): derivado do id do banco e
+  mostrado na interface, para identificar na conversa quem fez cada alteração.
+- **Cardápio público tem mapper PRÓPRIO**: `/api/cardapio` nunca usa o mapper do
+  painel, justamente para não vazar custo, margem, estoque ou ficha técnica.
+- **Carrinho no `localStorage`, com chave por usuário** (`monsterCarrinho:<id>`):
+  duas contas na mesma máquina não misturam pedidos, e o carrinho sobrevive ao
+  recarregar a página.

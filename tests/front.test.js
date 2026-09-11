@@ -153,8 +153,15 @@ describe('Interface — elementos obrigatórios', () => {
   it('o selo do topo mostra o NOME do usuário (não a palavra "cliente")', async () => {
     const resposta = await request(app).get('/js/layout.js');
 
-    // O texto do selo é montado com o ícone do papel + o nome da pessoa.
-    assert.match(resposta.text, /el\.textContent = `\$\{icone\} \$\{usuario\.nome\}`/);
+    // O texto do selo é montado com o ícone do papel + o nome + o código da pessoa.
+    assert.match(resposta.text, /el\.textContent = `\$\{icone\} \$\{usuario\.nome\} · \$\{usuario\.codigo\}`/);
+  });
+
+  it('o selo do topo inclui o código do usuário (#0001)', async () => {
+    const resposta = await request(app).get('/js/layout.js');
+
+    assert.match(resposta.text, /usuario\.codigo/);
+    assert.match(resposta.text, /data-codigo-usuario/);
   });
 
   it('Minha conta tem formulário editável (nome, telefone e endereço)', async () => {
@@ -258,5 +265,49 @@ describe('Interface — elementos obrigatórios', () => {
     const resposta = await request(app).get('/css/estilo.css');
 
     assert.match(resposta.text, /\.musica-botao/);
+  });
+
+  it('FASE 4: a loja tem cardápio dinâmico e carrinho', async () => {
+    const resposta = await request(app).get('/loja.html');
+
+    // cardápio montado a partir da API
+    assert.match(resposta.text, /id="cardapio"/);
+    assert.match(resposta.text, /API\.get\('\/api\/cardapio'\)/);
+    // carrinho: contador, lista, total e as ações de mexer no pedido
+    assert.match(resposta.text, /id="contador-carrinho"/);
+    assert.match(resposta.text, /id="lista-carrinho"/);
+    assert.match(resposta.text, /id="total-carrinho"/);
+    assert.match(resposta.text, /function adicionarAoCarrinho/);
+    assert.match(resposta.text, /function alterarQuantidade/);
+    assert.match(resposta.text, /function removerDoCarrinho/);
+    assert.match(resposta.text, /function limparCarrinho/);
+    // carrinho separado por usuário e guardado no navegador
+    assert.match(resposta.text, /localStorage/);
+    assert.match(resposta.text, /monsterCarrinho:/);
+  });
+
+  it('o código do usuário (#0000) aparece na loja e no selo do topo', async () => {
+    const loja = await request(app).get('/loja.html');
+    const layout = await request(app).get('/js/layout.js');
+
+    assert.match(loja.text, /data-codigo-usuario/);
+    assert.match(layout.text, /usuario\.codigo/);
+  });
+
+  it('a tabela de ingredientes tem Editar e Excluir', async () => {
+    const fs = await import('node:fs/promises');
+    const html = await fs.readFile(new URL('../public/admin/produtos.html', import.meta.url), 'utf8');
+
+    assert.match(html, /✏️ Editar/);
+    assert.match(html, /🗑️ Excluir/);
+    assert.match(html, /function excluirIngrediente/);
+  });
+
+  it('o painel mostra o histórico de alterações (auditoria)', async () => {
+    const fs = await import('node:fs/promises');
+    const html = await fs.readFile(new URL('../public/admin/painel.html', import.meta.url), 'utf8');
+
+    assert.match(html, /id="lista-auditoria"/);
+    assert.match(html, /\/api\/auditoria/);
   });
 });
