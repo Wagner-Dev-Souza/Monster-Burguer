@@ -87,9 +87,8 @@
           senha: document.getElementById('senha').value,
         });
 
-        // 🎵 A musiquinha da vitrine para AQUI: o usuário entrou (não volta a
-        // tocar depois, porque o estado salvo é apagado).
-        if (typeof pararMusica === 'function') pararMusica();
+        // 🎵 A musiquinha NÃO para aqui: ela continua tocando pelo site inteiro
+        // (loja, painel...). O tema retoma da mesma posição na próxima página.
 
         // Redireciona pelo PAPEL: é o que separa cliente de admin na prática.
         window.location.href = usuario.papel === 'admin' ? '/admin/painel.html' : '/loja.html';

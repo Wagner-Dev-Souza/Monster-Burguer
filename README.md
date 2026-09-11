@@ -130,9 +130,14 @@ Troque em produção!
 - **🎵 Musiquinha 8-bits** (`public/js/musica.js`): tema sombrio em Lá menor
   **gerado em tempo real** com a Web Audio API (osciladores quadrados, baixo
   triangular, bumbo e chimbal de ruído) — nenhum arquivo de áudio no repositório.
-  A posição tocada é salva no `sessionStorage`, então a música **continua de onde
-  parou** ao trocar entre login e cadastro, e **para de vez no login**
-  (`pararMusica()` limpa o estado). Botão flutuante 🔊/🔇 permite ligar/desligar.
+  Toca em **todo o site** (login, cadastro, loja, painel, produtos, compras) e
+  **não corta** ao trocar de página: a continuidade vem de uma **âncora de
+  relógio** gravada no `sessionStorage` (`inicioEm = Date.now() - posição`), então
+  a música retoma no mesmo compasso em que estaria — sem acumular erro a cada
+  navegação. Botão flutuante 🔊/🔇 liga/desliga, e a escolha vale para o site
+  todo. Só **uma aba toca por vez** (trava com batida de coração no
+  `localStorage`), senão duas abas abertas — loja e painel lado a lado — tocariam
+  a mesma trilha fora de fase.
   ⚠️ É carregada com `type="module"` de propósito: sem escopo isolado, as
   variáveis do arquivo colidiriam com as das páginas (o login declara `const botao`).
 
@@ -206,3 +211,10 @@ Troque em produção!
   estoque: é produzido na hora). O `MAX(0, ...)` impede estoque negativo.
 - **Telefone e endereço são exigidos para fechar o pedido** — é aqui que os dados
   de entrega são recolhidos; ficam editáveis em "Minha conta".
+- **Continuidade da música por ÂNCORA DE RELÓGIO**, não por posição salva em
+  intervalos: `inicioEm = Date.now() - posição`. Salvar a posição a cada 250ms
+  pareceria funcionar, mas somaria o atraso de cada troca de página — depois de
+  dez navegações a música estaria visivelmente atrás. Com a âncora, o relógio é a
+  única fonte da verdade e a posição é sempre `Date.now() - inicioEm`.
+- **Uma aba só toca a música** (trava no `localStorage` + batida de coração): com
+  duas abas abertas a mesma trilha sairia fora de fase e viraria um som sujo.

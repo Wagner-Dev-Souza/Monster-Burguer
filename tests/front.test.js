@@ -239,6 +239,33 @@ describe('Interface — elementos obrigatórios', () => {
     assert.match(cadastro.text, /<script type="module" src="\/js\/musica\.js"><\/script>/);
   });
 
+  it('TODAS as páginas carregam a musiquinha (o tema acompanha o site inteiro)', async () => {
+    // Lemos os arquivos do disco: as páginas de /admin respondem 302 sem sessão
+    // (proteção correta), e aqui o que interessa é o HTML em si.
+    const fs = await import('node:fs/promises');
+
+    const paginas = [
+      'index.html',
+      'login.html',
+      'cadastro.html',
+      'loja.html',
+      'admin/painel.html',
+      'admin/produtos.html',
+      'admin/compras.html',
+    ];
+
+    for (const pagina of paginas) {
+      const html = await fs.readFile(new URL(`../public/${pagina}`, import.meta.url), 'utf8');
+
+      assert.match(html, /\/js\/musica\.js/, `${pagina} deveria carregar a música`);
+      assert.match(
+        html,
+        /<script type="module" src="\/js\/musica\.js"><\/script>/,
+        `${pagina} deveria carregar a música como módulo (escopo isolado)`,
+      );
+    }
+  });
+
   it('a música é gerada por código (Web Audio) e persiste a posição entre páginas', async () => {
     const resposta = await request(app).get('/js/musica.js');
 
@@ -246,19 +273,31 @@ describe('Interface — elementos obrigatórios', () => {
     // síntese em vez de arquivo de áudio
     assert.match(resposta.text, /AudioContext/);
     assert.match(resposta.text, /createOscillator/);
-    // continuidade entre login <-> cadastro
+    // continuidade pelo site inteiro: âncora de relógio no sessionStorage
     assert.match(resposta.text, /sessionStorage/);
     assert.match(resposta.text, /monsterMusica/);
+    assert.match(resposta.text, /inicioEm/);     // a âncora que evita acumular erro
     assert.match(resposta.text, /pagehide/);
-    // parada ao logar
-    assert.match(resposta.text, /function pararMusica/);
-    assert.match(resposta.text, /window\.pararMusica = pararMusica/);
+    // uma aba por vez (senão duas abas tocam fora de fase)
+    assert.match(resposta.text, /monsterMusicaAbaAtiva/);
+    assert.match(resposta.text, /outraAbaEstaTocando/);
+    // e a música NÃO para mais no login
+    assert.ok(!/function pararMusica/.test(resposta.text));
   });
 
-  it('o login PARA a música antes de entrar', async () => {
+  it('o login NÃO interrompe mais a música (ela continua pelo site)', async () => {
     const resposta = await request(app).get('/login.html');
 
-    assert.match(resposta.text, /pararMusica\(\)/);
+    assert.ok(!/pararMusica\(\)/.test(resposta.text), 'o login não deve mais parar a música');
+    assert.match(resposta.text, /js\/musica\.js/);
+  });
+
+  it('o desligar/ligar pelo botão fica gravado no estado (vale para o site todo)', async () => {
+    const resposta = await request(app).get('/js/musica.js');
+
+    // desligado = ativa:false salvo -> a próxima página continua desligada
+    assert.match(resposta.text, /ativa: false/);
+    assert.match(resposta.text, /ativa: true/);
   });
 
   it('o botão flutuante de ligar/desligar tem estilo próprio', async () => {
