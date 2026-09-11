@@ -6,15 +6,15 @@
    ===================================================================== */
 
 const MASCOTES = [
-  { arquivo: 'fantasma', nome: 'Fantasma' },
-  { arquivo: 'esqueleto', nome: 'Esqueleto' },
-  { arquivo: 'bruxa', nome: 'Bruxa' },
+  { arquivo: 'fantasma', nome: 'Phantom' },
+  { arquivo: 'esqueleto', nome: 'Skullbone' },
+  { arquivo: 'bruxa', nome: 'Wyka' },
   { arquivo: 'frank', nome: 'Frank' },
-  { arquivo: 'draculinha', nome: 'Draculinha' },
+  { arquivo: 'draculinha', nome: 'Draculito' },
   { arquivo: 'lobisomem', nome: 'Lobi' },
   { arquivo: 'mumia', nome: 'Faraó Múmia' },
   { arquivo: 'monstro-pantano', nome: 'Monstro do Pântano' },
-  { arquivo: 'zumbi', nome: 'Zu' },
+  { arquivo: 'zumbi', nome: 'Zú' },
 ];
 
 /** Escreve um mascote sorteado em todo elemento [data-mascote-aleatorio]. */
