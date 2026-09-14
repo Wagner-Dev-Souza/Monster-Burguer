@@ -33,10 +33,15 @@ export async function criarAmbienteDeTeste() {
   runMigrations();
 
   const { criarApp } = await import('../../src/app.js');
+  const { db } = await import('../../src/database/connection.js');
 
   return {
     app: criarApp(),
     encerrar() {
+      // Fecha a conexão ANTES de apagar a pasta: no Windows o arquivo .db
+      // fica travado enquanto o handle do SQLite estiver aberto, e o rmSync
+      // falha com EBUSY — o temp dir vaza e a hook de teardown quebra.
+      db.close();
       rmSync(pasta, { recursive: true, force: true });
     },
   };
