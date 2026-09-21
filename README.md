@@ -13,6 +13,12 @@ Sistema de gestão e pedidos online para a hamburgueria **Monster Burguer**.
 
 ---
 
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+![node](https://img.shields.io/badge/node-%E2%89%A520-informational)
+![testes](https://img.shields.io/badge/testes-node%3Atest%20%2B%20supertest-success)
+![banco](https://img.shields.io/badge/banco-SQLite%20(better--sqlite3)-lightgrey)
+![build](https://img.shields.io/badge/build-nenhum%20(ES%20Modules%20nativos)-success)
+
 ## 🧱 Stack
 
 | Camada    | Tecnologia                                   |
@@ -252,3 +258,49 @@ Troque em produção!
 - **`reais()` e a navegação vivem no `layout.js`**, e as páginas NÃO redeclaram nada
   disso (colisão de escopo global mata o script inteiro em silêncio — ver o teste
   `tests/escopo-global.test.js`, feito depois de esse bug morder duas vezes).
+
+---
+
+## 🧪 Testes
+
+A suíte roda com o test runner **nativo do Node** (`node:test`) mais **supertest** para
+exercitar as rotas HTTP de verdade — sem mocks de servidor:
+
+```bash
+npm test
+```
+
+**17 arquivos de teste**, cobrindo:
+
+| Arquivo | O que verifica |
+|---|---|
+| `auth.test.js` | cadastro, login com CPF + senha, cookie de sessão |
+| `usuarios.test.js` | papéis, promoção/rebaixamento e permissões |
+| `minha-conta.test.js`, `excluir-conta.test.js` | área do cliente e exclusão de conta |
+| `ingredientes.test.js`, `produtos.test.js` | CRUD e ficha técnica |
+| `cardapio.test.js` | cardápio público |
+| `compras.test.js` | compras/despesas e reflexo no estoque |
+| `pedidos.test.js`, `entrega.test.js` | criação do pedido, preço congelado e fluxo de status |
+| `promocoes-cupons.test.js` | validação de promoção e cupom no total |
+| `relatorios.test.js` | receita, despesa, saldo e margem |
+| `auditoria.test.js` | trilha de auditoria das ações administrativas |
+| `front.test.js`, `paginas-admin.test.js` | páginas entregues e proteção das telas do painel |
+| `escopo-global.test.js` | colisão de escopo entre scripts das páginas |
+| `health.test.js` | disponibilidade do serviço |
+
+O `tests/helpers/` concentra o preparo de ambiente e sessão usados pelos demais.
+
+## ⚠️ Status e limitações
+
+- **Fases 0 a 8 concluídas**, cada uma construída, testada e versionada de forma independente — o mapa completo está em [`PLANO.md`](PLANO.md)
+- **Pagamento simulado**: o botão de confirmar pagamento marca o pedido como pago, mas **não há integração com gateway real** (PIX, cartão)
+- **Sem deploy publicado**: o sistema roda localmente; não há ambiente em produção
+- Sem pipeline de integração contínua — os testes são executados manualmente
+
+## 📄 Licença
+
+MIT — veja [LICENSE](LICENSE).
+
+---
+
+**Wagner Silva Souza** · [LinkedIn](https://linkedin.com/in/wagner-silva-souza-3a840935) · [GitHub](https://github.com/Wagner-Dev-Souza)
