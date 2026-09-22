@@ -13,6 +13,7 @@ Sistema de gestão e pedidos online para a hamburgueria **Monster Burguer**.
 
 ---
 
+[![CI](https://github.com/Wagner-Dev-Souza/Monster-Burguer/actions/workflows/ci.yml/badge.svg)](https://github.com/Wagner-Dev-Souza/Monster-Burguer/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 ![node](https://img.shields.io/badge/node-%E2%89%A520-informational)
 ![testes](https://img.shields.io/badge/testes-node%3Atest%20%2B%20supertest-success)
@@ -270,7 +271,9 @@ exercitar as rotas HTTP de verdade — sem mocks de servidor:
 npm test
 ```
 
-**17 arquivos de teste**, cobrindo:
+**São 194 testes, distribuídos em 17 arquivos**, e o GitHub Actions executa tudo
+automaticamente a cada push. Cada arquivo de teste sobe com um **banco SQLite temporário
+próprio**, então os testes nunca tocam o banco real nem interferem entre si.
 
 | Arquivo | O que verifica |
 |---|---|
